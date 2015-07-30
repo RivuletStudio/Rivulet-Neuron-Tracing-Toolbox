@@ -1,4 +1,8 @@
 function [tree] = branch2swc(S, filename)
+% Convert branchpoints cellarrays to swc tree
+% S: cell array of branch points, each cell with size N * 3
+% filename: the filename to save the swc file, if empty, the file will not be saved
+
     % Take the first node of the first branch as the root
     nbranch = numel(S);
     B = {};
@@ -87,7 +91,7 @@ function [tree] = branch2swc(S, filename)
     if numel(filename) == 0
         return
     end
-    
+
     fprintf('Saving to %s\n', [filename, '.swc']);
     save_v3d_swc_file(tree, [filename, '.swc']);
 end
