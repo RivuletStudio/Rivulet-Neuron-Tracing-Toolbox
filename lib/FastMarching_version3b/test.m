@@ -8,7 +8,7 @@ num_images = numel(info);
 for k = 1:num_images
    vision_box(:,:,k) = imread(fname, k);
 end
-threshold = 130
+threshold = 0.2
 A = vision_box > threshold;  % synthetic data
 [x y z] = ind2sub(size(A), find(A));
 plot3(x, y, z, 'b.')
