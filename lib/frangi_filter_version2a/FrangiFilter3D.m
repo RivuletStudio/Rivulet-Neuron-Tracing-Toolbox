@@ -45,8 +45,8 @@ function [Iout,whatScale,Voutx,Vouty,Voutz]=FrangiFilter3D(I,options)
 %   options.BlackWhite=false;
 %   options.FrangiScaleRange=[1 1];
 %   Vfiltered=FrangiFilter3D(V,options);
-%
-%   % Show maximum intensity plots of input and result
+
+  % Show maximum intensity plots of input and result
 %   figure, 
 %   subplot(2,2,1), imshow(squeeze(max(V,[],2)),[])
 %   subplot(2,2,2), imshow(squeeze(max(Vfiltered,[],2)),[])
@@ -126,7 +126,7 @@ for i = 1:length(sigmas),
     expRa = (1-exp(-(Ra.^2./A)));
     expRb =    exp(-(Rb.^2./B));
     expS  = (1-exp(-S.^2./(2*options.FrangiC^2)));
-    keyboard
+%     keyboard
     % Free memory
     clear S A B C Ra Rb
 
