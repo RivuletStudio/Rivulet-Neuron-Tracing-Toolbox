@@ -62,7 +62,7 @@ for(r = 1 : max_r)
 					jj = neighindex(2);
 					kk = neighindex(3);
 					%Make sure that center point is still in the 3D binary matrix
-					if (x(ii)<0 || x(ii)>sz(1) || y(jj)<0 || y(jj)>sz(2) || z(kk)<0 || z(kk)>sz(3))
+					if (x(ii)<1 || x(ii)>sz(1) || y(jj)<1 || y(jj)>sz(2) || z(kk)<1 || z(kk)>sz(3))
 						%radius is final return value 
 						radius = r;
 						return;
@@ -74,7 +74,7 @@ for(r = 1 : max_r)
 							bak_num = bak_num + 1;
                         end
                         %This is the criterion to calculate the radius, I have to say it is a harsh criterion which might be adjusted in the future 
-                        judge = (bak_num / tol_num) > 0.0001;
+                        judge = (bak_num / tol_num) > 0.3;
                         %disp(judge)
 						if (judge)
 							radius = r;

@@ -20,5 +20,5 @@ for i = 1 : lengthtree
 	end
 end
 [x y z] = ind2sub(size(binarygt), find(binarygt));
-plot3(x, y, z, 'r.')
+plot3(x, y, z, 'b.')
 end
