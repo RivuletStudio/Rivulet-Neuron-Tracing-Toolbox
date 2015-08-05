@@ -1,10 +1,10 @@
 function binarygt = binarysphere(originalimg, tree)
 %tree is the  swc matrix and the dimension of this matrix is N * 7
 %originalimg is the original 3D image stack
-figure
+% figure
 [M, N, Z] = size(originalimg);
 %Initialize the 3d binary matrix with zeros 
-binarygt = (zeros(M, N, Z));
+binarygt = logical(zeros(M, N, Z));
 [lengthtree useless] = size(tree); 
 for i = 1 : lengthtree
     xlist = [];
@@ -20,5 +20,5 @@ for i = 1 : lengthtree
 	end
 end
 [x y z] = ind2sub(size(binarygt), find(binarygt));
-plot3(x, y, z, 'r.')
+% plot3(x, y, z, 'r.')
 end
