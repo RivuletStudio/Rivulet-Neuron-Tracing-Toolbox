@@ -1,12 +1,6 @@
-function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
+%function Frozen = simplemarching3d(inputMatrix, input_x, input_y, input_z)
 %SIMPLEMARCHING Summary of this function goes here
 %   Detailed explanation goes here
-% ne =[-1  0  0;
-%       1  0  0;
-%       0 -1  0;
-%       0  1  0;
-%       0  0 -1
-%       0  0  1];
 % input_x and input_y define the location of sourcepoint or you may call it starting point
 % inputMatrix is wall image used for marching 
 % The following code shows how to use simplemarching function 
@@ -18,50 +12,61 @@ function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
 % imshow(bw)
 % marchpath = simplemarching(bw, 168, 206)
 % The following line is for marching process visulisation uncomment it if you need
- hold on
+close all
+binarytest;
+inputMatrix = remain;
+input_x = 202;
+input_y = 307;
+input_z = 11;
+hold on
 % The following four lines are used to create cross shape neighbouring pixels
 % pixels are at boundary condition shold be considered in 3d version of simplemarching
-ne = [-1  0;
-       1  0;
-       0 -1;
-       0  1;]
+
+ne =[-1  0  0;
+      1  0  0;
+      0 -1  0;
+      0  1  0;
+      0  0 -1;
+      0  0  1];
 % Initialise the starting process       
 I_col = input_x;
 I_row = input_y;
+I_stack = input_z;
 curposx = I_col;
 curposy = I_row;
+curposz = I_stack;
 counter = 1;
 curvalue = 0;
 
 % Forzen is binary image which records the marched process
 Frozen = zeros(size(inputMatrix));
-Label = zeros(size(inputMatrix));
 % Initialise the neighbouring points with starting point
-neg_list = [I_col, I_row];
-neg_list_old = [I_col, I_row];
+neg_list = [I_col, I_row, I_stack];
+neg_list_old = [I_col, I_row, I_stack];
 
 % Initialise the number of neighbouring points
 negnum = 1;
-for i = 1 : 10000  
+for i = 1 : 100  
 	neg_list = [];
 	for negnum_i = 1 : negnum 
 	curposx = neg_list_old(negnum_i, 1);
 	curposy = neg_list_old(negnum_i, 2);
-		for ne_i = 1 : 4
+	curposz = neg_list_old(negnum_i, 3);
+		for ne_i = 1 : 6
 			xindex = ne(ne_i, 1) + curposx;
 			yindex = ne(ne_i, 2) + curposy;
-			binaryvalue = inputMatrix(xindex, yindex);
+			zindex = ne(ne_i, 3) + curposz;
+			binaryvalue = inputMatrix(xindex, yindex, zindex);
 			%Check this pixel is true value in the input binary image and we have not visited it yet
-			if (binaryvalue == 1)&&(Frozen(xindex, yindex) == 0)
+			if (binaryvalue == 1)&&(Frozen(xindex, yindex, zindex) == 0)
 			neg_list(counter, 1) = xindex;
 			neg_list(counter, 2) = yindex;
-			Frozen(xindex, yindex) = 1;
-            Label(xindex, yindex) = i;
+			neg_list(counter, 3) = zindex;
+			Frozen(xindex, yindex, zindex) = 1;
 			counter = counter + 1;
 			%Uncomment these two lines if you want to view the marching process
-			plot(yindex, xindex, 'r.')
-			%pause(0.01);
-            drawnow
+			plot3(xindex, yindex, zindex, 'g.')
+			pause(0.001)
 			end
 		end
 	end
@@ -75,5 +80,5 @@ for i = 1 : 10000
 	counter = 1;
 	[negnum useless] = size(neg_list);
 end
-% hold off 
+ hold off 
 % uncomment the above is you want to visualise the marching process 
