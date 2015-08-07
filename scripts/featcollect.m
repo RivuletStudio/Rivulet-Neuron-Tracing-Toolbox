@@ -1,4 +1,4 @@
-function [X, Y] = featcollect(path2feat, skip)
+function [X, Y, feats] = featcollect(path2feat, skip)
 % Collect each .mat feature file of 1 subject and normalize the feature fields
 % To be run after featextract
     [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
@@ -31,6 +31,8 @@ function [X, Y] = featcollect(path2feat, skip)
         	if strcmp(fields{j}, 'gt')
         	    yrows = feats.(fields{j});	
         	    yrows = yrows(:, end:-1:1, :);
+            elseif strcmp(fields{j}, 'I')
+                continue
 			else
 	            x = feats.(fields{j});
 	            x = normalise(x(:));
@@ -43,9 +45,9 @@ function [X, Y] = featcollect(path2feat, skip)
         clear rows, feats;
     end
 
-	path2save = fullfile(path2feat, '..', 'allfeat.mat')
-	fprintf('saving to %s\n', path2save);
-    save(path2save, 'X', 'Y', 'fields', '-v7.3');
+	% path2save = fullfile(path2feat, '..', 'allfeat.mat');
+	% fprintf('saving to %s\n', path2save);
+    % save(path2save, 'X', 'Y', 'fields', '-v7.3');
 end
 
 function x = normalise(x)

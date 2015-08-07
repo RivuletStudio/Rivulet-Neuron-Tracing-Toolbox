@@ -12,13 +12,13 @@
 #PBS -l nodes=1
 #PBS -M lsqshr@gmail.com 
 
-#PBS -l pmem=24gb
+#PBS -l pmem=16gb
 
 # How long to run the job? (hours:minutes:seconds)
 #PBS -l walltime=3:00:0
 #PBS -m ae
 #     Name of output file:
-#PBS -o quad.txt
+#PBS -o binarize.txt
 
 #     Environmental varibles to make it work:
  
@@ -43,10 +43,12 @@ fi
 # me="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 # cp $PBS_O_WORKDIR/vess.pbs $cachefolder/vess.pbs;
 
-DATAPATH=/project/RDS-FEI-NRMMCI-RW/Data/OP/OP_Feat;
+DATAPATH=/project/RDS-FEI-NRMMCI-RW/Data/first2000/first2000-subsets/first5/00001.FruMARCM-M002262_seg001.lsm.tif.c3.v3draw.uint8.v3draw;
+TARGET=/project/RDS-FEI-NRMMCI-RW/Data/first2000/first2000-subsets/first5/00001.FruMARCM-M002262_seg001.lsm.tif.c3.v3draw.uint8.v3draw.binary.mat;
+MODELPATH=/project/RDS-FEI-NRMMCI-RW/Data/OP/quad.mat;
 
 # arr=( $(find $DATAPATH -name '*.mat') );
 # filename=${arr[${PBS_ARRAY_INDEX}]};
 
 #     Run Script
-matlab -nodesktop -nosplash -r "cd scripts; gotrain('$DATAPATH', [2,3], 0.8, 'quad', 'quadratic');";
+matlab -nodesktop -nosplash -r "cd util; load('$MODELPATH'); tic; [X, feats] = binarizeimage('$DATAPATH', obj, 2); toc; save('$TARGET', 'X', 'feats');";
