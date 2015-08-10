@@ -56,6 +56,10 @@ i=0;
 ifree=10000;
 ShortestLine=zeros(ifree,ndims(DistanceMap));
 
+figure(7)
+hold on
+imagesc(DistanceMap)
+
 % Iteratively trace the shortest line
 while(true)
     % Calculate the next point using runge kutta
@@ -93,6 +97,9 @@ while(true)
   
     % Add current point to the shortest line array
     ShortestLine(i,:)=EndPoint;
+
+    plot(EndPoint(2), EndPoint(1), '*', 'Color', 'r');
+    drawnow
     
     if(DistancetoEnd<Stepsize), 
         i=i+1;  if(i>ifree), ifree=ifree+10000; ShortestLine(ifree,:)=0; end
@@ -104,6 +111,7 @@ while(true)
     % Current point is next Starting Point
     StartPoint=EndPoint;
 end
+hold off;
 
 if((DistancetoEnd>1)&&(~isempty(SourcePoint)))
     disp('The shortest path trace did not finish at the source point');

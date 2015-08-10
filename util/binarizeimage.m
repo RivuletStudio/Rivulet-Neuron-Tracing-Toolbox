@@ -1,5 +1,5 @@
 function [X, feats] = binarizeimage(path2img, cl, delta_t)
-	parpool
+	% parpool
 	% Use the trained classifier to enhance and binarize the foreground neuron from v3draw
     [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, '..', 'scripts'));
