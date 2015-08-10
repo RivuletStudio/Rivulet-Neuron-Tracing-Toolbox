@@ -12,13 +12,9 @@
 % imshow(bw)
 % marchpath = simplemarching(bw, 168, 206)
 % The following line is for marching process visulisation uncomment it if you need
-close all
-binarytest;
-inputMatrix = remain;
-input_x = 202;
-input_y = 307;
-input_z = 11;
-hold on
+
+function [xcenter, ycenter, zcenter, volume, new_remain] = simplemarching3d(inputMatrix, input_x, input_y, input_z)
+%hold on
 % The following four lines are used to create cross shape neighbouring pixels
 % pixels are at boundary condition shold be considered in 3d version of simplemarching
 
@@ -43,7 +39,7 @@ Frozen = zeros(size(inputMatrix));
 % Initialise the neighbouring points with starting point
 neg_list = [I_col, I_row, I_stack];
 neg_list_old = [I_col, I_row, I_stack];
-
+Frozen(I_col, I_row, I_stack) = 1;
 % Initialise the number of neighbouring points
 negnum = 1;
 for i = 1 : 100  
@@ -65,8 +61,8 @@ for i = 1 : 100
 			Frozen(xindex, yindex, zindex) = 1;
 			counter = counter + 1;
 			%Uncomment these two lines if you want to view the marching process
-			plot3(xindex, yindex, zindex, 'g.')
-			pause(0.001)
+			%plot3(xindex, yindex, zindex, 'g.')
+			%pause(0.001)
 			end
 		end
 	end
@@ -75,10 +71,23 @@ for i = 1 : 100
 	neg_list_old = neg_list;
 	% There are no more new pixels, so it is the right time to stop
 	if counter == 1
-		return;
+		break;
 	end
 	counter = 1;
 	[negnum useless] = size(neg_list);
 end
- hold off 
+ %hold off 
 % uncomment the above is you want to visualise the marching process 
+new_remain = inputMatrix - Frozen;
+Frozenind = find(Frozen);
+[indx, indy, indz] = ind2sub(size(Frozen), Frozenind);
+xcenter = sum(indx(:))/numel(indx);
+ycenter = sum(indy(:))/numel(indx);
+zcenter = sum(indz(:))/numel(indx);
+volume = sum(Frozen(:));
+% point.xcenter = xcenter;
+% point.ycenter = ycenter;
+% point.zcenter = zcenter;
+% point.volume = volume;
+%showbox(new_remain, 0)
+end

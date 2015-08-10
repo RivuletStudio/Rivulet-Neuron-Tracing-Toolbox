@@ -74,7 +74,7 @@ for i = 1 : 10000
 
 	% There are no more new pixels, so it is the right time to stop
 	if counter == 1
-		break;
+		return;
 	end
 	counter = 1;
 	[negnum useless] = size(neg_list_old);
