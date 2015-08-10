@@ -100,12 +100,12 @@ itt = 0;
     % Do fast marching using the maximum distance value in the image
     % and the points describing all found branches are sourcepoints.
     [T,Y] =  msfm(SpeedImage, SourcePoint, false, false);
-    %figure
+    figure
     %Y = Y/(max(Y(:)));
-    %imagesc(Y)
-    %figure
+    imagesc(Y)
+    figure
     %T = T/(max(T(:)));
-    %imagesc(T)  
+    imagesc(T)  
     % Trace a branch back to the used sourcepoints
     StartPoint=maxDistancePoint(Y,I,IS3D);
     %T = T/(max(T(:)));
@@ -115,12 +115,12 @@ itt = 0;
     ShortestLine=shortestpath(T,StartPoint,SourcePoint,1,'rk4');
     %ShortestLine=unique(round(ShortestLine),'rows');
     
-    hold on
-    colorrnd = rand(1,3);
-    plot(ShortestLine(:,2), ShortestLine(:,1), '-', 'Color', colorrnd, 'LineWidth', 3);
-    %plot(StartPoint(2), StartPoint(1), '-s', 'Color', colorrnd);
-    pause(3);
-    % Calculate the length of the new skeleton segment
+    % hold on
+    % colorrnd = rand(1,3);
+    % plot(ShortestLine(:,2), ShortestLine(:,1), '-', 'Color', colorrnd, 'LineWidth', 3);
+    % %plot(StartPoint(2), StartPoint(1), '-s', 'Color', colorrnd);
+    % pause(3);
+    % % Calculate the length of the new skeleton segment
     linelength=GetLineLength(ShortestLine,IS3D);
         
     % Stop finding branches, if the lenght of the new branch is smaller
