@@ -1,4 +1,4 @@
-function featextract(imgpath, gtpath, saveprefix, sigma)
+function feats = featextract(imgpath, gtpath, saveprefix, sigma)
 % Extract hession features from 1 subject
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 	addpath(fullfile(pathstr, '..', 'util'));
@@ -16,6 +16,7 @@ function featextract(imgpath, gtpath, saveprefix, sigma)
 	options.BlackWhite = false;
     options.FrangiScaleRange = [1 10];
     vess = FrangiFilter3D(I, options);
+    [kriss] = VessFilters(l1, l2, l3);
 
     m = max(l3(:));
     l1reverse = -l1 + m;
@@ -26,8 +27,23 @@ function featextract(imgpath, gtpath, saveprefix, sigma)
     	              (l3reverse-l1reverse).^2).^0.5) ./ ...
 				    ((l1reverse.^2 + l2reverse.^2 + l3reverse.^2).^0.5);
     
-    gttree = load_v3d_swc_file(gtpath);
-    gt = binarysphere(I, gttree);
+    gt = [];
+
+    if numel(gtpath) ~= 0
+        gttree = load_v3d_swc_file(gtpath);
+        gt = binarysphere(I, gttree);
+    end
 				    
-    save(fullfile(saveprefix, [filename, '.mat']), 'l1', 'l2', 'l3', 'I', 'fa', 'vess', 'gt'); 
+    if numel(saveprefix) > 0
+        save(fullfile(saveprefix, [filename, '.mat']), 'l1', 'l2', 'l3', 'I', 'fa', 'vess', 'kriss', 'gt'); 
+    end
+
+    feats.l1 = l1;
+    feats.l2 = l2;
+    feats.l3 = l3;
+    feats.I = I;
+    feats.fa = fa;
+    feats.vess = vess;
+    feats.kriss = kriss;
+    feats.gt = gt;
 end
