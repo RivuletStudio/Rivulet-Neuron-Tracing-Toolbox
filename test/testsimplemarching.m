@@ -1,4 +1,34 @@
-function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
+% function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
+%SIMPLEMARCHING Summary of this function goes here
+%   Detailed explanation goes here
+% ne =[-1  0  0;
+%       1  0  0;
+%       0 -1  0;
+%       0  1  0;
+%       0  0 -1
+%       0  0  1];
+% input_x and input_y define the location of sourcepoint or you may call it starting point
+% inputMatrix is wall image used for marching 
+% The following code shows how to use simplemarching function 
+% assume you already add fish head folder to the path and test image is in the test folder  
+% image = imread('binary.png');
+% gray= rgb2gray(image);
+% bw= im2bw(gray);
+% figure
+% imshow(bw)
+% marchpath = simplemarching(bw, 168, 206)
+% The following line is for marching process visulisation uncomment it if you need
+clc
+clear all
+close all
+I=im2double(rgb2gray(imread('vessels2d.png')));
+I = I < 0.5;
+figure
+imshow(I);
+tic
+inputMatrix = I;
+input_x = 157;
+input_y = 127;
 %SIMPLEMARCHING Summary of this function goes here
 %   Detailed explanation goes here
 % ne =[-1  0  0;
@@ -42,7 +72,6 @@ neg_list(1,1) = I_col;
 neg_list(2,1) = I_row;
 neg_list_old = [I_col, I_row];
 
-
 % Initialise the number of neighbouring points
 negnum = 1;
 for i = 1 : 10000  
@@ -59,7 +88,7 @@ for i = 1 : 10000
 			neg_list(counter, 1) = xindex;
 			neg_list(counter, 2) = yindex;
 			Frozen(xindex, yindex) = 1;
-			Label(xindex, yindex) = i;
+            Label(xindex, yindex) = i;
 			counter = counter + 1;
 			%Uncomment these two lines if you want to view the marching process
 			%plot(yindex, xindex, 'r.')
@@ -69,15 +98,20 @@ for i = 1 : 10000
 		end
 	end
 	% Make points in the neighbouring points are not redundant  
-	neg_list_old = neg_list(1:counter-1, :);
+	%neg_list = unique(neg_list,'rows');
+    neg_list_old = neg_list(1:counter-1, :);
 	neg_list_old = unique(neg_list_old,'rows');
 
 	% There are no more new pixels, so it is the right time to stop
 	if counter == 1
-		return;
+		break;
 	end
 	counter = 1;
 	[negnum useless] = size(neg_list_old);
+%disp(i);
 end
-% hold off 
+toc
+% hold off
 % uncomment the above is you want to visualise the marching process 
+figure
+imagesc(Label)
