@@ -31,9 +31,9 @@ tic;
     S = {};
     B = zeros(size(T));
     i = 1;
-% 	figure(1)
-% 	showbox(I, 0.5);
-% 	drawnow
+ 	figure(1)
+ 	showbox(I, 0.5);
+ 	drawnow
 
 	% figure(2)
 	% showbox(I, 0.5);
@@ -58,10 +58,19 @@ tic;
 	    end
 
 	    % disp('start tracing');
-	    % figure(1)
-	    % hold on
+	     figure(1)
+	     hold on
 	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 2, 'rk4');
-	    % hold off
+	    [rlistlength, useless] = size(l);
+	    radiuslist = zeros(rlistlength,1);
+        radiuslist = radiuslist + 2;
+	    for radius_i = 1 : rlistlength
+	    	curradius = getradius(I, l(radius_i, 1), l(radius_i, 2), l(radius_i, 3));
+	    	radiuslist(radius_i) = curradius; 
+        end
+        radiuslist = radiuslist + 2;
+        
+	     hold off
 	    % disp('end tracing')
 
 	    % Get radius of each point from distance transform
@@ -77,8 +86,14 @@ tic;
 	    	radius = zeros(size(l, 1), 1);
 	    	radius(:) = 2;
 	    end
+		[rlistlength, useless] = size(l);
+	    radiuslist = zeros(rlistlength, 1);
+	    for radius_i = 1 : rlistlength
+	    	curradius = getradius(I, l(radius_i, 1), l(radius_i, 2), l(radius_i, 3));
+	    	radiuslist(radius_i) = curradius; 
+	    end 
 	    % Remove the traced path from the timemap
-	    tB = binarysphere3d(size(T), l, radius);
+	    tB = binarysphere3d(size(T), l, radiuslist);
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
 	    T(tB==1) = -1;
 	    S{i} = l;
@@ -88,14 +103,14 @@ tic;
         B = B | tB;
 
         percent = sum(B(:) & I(:)) / sum(I(:))
-        if percent > 0.95
+        if percent > 0.7
         	break;
         end
 
-        % figure(2)
+         figure(2)
         % % scatter3(B(:, 1), B(:, 2), B(:, 3));
-        % showbox(B, 0.5);
-        % drawnow
+         showbox(B, 0.5);
+         drawnow
 
 	    i = i + 1;
     end
