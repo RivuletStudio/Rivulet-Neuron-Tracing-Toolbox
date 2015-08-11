@@ -21,7 +21,8 @@ function tree = showswc(tree, A)
 	%sphere creates the base sphere
 	[x,y,z] = sphere();
 	figure
-	surf(x,y,z)  % sphere centered at origin
+	camlight
+	surfl(x,y,z, 'light')  % sphere centered at origin
 	hold on
 	for i = 1 : numel(xlist)
 	surf((radiuslist(i)+3) * y + ylist(i), (radiuslist(i)+3) * x + xlist(i), (radiuslist(i)+3) * z + zlist(i));  
