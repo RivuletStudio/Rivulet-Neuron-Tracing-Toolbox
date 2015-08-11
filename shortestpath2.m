@@ -132,5 +132,3 @@ end
 
 % Remove unused memory from array
 ShortestLine=ShortestLine(1:i,:);
-
-
