@@ -2,15 +2,12 @@
 tic;
 	disp('Loading Image and classifying...')
 	% I = load_v3d_raw_img_file('/home/siqi/hpc-data1/Data/OP/OP_V3Draw/OP_2.v3draw');
-	% Convert double image to logical
-	
 	% I = squeeze(I>30);
-	% clsf = load('/home/siqi/hpc-data1/Data/OP/quad.mat');
- %    cl = clsf.obj;
-	% [I, ~] = binarizeimage('/home/siqi/hpc-data1/Data/OP/OP_V3Draw/OP_1.v3draw', cl, 2);
-	% I = I > 0.5;
+	clsf = load('/home/siqi/hpc-data1/Data/OP/quad.mat');
+    cl = clsf.obj;
+	[I, ~] = binarizeimage('/home/siqi/hpc-data1/Data/OP/OP_V3Draw/OP_4.v3draw', cl, 2);
+	I = I > 0.5;
 
-	% showbox(double(I), 0.5);
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
     disp('Looking for the source point...')
@@ -27,13 +24,15 @@ tic;
 
     close all
     T = oT;
+    tree = []; % swc tree
+    prune = true;
 	grad = distgradient(T);
     S = {};
     B = zeros(size(T));
     i = 1;
-% 	figure(1)
-% 	showbox(I, 0.5);
-% 	drawnow
+	figure(1)
+	showbox(I, 0.5);
+	drawnow
 
 	% figure(2)
 	% showbox(I, 0.5);
@@ -57,12 +56,12 @@ tic;
 	    	break;
 	    end
 
-	    % disp('start tracing');
-	    % figure(1)
-	    % hold on
+	    disp('start tracing');
+	    figure(1)
+	    hold on
 	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 2, 'rk4');
-	    % hold off
-	    % disp('end tracing')
+	    hold off
+	    disp('end tracing')
 
 	    % Get radius of each point from distance transform
 	    ind = sub2ind(size(bdist), int16(l(:, 1)), int16(l(:, 2)), int16(l(:, 3)));
@@ -82,8 +81,11 @@ tic;
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
 	    T(tB==1) = -1;
 	    S{i} = l;
-	    % line(l(:, 2), l(:,1), l(:, 3), 'Color', 'r');
-	    % drawnow
+
+	    % Add l to the tree
+	    if prune && size(l, 1) > 4
+		    tree = addbranch2tree(tree, l, radius);
+		end
 
         B = B | tB;
 
@@ -99,4 +101,7 @@ tic;
 
 	    i = i + 1;
     end
+
+    showswc(tree, I);
+    % save_v3d_swc_file('shit.swc', tree);
 toc

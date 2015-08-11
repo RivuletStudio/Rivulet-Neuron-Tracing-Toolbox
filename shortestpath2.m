@@ -77,8 +77,8 @@ while(true)
             error('shortestpath:input','unknown method');
     end
 
-    % scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
-    % drawnow
+    scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
+    drawnow
 
     if (ndims(DistanceMap) == 2)
         if isnan(ceil(EndPoint(1))) || isnan(ceil(EndPoint(2)))
@@ -132,5 +132,3 @@ end
 
 % Remove unused memory from array
 ShortestLine=ShortestLine(1:i,:);
-
-
