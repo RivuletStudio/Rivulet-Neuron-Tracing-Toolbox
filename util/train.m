@@ -10,7 +10,7 @@ function [obj, eidx] = train(X, Y, path2save, holdout, method)
 
     % Randomly pick only the same number of negative cases
     randnegidx = randperm(size(yneg, 1));
-    randnegidx = randnegidx(1:size(ypos, 1) * 0.7);
+    randnegidx = randnegidx(1:size(ypos, 1) * 1.5);
     yneg = yneg(randnegidx, :);
     xneg = xneg(randnegidx, :);
 

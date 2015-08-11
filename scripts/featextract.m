@@ -11,6 +11,7 @@ function feats = featextract(imgpath, gtpath, saveprefix, sigma)
     if ndims(I) > 3
         I = I(:, :, :, 1);
     end
+
     [l1, l2, l3] = eigextract(I, sigma);  
     
 	options.BlackWhite = false;
