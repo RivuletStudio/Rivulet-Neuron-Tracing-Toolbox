@@ -1,4 +1,4 @@
-function ShortestLine=shortestpath2(DistanceMap,StartPoint,SourcePoint,Stepsize,Method)
+function ShortestLine=shortestpath2(DistanceMap, GradientVolume, StartPoint,SourcePoint,Stepsize,Method)
 % This function SHORTESTPATH traces the shortest path from start point to
 % source point using Runge Kutta 4 in a 2D or 3D distance map.
 %
@@ -39,18 +39,7 @@ if(~exist('Stepsize','var')), Stepsize=0.5; end
 if(~exist('SourcePoint','var')), SourcePoint=[]; end
 if(~exist('Method','var')), Method='rk4'; end
 
-
-% Calculate gradient of DistanceMap
-if(ndims(DistanceMap)==2) % Select 2D or 3D
-    [Fy,Fx] = pointmin(DistanceMap);
-    GradientVolume(:,:,1)=-Fx;
-    GradientVolume(:,:,2)=-Fy;
-else
-    [Fy,Fx,Fz] = pointmin(DistanceMap);
-    GradientVolume(:,:,:,1)=-Fx;
-    GradientVolume(:,:,:,2)=-Fy;
-    GradientVolume(:,:,:,3)=-Fz;
-end
+% GradientVolume = distgradient(DistanceMap);
 
 i=0;
 % Reserve a block of memory for the shortest line array
@@ -88,8 +77,8 @@ while(true)
             error('shortestpath:input','unknown method');
     end
 
-    scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
-    drawnow
+    % scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
+    % drawnow
 
     if (ndims(DistanceMap) == 2)
         if isnan(ceil(EndPoint(1))) || isnan(ceil(EndPoint(2)))
