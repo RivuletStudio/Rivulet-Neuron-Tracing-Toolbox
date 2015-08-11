@@ -1,3 +1,4 @@
+%this script can  also be used as get the remaining volumes and centers of the volumes
 close all
 clc
 clear all
@@ -34,3 +35,7 @@ xpointlist(counter+1:end) = [];
 ypointlist(counter+1:end) = [];
 zpointlist(counter+1:end) = [];
 volumelist(counter+1:end) = [];
+[sortedvolume, volumeindex] = sort(volumelist, 2);
+sortedxpoint = xpointlist(volumeindex); 
+sortedypoint = ypointlist(volumeindex); 
+sortedzpoint = zpointlist(volumeindex); 
