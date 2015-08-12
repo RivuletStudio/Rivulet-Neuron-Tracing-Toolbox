@@ -5,7 +5,7 @@ function [X, feats] = binarizeimage(path2img, cl, delta_t)
     addpath(fullfile(pathstr, '..', 'scripts'));
     addpath(fullfile(pathstr, '..', 'lib', 'AOSLevelsetSegmentationToolboxM','AOSLevelsetSegmentationToolboxM'));
     addpath(fullfile(pathstr, '..', '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
-
+    
     [imgdir, ~, ~] = fileparts(path2img);
     featdir = fullfile(imgdir, 'tmp');
 
