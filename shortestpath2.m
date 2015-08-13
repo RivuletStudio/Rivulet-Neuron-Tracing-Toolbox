@@ -77,8 +77,9 @@ while(true)
             error('shortestpath:input','unknown method');
     end
 
-    scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
-    drawnow
+    % scatter3(EndPoint(2), EndPoint(1), EndPoint(3), 'r');
+    % plot3([EndPoint(2);StartPoint(2)], [EndPoint(1);StartPoint(1)], [EndPoint(3); StartPoint(3)], 'b.');
+    % drawnow
 
     if (ndims(DistanceMap) == 2)
         if isnan(ceil(EndPoint(1))) || isnan(ceil(EndPoint(2)))

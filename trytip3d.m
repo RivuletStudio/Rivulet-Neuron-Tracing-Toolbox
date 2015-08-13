@@ -4,7 +4,7 @@ clear;
 	disp('Loading Image and classifying...')
 	clsf = load('/home/siqi/hpc-data1/Data/OP/quad.mat');
     cl = clsf.obj;
-	[I] = binarizeimage('threshold', '/home/siqi/hpc-data1/Data/first2000/first2000-subsets/first5/00002.FruMARCM-M002262_seg002.lsm.tif.c3.v3draw.uint8.v3draw', 0, 1, true);
+	[I] = binarizeimage('threshold', '/home/siqi/hpc-data1/Data/first2000/first2000-subsets/first5/00001.FruMARCM-M002262_seg001.lsm.tif.c3.v3draw.uint8.v3draw', 0, 1, true);
 
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
@@ -37,9 +37,15 @@ clear;
 	% drawnow
 
     lconfidence = [];
+    hold on
+    [x,y,z] = sphere;
+    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
+	    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+
 	    % disp('SourcePoint')
 	    % disp(SourcePoint)
 	    % disp('StartPoint')
@@ -56,10 +62,7 @@ clear;
 	    end
 
 	    disp('start tracing');
-	    figure(1)
-	    hold on
-	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 2, 'rk4');
-	    hold off
+	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 1, 'rk4');
 	    disp('end tracing')
 
 	    % Get radius of each point from distance transform
@@ -104,10 +107,11 @@ clear;
         % drawnow
 
     end
+    hold off
 
     rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
     % showswc(tree, I, true);
-    showswc(rewiredtree, I, true);
+%     showswc(rewiredtree, I, true);
     rewiredtree(:, 6) = 1;
     tree(:, 6) = 1;
     
