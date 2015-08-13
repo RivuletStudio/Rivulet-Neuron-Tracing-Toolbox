@@ -47,7 +47,6 @@ function [X] = binarizeimage(varargin)
         disp(size(X));
     end
 
-
     X = X > 0.5;
 end
 
