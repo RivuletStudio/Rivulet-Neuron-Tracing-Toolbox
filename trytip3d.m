@@ -1,12 +1,10 @@
 % function trytip3d(I)
 tic;
+clear;
 	disp('Loading Image and classifying...')
-	% I = load_v3d_raw_img_file('/home/siqi/hpc-data1/Data/OP/OP_V3Draw/OP_2.v3draw');
-	% I = squeeze(I>30);
 	clsf = load('/home/siqi/hpc-data1/Data/OP/quad.mat');
     cl = clsf.obj;
-	[I, ~] = binarizeimage('/home/siqi/hpc-data1/Data/OP/OP_V3Draw/OP_4.v3draw', cl, 2);
-	I = I > 0.5;
+	[I] = binarizeimage('threshold', '/home/siqi/hpc-data1/Data/first2000/first2000-subsets/first5/00001.FruMARCM-M002262_seg001.lsm.tif.c3.v3draw.uint8.v3draw', 0, 1, true);
 
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
@@ -38,9 +36,16 @@ tic;
 	% showbox(I, 0.5);
 	% drawnow
 
+    lconfidence = [];
+    hold on
+    [x,y,z] = sphere;
+    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
+	    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+
 	    % disp('SourcePoint')
 	    % disp(SourcePoint)
 	    % disp('StartPoint')
@@ -56,22 +61,9 @@ tic;
 	    	break;
 	    end
 
-	    % disp('start tracing');
-	     figure(1)
-	     hold on
-	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 2, 'rk4');
-	    [rlistlength, useless] = size(l);
-	    radiuslist = zeros(rlistlength,1);
-        radiuslist = radiuslist + 2;
-	    for radius_i = 1 : rlistlength
-	    	curradius = getradius(I, l(radius_i, 1), l(radius_i, 2), l(radius_i, 3));
-	    	radiuslist(radius_i) = curradius; 
-        end
-        radiuslist = radiuslist + 2;
-        
-	     hold off
-	    % disp('end tracing')
-
+	    disp('start tracing');
+	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 1, 'rk4');
+	    disp('end tracing')
 
 	    % Get radius of each point from distance transform
 	    ind = sub2ind(size(bdist), int16(l(:, 1)), int16(l(:, 2)), int16(l(:, 3)));
@@ -96,11 +88,16 @@ tic;
 	    tB = binarysphere3d(size(T), l, radiuslist);
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
 	    T(tB==1) = -1;
-	    S{i} = l;
 
 	    % Add l to the tree
 	    if prune && size(l, 1) > 4
-		    tree = addbranch2tree(tree, l, radius);
+		    [tree, confidence] = addbranch2tree(tree, l, radius, I);
+
+		    if confidence > 0.5
+		    	lconfidence = [lconfidence; confidence];
+			    S{i} = l;
+			    i = i + 1;
+		    end
 		end
 
         B = B | tB;
@@ -115,9 +112,16 @@ tic;
          showbox(B, 0.5);
          drawnow
 
-	    i = i + 1;
     end
+    hold off
 
-    showswc(tree, I);
-    % save_v3d_swc_file('shit.swc', tree);
+    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
+    % showswc(tree, I, true);
+%     showswc(rewiredtree, I, true);
+    rewiredtree(:, 6) = 1;
+    tree(:, 6) = 1;
+    
+    save_v3d_swc_file(tree, 'shit.swc');
+    save_v3d_swc_file(rewiredtree, 'rewired-shit.swc');
 toc
+

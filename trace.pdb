@@ -1,0 +1,35 @@
+#!/bin/bash
+# pbs launching script example for NAMD job
+# PLEASE DO NOT CHANGE THIS FILE. TO SUBMIT QUEUE, PLS MAKE A COPY OF THIS FILE AND MAKE THE ACCORDING CHANGES
+
+#     job name:
+#PBS -N FishHead 
+#PBS -P RDS-FEI-NRMMCI-RW
+#PBS -q compute 
+
+#     how many cpus?
+#PBS -l ncpus=4
+#PBS -l nodes=1
+
+#PBS -l pmem=16gb
+
+# How long to run the job? (hours:minutes:seconds)
+#PBS -l walltime=12:0:0
+#PBS -J 1-9
+#PBS -o tracelog.txt
+
+#     Environmental varibles to make it work:
+ 
+module load matlab;
+cd $PBS_O_WORKDIR;
+
+#     Launching the job!
+JOBNAME='FishHead';
+
+DATETIME=$(date +"%F-%T");
+
+#DATAPATH=/project/RDS-FEI-NRMMCI-RW/Data/first2000/first2000-subsets/first50/sorted;
+DATAPATH=/project/RDS-FEI-NRMMCI-RW/Data/OP/OP_V3Draw;
+
+# luajit cnnexample.lua
+matlab -nodesktop -nosplash -r "trace('$DATAPATH/OP_$PBS_ARRAY_INDEX.v3draw', 'threshold', 30, false)";
