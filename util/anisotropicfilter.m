@@ -1,6 +1,10 @@
+close all
+clc
 sigma = 1;
 % I = op1;
+I = double(I);
 [Lambda1, Lambda2, Lambda3] = eigextract(I, sigma);
+disp('Lambda calculation finished');
 kone = exp(-(Lambda1.^2) ./ (Lambda1.^2 + Lambda2.^2 + Lambda3.^2));
 ktwo = exp(-(Lambda2.^2) ./ (Lambda1.^2 + Lambda2.^2 + Lambda3.^2));
 kthree = exp(-(Lambda3.^2) ./ (Lambda1.^2 + Lambda2.^2 + Lambda3.^2));
@@ -10,6 +14,7 @@ conditiontwo = (Lambda1 - Lambda3) > 0;
 % conditionthree = abs(Lambda1) < 0.01;
 % conditionfour = Lambda1 > (-1);
 condition = conditionone & conditiontwo; %& conditionthree;% & conditionfour;
+disp('condition calculation finished');
 clear conditionone;
 clear conditiontwo;
 clear conditionthree;
@@ -21,14 +26,36 @@ clear kone;
 clear ktwo;
 clear kthree;
 grad = distgradient(I);
+disp('gradient calculation finished');
 sum_grad = grad(:,:,:,1).^2 + grad(:,:,:,2).^2 + grad(:,:,:,3).^2;
 fu(isnan(fu)) = 0;
 v = exp(-sum_grad).*fu;
 v = v .* fu;
 v = v .* double(condition);
-v = v / max(v(:)) * 255;
-
+vvec = v(:);
+[sortv, index] =sort(vvec);
+numberv = numel(v);
+%maxv = sortv(round(numberv-numberv/100000));
+maxv = max(vvec);
+v = v / maxv * 255;
+v = abs(v);
+v = round(v);
+%v = v * 30;
+%safeshowbox(v,3);
+disp('begin otsu');
+binaryI = otsuown(v);
+%safeshowbox(binaryI,0.5);
+C = reshape(v,[],size(v,2),1);
+[IDX,sep] = otsu(C,5);
+newC = reshape(IDX, size(v));
+% fuck = newC==6;
+%fucker = ac_linear_diffusion_AOS(newC == 2, 1);
+safeshowbox(newC,1);
+%afterls = ac_linear_diffusion_AOS(newC == 2, 1);
+%safeshowbox(afterls, 0.5);
+%figure(1);
+%showbox(double(fucker), 0.5);
 %disp(max(fu(:), min(fu(:))))
-showbox(v, 0);
-save_v3d_raw_img_file(uint8(v),'filter.v3draw');
+%showbox(v, 10);
+%save_v3d_raw_img_file(uint8(v),'filter.v3draw');
 
