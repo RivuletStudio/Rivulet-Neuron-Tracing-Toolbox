@@ -47,12 +47,16 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I)
 		drawnow
 		tree = newtree;
 	else
-		termini = l(end, :);
+		termini1 = l(end, :);
+		termini2 = l(1, :)
 		treenodes = tree(:, 3:5);
         
         % Get pairwise distance between the termini and tree nodes 
-        d = pdist2(termini, treenodes);
-        [d, idx] = min(d);
+        d1 = pdist2(termini1, treenodes);
+        [d1, idx1] = min(d1);
+
+        d2 = pdist2(termini2, treenodes);
+        [d2, idx2] = min(d2)
 
         % Sort internal relationship
 		newtree(:, 1) = tree(end, 1) + 1 : tree(end, 1) + size(l, 1);
@@ -62,12 +66,20 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I)
 		newtree(1:end-1, 7) = newtree(2:end, 1);
 		plot3(newtree(:, 4), newtree(:, 3), newtree(:, 5), 'b-.');
 
-	    if d < tree(idx, 6) * 4
-			newtree(end, 7) = tree(idx, 1); % Connect to the tree parent
-			plot3([newtree(end, 4);tree(idx, 4)], [newtree(end, 3);tree(idx, 3)], [newtree(end, 5);tree(idx, 5)], 'b-.');
+	    if d1 < tree(idx1, 6) * 4 || d1 < newtree(end, 6) * 4
+			newtree(end, 7) = tree(idx1, 1); % Connect to the tree parent
+			plot3([newtree(end, 4);tree(idx1, 4)], [newtree(end, 3);tree(idx1, 3)], [newtree(end, 5);tree(idx1, 5)], 'b-.');
 		else
 			newtree(end, 7) = -2; % Remain unconnected
 		end
+
+	    if d2 < tree(idx2, 6) * 4 || d2 < newtree(1, 6) * 4
+			newtree(1, 7) = tree(idx2, 1); % Connect to the tree parent
+			plot3([newtree(1, 4);tree(idx2, 4)], [newtree(1, 3);tree(idx2, 3)], [newtree(1, 5);tree(idx2, 5)], 'b-.');
+		else
+			newtree(end, 7) = -2; % Remain unconnected
+		end
+
 		% plot3([newtree(end, 4);tree(idx, 4)], [newtree(end, 3);tree(idx, 3)], [newtree(end, 5);tree(idx, 5)], 'b-.');
 		drawnow
 		tree = [tree; newtree];

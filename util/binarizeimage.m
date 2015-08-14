@@ -1,4 +1,4 @@
-function [X] = binarizeimage(varargin)
+function [X, cropregion] = binarizeimage(varargin)
     % Segment the 3D v3draw uint image to binary image with a classifier or threshold
     % The segmentation will be enhanced with levelset
     % example:
@@ -42,7 +42,7 @@ function [X] = binarizeimage(varargin)
     X = ac_linear_diffusion_AOS(X, delta_t);
 
     if crop
-        X = imagecrop(X, 0.5);
+        [X, cropregion] = imagecrop(X, 0.5);
         disp('Image Size After Crop: ')
         disp(size(X));
     end
