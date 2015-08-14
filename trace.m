@@ -27,7 +27,7 @@ function tree = trace(varargin)
     if numel(varargin) > 4
 		delta_t = varargin{5};
 	else
-		delta_t = 1;
+		delta_t = 0.5;
 	end
 
 	if numel(varargin) > 5
@@ -93,14 +93,18 @@ function tree = trace(varargin)
 	drawnow
 
     lconfidence = [];
-    hold on
-    [x,y,z] = sphere;
-    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+    if plot
+	    hold on
+	    [x,y,z] = sphere;
+	    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+	end
 
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
-	    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+	    if plot
+		    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+		end
 
 	    if T(StartPoint(1), StartPoint(2), StartPoint(3)) == 0 || I(StartPoint(1), StartPoint(2), StartPoint(3)) == 0
 	    	break;
@@ -111,10 +115,15 @@ function tree = trace(varargin)
 	    disp('end tracing')
 
 	    % Get radius of each point from distance transform
-	    ind = sub2ind(size(bdist), int16(l(:, 1)), int16(l(:, 2)), int16(l(:, 3)));
-	    radius = bdist(ind);
-	    radius(radius < 1) = 2;
-	    radius = ceil(radius);
+	    % ind = sub2ind(size(bdist), int16(l(:, 1)), int16(l(:, 2)), int16(l(:, 3)));
+	    % radius = bdist(ind);
+	    % radius(radius < 1) = 1;
+	    % radius = ceil(radius);
+	    radius = zeros(size(l, 1), 1);
+	    for r = 1 : size(l, 1)
+		    radius(i) = getradius(I, l(r, 1), l(r, 2), l(r, 3));
+		end
+	    radius(radius < 1) = 1;
 
 	    if size(l, 1) < 4
 	    	l = [StartPoint'; l];

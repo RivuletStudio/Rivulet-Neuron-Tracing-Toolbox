@@ -10,29 +10,30 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I)
     fprintf('confidence of this branch %f\n', confidence);
 
     % Get rid of the noise points 
-    if confidence < 0.5
-        s = 0;
-        lastoneidx = numel(vox);
+   %  if confidence < 0.5
+   %      s = 0;
+   %      lastoneidx = numel(vox);
 
-    	for i = numel(vox) : -1 : 1
-			if vox(i)
-                lastoneidx = i;
-			end
+   %  	for i = numel(vox) : -1 : 1
+			% if vox(i)
+   %              lastoneidx = i;
+			% end
 
-			s = s + vox(i);
-			p = s / i;
-            if p < 0.9
-                l = l(end:lastoneidx, :);
-                break;
-            end
-    	end
+			% s = s + vox(i);
+			% p = s / i;
+   %          if p < 0.9
+   %              l = l(end:lastoneidx, :);
+   %              break;
+   %          end
+   %  	end
 
-    	radius = radius(end:lastoneidx);
-    end
+   %  	radius = radius(end:lastoneidx);
+   %  end
 
     if size(l, 1) < 4
     	return;
     end
+
 
 	assert(size(l, 1) == size(radius, 1));
 	newtree = zeros(size(l, 1), 7);
