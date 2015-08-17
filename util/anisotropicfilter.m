@@ -36,7 +36,6 @@ maxv = max(vvec);
 v = v / maxv * 255;
 v = abs(v);
 v = round(v);
-end
 
 %%The folowing code demonstrates how to use otsu library
 %please notice that use the otsu rather than otsuown
@@ -44,12 +43,12 @@ end
 %disp('begin otsu');
 %binaryI = otsuown(v);
 %safeshowbox(binaryI,0.5);
-%C = reshape(v,[],size(v,2),1);
-%[IDX,sep] = otsu(C,5);
-%newC = reshape(IDX, size(v));
+C = reshape(v,[],size(v,2),1);
+[IDX,sep] = otsu(C,2);
+newC = reshape(IDX, size(v));
 % fuck = newC==6;
 %fucker = ac_linear_diffusion_AOS(newC == 2, 1);
-%safeshowbox(newC,1);
+safeshowbox(newC,1);
 %afterls = ac_linear_diffusion_AOS(newC == 2, 1);
 %safeshowbox(afterls, 0.5);
 %figure(1);
@@ -57,4 +56,4 @@ end
 %disp(max(fu(:), min(fu(:))))
 %showbox(v, 10);
 %save_v3d_raw_img_file(uint8(v),'filter.v3draw');
-
+end
