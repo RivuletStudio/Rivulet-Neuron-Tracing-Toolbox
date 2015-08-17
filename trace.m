@@ -46,8 +46,13 @@ function tree = trace(varargin)
 		rewire = varargin{8};
 	else
 		rewire = false;
+    end
+    
+    if numel(varargin) > 8
+		Gap = varargin{9};
+	else
+		Gap = 10;
 	end
-
 
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
@@ -59,10 +64,14 @@ function tree = trace(varargin)
 
 	tic;
 	fprintf('Segmenting image using %s\n', segmentmethod);
+	disp(imgpath);
+	imgpath = 'c1.v3draw';
 	if strcmp(segmentmethod, 'threshold')
 	    [I, cropregion] = binarizeimage(segmentmethod, imgpath, threshold, delta_t, crop);
+	    disp(imgpath);
 	else
 	    [I, cropregion] = binarizeimage(segmentmethod, imgpath, cl, delta_t, crop);
+	    disp(imgpath);
 	end
 
     
@@ -107,7 +116,7 @@ function tree = trace(varargin)
 	    end
 
 	    disp('start tracing');
-	    l = shortestpath2(T, grad, StartPoint, SourcePoint, 1, 'rk4');
+	    l = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', Gap);
 	    disp('end tracing')
 
 	    % Get radius of each point from distance transform

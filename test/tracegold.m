@@ -1,0 +1,1 @@
+tree = trace('home/donghao/Desktop/fishhead/test/c1.v3draw', 'classify', 0.5, true, 1, 0.95, true, false);
