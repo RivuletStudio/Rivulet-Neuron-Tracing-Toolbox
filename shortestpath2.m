@@ -106,7 +106,27 @@ while(true)
     if(i>10), Movement=sqrt(sum((EndPoint(:)-ShortestLine(i-10,:)').^2));  else Movement=Stepsize+1;  end
     
 %     fprintf('I: %f; j: %i\n', I(int16(EndPoint(1)), int16(EndPoint(2)), int16(EndPoint(3))), j);
-    if (I(int16(EndPoint(1)), int16(EndPoint(2)), int16(EndPoint(3))) == 0), j = j + 1; else j = 0; end
+    [Ixsize, Iysize, Izsize] = size(I);
+    Ixvalue = int16(EndPoint(1));
+    Iyvalue = int16(EndPoint(2));
+    Izvalue = int16(EndPoint(3));
+    if Ixvalue <= 0
+        Ixvalue =1;
+    elseif Ixvalue >= Ixsize
+        Ixvalue = Ixsize -1;
+    end
+    if Iyvalue <= 0
+        Iyvalue =1;
+    elseif Iyvalue >= Iysize
+        Iyvalue = Iysize -1;
+    end
+    if Izvalue <= 0
+        Izvalue =1;
+    elseif Izvalue >= Izsize
+        Izvalue = Izsize -1;        
+    end
+    
+    if (I(Ixvalue, Iyvalue, Izvalue) == 0), j = j + 1; else j = 0; end
         
     % Stop if out of boundary, distance to end smaller then a pixel or
     % if we have not moved for 10 itterations

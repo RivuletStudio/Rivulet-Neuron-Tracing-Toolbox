@@ -1,6 +1,6 @@
     
     percentage = 0.99;
-    Gap = 5;
+    Gap = 50;
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
     disp('Looking for the source point...')
@@ -38,7 +38,7 @@
 	    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
 
 	    if T(StartPoint(1), StartPoint(2), StartPoint(3)) == 0 || I(StartPoint(1), StartPoint(2), StartPoint(3)) == 0
-	    	break;
+	    	continue;
 	    end
 
 	    disp('start tracing');
@@ -88,5 +88,4 @@
 
     end
     hold off
-    toc;
 
