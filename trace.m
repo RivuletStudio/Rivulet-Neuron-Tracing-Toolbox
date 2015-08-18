@@ -164,6 +164,9 @@ function tree = trace(varargin)
     hold off
     toc;
 
+    % Remove the unconnected branches
+    
+
     % showswc(tree, I, true);
     % showswc(rewiredtree, I, true);
     tree(:, 6) = 1;
