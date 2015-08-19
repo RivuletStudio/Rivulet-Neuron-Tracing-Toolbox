@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 18-Aug-2015 15:28:06
+% Last Modified by GUIDE v2.5 18-Aug-2015 17:56:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,7 +60,7 @@ guidata(hObject, handles);
 
 % UIWAIT makes gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-set(hObject, 'toolbar', 'figure')
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = gui_OutputFcn(hObject, eventdata, handles) 
@@ -90,21 +90,46 @@ end
 addpath(fullfile(pathstr, 'util'));
 
 % Try to read the image in
-if exist('load_v3d_raw_img_file')
-  h = msgbox('Loading...');
-  I = load_v3d_raw_img_file(filepath);
-  fig = handles.mainfig;
-  axes(fig);
-  showbox(I, 0);
-  delete(h);
-else
-  msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
-end
+if filename
+  if exist('load_v3d_raw_img_file')
+    h = msgbox('Loading...')
+    I = load_v3d_raw_img_file(filepath);
+    ax = handles.mainfig;
+    axes(ax);
+    cla(ax, 'reset');
+    v = handles.thresholdslider.Value;
+    if handles.thresholdcheck.Value
+      bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value);
+    else
+      msgbox('Not yet implemented!')
+    end
+
+    showbox(bI, 0.5);
+    delete(h);
+    hObject.UserData.I = I;
+    hObject.UserData.bI = bI;
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+  else
+    msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
+  end
 
 filepathtext = findobj('Tag', 'filepath');
 filepathtext.String = filepath;
 setappdata(hObject.Parent, 'filepath', filepath);
 
+end
+
+
+function autocropbtn_Callback(hObject, eventdata, handles)
+if isfield(handles.selectfilebtn.UserData, 'bI')
+  bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
+  handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+  ax = handles.mainfig;
+  axes(ax);
+  cla(ax, 'reset')
+  showbox(bI, 0.5);
+  handles.selectfilebtn.UserData.bI = bI;
+end
 
 % --- Executes on button press in radiobutton1.
 function radiobutton1_Callback(hObject, eventdata, handles)
@@ -273,13 +298,13 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
+% --- Executes on button press in cropcheck.
+function cropcheck_Callback(hObject, eventdata, handles)
+% hObject    handle to cropcheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
+% Hint: get(hObject,'Value') returns toggle state of cropcheck
 
 
 % --- Executes on button press in pushbutton2.
@@ -296,13 +321,13 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in checkbox6.
-function checkbox6_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox6 (see GCBO)
+% --- Executes on button press in levelsetcheck.
+function levelsetcheck_Callback(hObject, eventdata, handles)
+% hObject    handle to levelsetcheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox6
+% Hint: get(hObject,'Value') returns toggle state of levelsetcheck
 
 
 % --- Executes on button press in checkbox5.
@@ -334,18 +359,19 @@ addpath(dirname)
 
 
 % --- Executes on slider movement.
-function slider2_Callback(hObject, eventdata, handles)
-% hObject    handle to slider2 (see GCBO)
+function thresholdslider_Callback(hObject, eventdata, handles)
+% hObject    handle to thresholdslider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.Value = round(hObject.Value);
+handles.thresholdtxt.String = num2str(hObject.Value);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 
-
 % --- Executes during object creation, after setting all properties.
-function slider2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to slider2 (see GCBO)
+function thresholdslider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thresholdslider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -376,3 +402,76 @@ function edit6_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function thresholdedit_Callback(hObject, eventdata, handles)
+% hObject    handle to thresholdedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of thresholdedit as text
+%        str2double(get(hObject,'String')) returns contents of thresholdedit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function thresholdedit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thresholdedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in segupdatebtn.
+function segupdatebtn_Callback(hObject, eventdata, handles)
+% hObject    handle to segupdatebtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+v = handles.thresholdslider.Value;
+ud = handles.selectfilebtn.UserData;
+
+if isfield(ud, 'I') 
+  h = msgbox('Updating...');
+  I = handles.selectfilebtn.UserData.I;
+
+  if handles.thresholdcheck.Value
+    bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value);
+  else
+    msgbox('Not yet implemented!')
+  end
+
+  ax = handles.mainfig;
+  cla(ax);
+  axes(ax);
+  showbox(bI, 0.5);
+  handles.selectfilebtn.UserData.bI = bI;
+  handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+  delete(h);
+end
+
+function delta_t_Callback(hObject, eventdata, handles)
+function delta_t_CreateFcn(hObject, eventdata, handles)
+function coverageedit_CreateFcn(hObject, eventdata, handles)
+function gapedit_CreateFcn(hObject, eventdata, handles)
+function plottracecheck_Callback(hObject, eventdata, handles)
+
+function tracebtn_Callback(hObject, eventdata, handles)
+
+if isfield(handles.selectfilebtn.UserData, 'bI')
+  ax = handles.mainfig;
+  cla(ax);
+  axes(ax);
+  showbox(handles.selectfilebtn.UserData.bI, 0.5);
+  tree = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), true);
+else
+  msgbox('Sorry, no segmented image found!');
+end
+
+  
+  
