@@ -7,13 +7,13 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
     ind = sub2ind(size(I), lint(:, 1), lint(:, 2), lint(:, 3));
     vox = I(ind);
     confidence = sum(vox)/numel(vox);
-    fprintf('confidence of this branch %f\n', confidence);
+    % fprintf('confidence of this branch %f\n', confidence);
 
     if size(l, 1) < 4
     	return;
     end
 
-    disp([size(l, 1), size(radius, 1)]);
+    % disp([size(l, 1), size(radius, 1)]);
 	assert(size(l, 1) == size(radius, 1));
 	newtree = zeros(size(l, 1), 7);
 	if size(tree, 1) == 0
@@ -30,7 +30,7 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
 		tree = newtree;
 	else
 		termini1 = l(end, :);
-		termini2 = l(1, :)
+		termini2 = l(1, :);
 		treenodes = tree(:, 3:5);
         
         % Get pairwise distance between the termini and tree nodes 
@@ -38,7 +38,7 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
         [d1, idx1] = min(d1);
 
         d2 = pdist2(termini2, treenodes);
-        [d2, idx2] = min(d2)
+        [d2, idx2] = min(d2);
 
         % Sort internal relationship
 		newtree(:, 1) = tree(end, 1) + 1 : tree(end, 1) + size(l, 1);

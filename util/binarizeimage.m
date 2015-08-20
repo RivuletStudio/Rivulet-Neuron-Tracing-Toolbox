@@ -45,6 +45,7 @@ function [X, cropregion] = binarizeimage(varargin)
     end
 
     if levelset
+        disp('Performing Linear Level-Set...')
         X = ac_linear_diffusion_AOS(X, delta_t);
     end
 

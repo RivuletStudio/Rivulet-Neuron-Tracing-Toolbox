@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 18-Aug-2015 17:56:22
+% Last Modified by GUIDE v2.5 19-Aug-2015 18:02:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -99,7 +99,7 @@ if filename
     cla(ax, 'reset');
     v = handles.thresholdslider.Value;
     if handles.thresholdcheck.Value
-      bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value);
+      bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
     else
       msgbox('Not yet implemented!')
     end
@@ -115,10 +115,8 @@ if filename
 
 filepathtext = findobj('Tag', 'filepath');
 filepathtext.String = filepath;
-setappdata(hObject.Parent, 'filepath', filepath);
-
+hObject.UserData.inputpath = filepath;
 end
-
 
 function autocropbtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
@@ -441,7 +439,7 @@ if isfield(ud, 'I')
   I = handles.selectfilebtn.UserData.I;
 
   if handles.thresholdcheck.Value
-    bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value);
+    bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
   else
     msgbox('Not yet implemented!')
   end
@@ -458,20 +456,56 @@ end
 function delta_t_Callback(hObject, eventdata, handles)
 function delta_t_CreateFcn(hObject, eventdata, handles)
 function coverageedit_CreateFcn(hObject, eventdata, handles)
+function coverageedit_Callback(hObject, eventdata, handles)
 function gapedit_CreateFcn(hObject, eventdata, handles)
 function plottracecheck_Callback(hObject, eventdata, handles)
 
-function tracebtn_Callback(hObject, eventdata, handles)
 
+function tracebtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
   ax = handles.mainfig;
   cla(ax);
   axes(ax);
   showbox(handles.selectfilebtn.UserData.bI, 0.5);
-  tree = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), true);
+  tree = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax);
+  if handles.ignoreradiuscheck.Value
+      tree(:, 6) = 1;
+  end
+  
+  if handles.outputswccheck.Value 
+      if exist('save_v3d_raw_img_file')
+          save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
+          axes(ax);
+          showswc(tree, handles.selectfilebtn.UserData.bI);
+          msgbox(sprintf('The traced swc file has been output to %s', [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
+      else
+          msgbox('Cannot find save_v3d_raw_img_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
+      end
+  end  
 else
   msgbox('Sorry, no segmented image found!');
 end
 
-  
-  
+% --- Executes on button press in ignoreradiuscheck.
+function ignoreradiuscheck_Callback(hObject, eventdata, handles)
+% hObject    handle to ignoreradiuscheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of ignoreradiuscheck
+
+
+% --- Executes on button press in outputswccheck.
+function outputswccheck_Callback(hObject, eventdata, handles)
+% hObject    handle to outputswccheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of outputswccheck
+
+
+% --- Executes on button press in pushbutton9.
+function pushbutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

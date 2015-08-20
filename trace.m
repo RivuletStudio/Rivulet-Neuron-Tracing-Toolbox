@@ -19,7 +19,7 @@ function tree = trace(varargin)
 
 	percentage = 0.95;
     if numel(varargin) >= 3
-		percentage = varargin{3};
+		percentage = double(varargin{3});
 	end
 
 	rewire = false;
@@ -32,9 +32,9 @@ function tree = trace(varargin)
 		gap = varargin{5};
 	end
 
-	msg = false;
+	ax = false;
     if numel(varargin) >= 6
-		msg = varargin{6};
+		ax = varargin{6};
 	end
 
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
@@ -42,31 +42,31 @@ function tree = trace(varargin)
     addpath(genpath(fullfile(pathstr, 'lib')));
 
     
-    if msg
-    	h1 = msgbox('Distance transform...')
+    if plot
+        h = waitbar(0.2, 'Preprocessing: Distance Tr...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
     end
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
-    if msg
-    	delete(h1);
-    end
+    
     disp('Looking for the source point...')
     [SourcePoint, maxD] = maxDistancePoint(bdist, I, true);
     disp('Make the speed image...')
     SpeedImage=(bdist/maxD).^4;
 	SpeedImage(SpeedImage==0) = 1e-10;
-	if msg
-		h2 = msgbox('Marching...');
+	if plot
+        set(0, 'CurrentFigure', h);
+		h = waitbar(0.5, h, 'Preprocessing: Marching...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
 	end	
 	disp('marching...');
     oT = msfm(SpeedImage, SourcePoint, false, false);
-    if msg
-    	delete(h2);
-    end
+    
     disp('Finish marching')
 
-    disp('Calculating gradient...')
-	% Calculate gradient of DistanceMap
+    
 
     % close all
     if plot
@@ -76,7 +76,15 @@ function tree = trace(varargin)
     T = oT;
     tree = []; % swc tree
     prune = true;
-	grad = distgradient(T);
+	% Calculate gradient of DistanceMap
+	disp('Calculating gradient...')
+    grad = distgradient(T);
+    if plot
+        set(0, 'CurrentFigure', h);
+		h = waitbar(0.8, h, 'Preprocessing: Calculate Distance Gradients...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
+    end
     S = {};
     B = zeros(size(T));
     i = 1;
@@ -98,11 +106,7 @@ function tree = trace(varargin)
 	    	break;
 	    end
 
-	    l = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
-	    % if size(l, 1) < 4
-	    % 	disp('Branch too short: abandoned');
-	    %     continue	
-	    % end
+	    [l, dump] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
 
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
@@ -110,7 +114,7 @@ function tree = trace(varargin)
 		    radius(r) = getradius(I, l(r, 1), l(r, 2), l(r, 3));
 		end
 	    radius(radius < 1) = 1;
-	    disp([size(l, 1), size(radius, 1)]);
+	    % disp([size(l, 1), size(radius, 1)]);
 		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
@@ -119,31 +123,32 @@ function tree = trace(varargin)
 	    T(tB==1) = -1;
 
 	    % Add l to the tree
-	    [tree, confidence] = addbranch2tree(tree, l, radius, I, plot);
-
-	    if confidence > 0.5 % skip noise points
-	    	lconfidence = [lconfidence; confidence];
-		    S{i} = l;
-		    i = i + 1;
-	    end
+	    if ~dump
+		    [tree, confidence] = addbranch2tree(tree, l, radius, I, plot);
+		end
 
         B = B | tB;
 
         percent = sum(B(:) & I(:)) / sum(I(:));
-        fprintf('Percent: %.2f/%.2f\n', percent * 100, percentage * 100);
+%         fprintf('Percent: %.2f/%.2f\n', percent * 100, percentage * 100);
+        if plot
+%             disp(percent)
+            set(0, 'CurrentFigure', h);
+%             h = waitbar(percent, h, sprintf('Tracing %.2f%%', percent*100 / percentage));
+            h = waitbar(percent, h);
+            set(h, 'windowstyle', 'modal');
+%             set(0, 'CurrentFigure', gcf);
+            axes(ax);
+        end
         if percent >= percentage
+            if plot
+                close(h)
+            end
         	disp('Coverage reached end tracing...')
         	break;
         end
 
     end
-
-    % Remove the unconnected branches
-    
-
-    % showswc(tree, I, true);
-    % showswc(rewiredtree, I, true);
-    tree(:, 6) = 1;
 
     % % Shift the result tree back to the original space if crop was conducted
     % if crop
@@ -151,8 +156,6 @@ function tree = trace(varargin)
     %     tree(:, 4) = tree(:, 4) + cropregion(2, 1);
     %     tree(:, 5) = tree(:, 5) + cropregion(3, 1);
     % end
-    
-    % save_v3d_swc_file(tree, [imgpath, '.trace.swc']);
 
     if rewire
 	    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
@@ -164,4 +167,5 @@ function tree = trace(varargin)
 	if plot
 		hold off
 	end
+
 end
