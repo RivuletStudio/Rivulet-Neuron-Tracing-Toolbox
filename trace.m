@@ -10,172 +10,152 @@ function tree = trace(varargin)
 % crop(optional): crop the image with threshold > 0; default true
 % rewire: whether the result tree will be rewired
 
-	imgpath = varargin{1};
-	segmentmethod = varargin{2};
-	if strcmp(segmentmethod, 'threshold')
-		threshold = varargin{3};
-	else
-	    cl = varargin{3};
+	I = varargin{1};
+
+	plot = false;
+    if numel(varargin) >= 2
+		plot = varargin{2};
 	end
 
-    if numel(varargin) > 3
-		plot = varargin{4};
-	else
-		plot = false;
+	percentage = 0.95;
+    if numel(varargin) >= 3
+		percentage = double(varargin{3});
 	end
 
-    if numel(varargin) > 4
-		delta_t = varargin{5};
-	else
-		delta_t = 1;
-	end
-
-	if numel(varargin) > 5
-		percentage = varargin{6};
-	else
-		percentage = 0.95;
-	end
-
-	if numel(varargin) > 6
-		crop = varargin{7};
-	else
-		crop = true;
-	end
-
-	if numel(varargin) > 7
-		rewire = varargin{8};
-	else
-		rewire = false;
+	rewire = false;
+	if numel(varargin) >= 4
+		rewire = varargin{4};
     end
     
-    if numel(varargin) > 8
-		Gap = varargin{9};
-	else
-		Gap = 10;
+	gap = 10;
+    if numel(varargin) >= 5
+		gap = varargin{5};
+	end
+
+	ax = false;
+    if numel(varargin) >= 6
+		ax = varargin{6};
 	end
 
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
-    addpath(fullfile(pathstr, '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
     addpath(fullfile(pathstr, 'util'));
     addpath(genpath(fullfile(pathstr, 'lib')));
 
-	disp('Loading Image and segment foreground...');
-	% I = load_v3d_raw_img_file(imgpath);
-
-	tic;
-	fprintf('Segmenting image using %s\n', segmentmethod);
-	disp(imgpath);
-	imgpath = 'c1.v3draw';
-	if strcmp(segmentmethod, 'threshold')
-	    [I, cropregion] = binarizeimage(segmentmethod, imgpath, threshold, delta_t, crop);
-	    disp(imgpath);
-	else
-	    [I, cropregion] = binarizeimage(segmentmethod, imgpath, cl, delta_t, crop);
-	    disp(imgpath);
-	end
-
     
+    if plot
+        h = waitbar(0.2, 'Preprocessing: Distance Tr...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
+    end
     disp('Distance transform');
     bdist = getBoundaryDistance(I, true);
+    
     disp('Looking for the source point...')
     [SourcePoint, maxD] = maxDistancePoint(bdist, I, true);
     disp('Make the speed image...')
     SpeedImage=(bdist/maxD).^4;
 	SpeedImage(SpeedImage==0) = 1e-10;
+	if plot
+        set(0, 'CurrentFigure', h);
+		h = waitbar(0.5, h, 'Preprocessing: Marching...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
+	end	
 	disp('marching...');
     oT = msfm(SpeedImage, SourcePoint, false, false);
+    
     disp('Finish marching')
 
-    disp('Calculating gradient...')
-	% Calculate gradient of DistanceMap
+    
 
-    close all
+    % close all
+    if plot
+    	hold on 
+    	% showbox(I, 0.5);
+    end
     T = oT;
     tree = []; % swc tree
     prune = true;
-	grad = distgradient(T);
+	% Calculate gradient of DistanceMap
+	disp('Calculating gradient...')
+    grad = distgradient(T);
+    if plot
+        set(0, 'CurrentFigure', h);
+		h = waitbar(0.8, h, 'Preprocessing: Calculate Distance Gradients...');
+        set(h, 'windowstyle', 'modal');
+        axes(ax);
+    end
     S = {};
     B = zeros(size(T));
     i = 1;
-	figure(1)
-	showbox(I, 0.5);
-	drawnow
 
     lconfidence = [];
-    hold on
-    [x,y,z] = sphere;
-    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+    if plot
+	    [x,y,z] = sphere;
+	    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+	end
 
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
-	    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+	    if plot
+		    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+		end
 
 	    if T(StartPoint(1), StartPoint(2), StartPoint(3)) == 0 || I(StartPoint(1), StartPoint(2), StartPoint(3)) == 0
 	    	break;
 	    end
 
-	    disp('start tracing');
-	    l = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', Gap);
-	    disp('end tracing')
+	    [l, dump] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
 
 	    % Get radius of each point from distance transform
-	    ind = sub2ind(size(bdist), int16(l(:, 1)), int16(l(:, 2)), int16(l(:, 3)));
-	    radius = bdist(ind);
-	    radius(radius < 1) = 2;
-	    radius = ceil(radius);
-
-	    if size(l, 1) < 4
-	    	l = [StartPoint'; l];
-	    	radius = zeros(size(l, 1), 1);
-	    	radius(:) = 2;
-	    end
-		[rlistlength, useless] = size(l);
-	    radiuslist = zeros(rlistlength, 1);
-	    for radius_i = 1 : rlistlength
-	    	curradius = getradius(I, l(radius_i, 1), l(radius_i, 2), l(radius_i, 3));
-	    	radiuslist(radius_i) = curradius; 
-	    end 
+	    radius = zeros(size(l, 1), 1);
+	    for r = 1 : size(l, 1)
+		    radius(r) = getradius(I, l(r, 1), l(r, 2), l(r, 3));
+		end
+	    radius(radius < 1) = 1;
+	    % disp([size(l, 1), size(radius, 1)]);
+		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
-	    tB = binarysphere3d(size(T), l, radiuslist);
+	    tB = binarysphere3d(size(T), l, radius);
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
 	    T(tB==1) = -1;
 
 	    % Add l to the tree
-	    if prune && size(l, 1) > 4
-		    [tree, confidence] = addbranch2tree(tree, l, radius, I);
-
-		    if confidence > 0.5 % skip noise points
-		    	lconfidence = [lconfidence; confidence];
-			    S{i} = l;
-			    i = i + 1;
-		    end
+	    if ~dump
+		    [tree, confidence] = addbranch2tree(tree, l, radius, I, plot);
 		end
 
         B = B | tB;
 
-        percent = sum(B(:) & I(:)) / sum(I(:))
+        percent = sum(B(:) & I(:)) / sum(I(:));
+%         fprintf('Percent: %.2f/%.2f\n', percent * 100, percentage * 100);
+        if plot
+%             disp(percent)
+            set(0, 'CurrentFigure', h);
+%             h = waitbar(percent, h, sprintf('Tracing %.2f%%', percent*100 / percentage));
+            h = waitbar(percent, h);
+            set(h, 'windowstyle', 'modal');
+%             set(0, 'CurrentFigure', gcf);
+            axes(ax);
+        end
         if percent >= percentage
+            if plot
+                close(h)
+            end
+        	disp('Coverage reached end tracing...')
         	break;
         end
 
     end
-    hold off
-    toc;
 
-    % showswc(tree, I, true);
-    % showswc(rewiredtree, I, true);
-    tree(:, 6) = 1;
-
-    % Shift the result tree back to the original space if crop was conducted
-    if crop
-        tree(:, 3) = tree(:, 3) + cropregion(1, 1);
-        tree(:, 4) = tree(:, 4) + cropregion(2, 1);
-        tree(:, 5) = tree(:, 5) + cropregion(3, 1);
-    end
-    
-    save_v3d_swc_file(tree, [imgpath, '.trace.swc']);
+    % % Shift the result tree back to the original space if crop was conducted
+    % if crop
+    %     tree(:, 3) = tree(:, 3) + cropregion(1, 1);
+    %     tree(:, 4) = tree(:, 4) + cropregion(2, 1);
+    %     tree(:, 5) = tree(:, 5) + cropregion(3, 1);
+    % end
 
     if rewire
 	    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
@@ -183,4 +163,9 @@ function tree = trace(varargin)
 	    save_v3d_swc_file(rewiredtree, [imgpath, '.rewired.swc']);
 	    tree = rewiredtree;
 	end
+
+	if plot
+		hold off
+	end
+
 end

@@ -1,4 +1,4 @@
-function feats = featextract(imgpath, gtpath, saveprefix, sigma)
+function feats = featextract(I, swc, sigma)
 % Extract hession features from 1 subject
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 	addpath(fullfile(pathstr, '..', 'util'));
@@ -6,8 +6,7 @@ function feats = featextract(imgpath, gtpath, saveprefix, sigma)
     addpath(fullfile(pathstr, '..', 'lib', 'frangi_filter_version2a'));
 	addpath(fullfile(pathstr, '..', '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
 
-	[~, filename, ~] = fileparts(imgpath);
-	I = single(load_v3d_raw_img_file(imgpath));
+	I = single(I);
     if ndims(I) > 3
         I = I(:, :, :, 1);
     end
@@ -31,8 +30,7 @@ function feats = featextract(imgpath, gtpath, saveprefix, sigma)
     gt = [];
 
     if numel(gtpath) ~= 0
-        gttree = load_v3d_swc_file(gtpath);
-        gt = binarysphere(I, gttree);
+        gt = binarysphere(I, swc);
     end
 				    
     if numel(saveprefix) > 0

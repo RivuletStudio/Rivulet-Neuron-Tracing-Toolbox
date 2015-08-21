@@ -1,4 +1,4 @@
-function ShortestLine=shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
+function [ShortestLine, dump] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
 % This function SHORTESTPATH traces the shortest path from start point to
 % source point using Runge Kutta 4 in a 2D or 3D distance map.
 %
@@ -13,6 +13,7 @@ function ShortestLine=shortestpath2(DistanceMap, GradientVolume, I, StartPoint,S
 %   Gap: the maximum voxel gap in step size to stop trace
 % output,
 %   ShortestLine: M x 2 or M x 3 array with the Shortest Path
+%   dump: true if stoped due to large gap 
 %
 % Note, first compile the rk4 c-code with compile_c_files
 %   
@@ -42,6 +43,7 @@ if(~exist('Method','var')), Method='rk4'; end
 
 % GradientVolume = distgradient(DistanceMap);
 
+dump = false;
 i=0; % Count movemnet 
 j = 0; % Count empty steps
 % Reserve a block of memory for the shortest line array
@@ -148,7 +150,7 @@ while(true)
         break, 
     end
     
-    if (j == Gap), disp('Found broken'); break; end
+    if (j == Gap), disp('Found broken'); dump = true; break; end
     
     % Current point is next Starting Point
     StartPoint=EndPoint;
