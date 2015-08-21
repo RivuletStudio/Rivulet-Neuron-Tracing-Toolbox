@@ -174,10 +174,6 @@ function tree = segandtrace(varargin)
     toc;
 
     % Remove the unconnected branches
-    
-
-    % showswc(tree, I, true);
-    % showswc(rewiredtree, I, true);
     tree(:, 6) = 1;
 
     % Shift the result tree back to the original space if crop was conducted

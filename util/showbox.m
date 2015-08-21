@@ -1,14 +1,18 @@
-function showbox(vision_box,threshold)
-% figure
+function showbox(varargin)
+X = varargin{1};
+threshold = varargin{2};
+endplot = true;
+if numel(varargin) >= 3
+    endplot = varargin{3};
+end
 hold on
 whitebg(gcf, 'black')
-biA = vision_box > threshold; 
-% [x y z] = ind2sub(size(biA), find(biA));
-% plot3(y, x, z, 'b.');
-%scatter3(x(i),y(i),z(i),15,A(x(i),y(i),z(i)),'filled');
+biA = X > threshold; 
 camlight;
 iso = isosurface(biA);
-h = patch(iso, 'facecolor',[1 1 1],'facealpha',0.3,'edgecolor','none');  view(3); axis equal;
+h = patch(iso, 'facecolor',[0.7 0.7 1],'facealpha',0.3,'edgecolor','none');  view(3); axis equal;
 drawnow
-hold off
+if endplot
+	hold off
+end
 end

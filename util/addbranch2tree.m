@@ -1,17 +1,17 @@
-function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
+function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, plot)
 % Add a branch with 3D points to a swc tree
 % Return the result swc tree and the confidence score of the newly added branch
-
     % Get the voxels on this branch and count the empty voxels 
+    unconnected = false;
+    newtree = [];
     lint = int16(l);
     ind = sub2ind(size(I), lint(:, 1), lint(:, 2), lint(:, 3));
     vox = I(ind);
     confidence = sum(vox)/numel(vox);
-    % fprintf('confidence of this branch %f\n', confidence);
-
-    if size(l, 1) < 4
-    	return;
+    if confidence < 0.5 || size(l, 1) < 4
+    	return
     end
+    % fprintf('confidence of this branch %f\n', confidence);
 
     % disp([size(l, 1), size(radius, 1)]);
 	assert(size(l, 1) == size(radius, 1));
@@ -51,7 +51,7 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
 			drawnow
 		end
 
-	    if d1 < tree(idx1, 6) * 4 || d1 < newtree(end, 6) * 4
+	    if (d1 < (tree(idx1, 6) + 3) * connectrate || d1 < (newtree(end, 6) + 3) * connectrate) && merged
 			newtree(end, 7) = tree(idx1, 1); % Connect to the tree parent
 			if plot
 				plot3([newtree(end, 4);tree(idx1, 4)], [newtree(end, 3);tree(idx1, 3)], [newtree(end, 5);tree(idx1, 5)], 'b-.');
@@ -61,7 +61,7 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
 			newtree(end, 7) = -2; % Remain unconnected
 		end
 
-	    if d2 < tree(idx2, 6) * 4 || d2 < newtree(1, 6) * 4
+	    if (d2 < (tree(idx2, 6) + 3) * connectrate || d2 < (newtree(1, 6) + 3)* connectrate) && merged
 			newtree(1, 7) = tree(idx2, 1); % Connect to the tree parent
 			if plot
 				plot3([newtree(1, 4);tree(idx2, 4)], [newtree(1, 3);tree(idx2, 3)], [newtree(1, 5);tree(idx2, 5)], 'b-.');
@@ -73,6 +73,10 @@ function [tree, confidence] = addbranch2tree(tree, l, radius, I, plot)
 
 		% plot3([newtree(end, 4);tree(idx, 4)], [newtree(end, 3);tree(idx, 3)], [newtree(end, 5);tree(idx, 5)], 'b-.');
 		tree = [tree; newtree];
+
+		if newtree(end, 7) == -2 && newtree(1, 7) == -2
+			unconnected = true;
+		end
 	end
 	% waitforbuttonpress
 end

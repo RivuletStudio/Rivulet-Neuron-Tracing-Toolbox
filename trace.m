@@ -1,4 +1,4 @@
-function tree = trace(varargin)
+function [tree, meanconf] = trace(varargin)
 % Main tracing function
 % imgpath: the path to the v3draw image
 % Return: swc tree
@@ -36,6 +36,16 @@ function tree = trace(varargin)
     if numel(varargin) >= 6
 		ax = varargin{6};
 	end
+
+    dumpbranch = false;
+    if numel(varargin) >= 7
+        dumpbranch = varargin{7};
+    end
+
+    connectrate = false;
+    if numel(varargin) >= 8
+        connectrate = varargin{8};
+    end
 
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
@@ -95,6 +105,8 @@ function tree = trace(varargin)
 	    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
 	end
 
+    unconnectedBranches = {};
+
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
@@ -106,7 +118,7 @@ function tree = trace(varargin)
 	    	break;
 	    end
 
-	    [l, dump] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
+	    [l, dump, merged] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
 
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
@@ -123,8 +135,12 @@ function tree = trace(varargin)
 	    T(tB==1) = -1;
 
 	    % Add l to the tree
-	    if ~dump
-		    [tree, confidence] = addbranch2tree(tree, l, radius, I, plot);
+	    if ~(dump && dumpbranch) 
+		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, plot);
+            if unconnected
+                unconnectedBranches = {unconnectedBranches, newtree};
+            end
+            lconfidence = [lconfidence, conf];
 		end
 
         B = B | tB;
@@ -157,12 +173,43 @@ function tree = trace(varargin)
     %     tree(:, 5) = tree(:, 5) + cropregion(3, 1);
     % end
 
+    % Double check the unconnected terminis
+    for t = unconnectedBranches
+        t1 = t(1, :);
+        t2 = t(end, :);
+        tid = t(:, 1);
+        treeid = tree(:, 1);
+        rest = tree(~ismember(treeid, tid), :);
+        [d1, idx1] = pdist2(t1(3:5), rest(:, 3:5));
+
+        if (d1 < (rest(idx1, 6) + 3) * connectrate || d1 < (t1(6) + 3) * connectrate)
+            fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t1(3:5), rest(idx1, 3:5));
+            tree(treeid == t1(1), 7) = rest(idx1, 1); % Connect to the tree parent
+            if plot
+                plot3([t1(4); rest(idx1, 4)], [t1(3);rest(idx1, 3)], [t1(5);rest(idx1, 5)], 'r-.');
+                drawnow
+            end
+        end
+
+        [d2, idx2] = pdist2(t2(3:5), rest(:, 3:5));
+        if (d2 < (rest(idx2, 6) + 3) * connectrate || d2 < (t1(6) + 3) * connectrate)
+            fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t2(3:5), rest(idx2, 3:5));
+            tree(treeid == t2(1), 7) = rest(idx2, 1); % Connect to the tree parent
+            if plot
+                plot3([t2(4); rest(idx2, 4)], [t2(3);rest(idx2, 3)], [t2(5);rest(idx2, 5)], 'r-.');
+                drawnow
+            end
+        end
+    end
+
+    % Deprecated for now
     if rewire
 	    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
 	    rewiredtree(:, 6) = 1;
 	    save_v3d_swc_file(rewiredtree, [imgpath, '.rewired.swc']);
 	    tree = rewiredtree;
 	end
+    meanconf = mean(lconfidence);
 
 	if plot
 		hold off

@@ -4,7 +4,6 @@ function [X, cropregion] = binarizeimage(varargin)
     % example:
     % binarizeimage('classifier', X, cl, delta_t, crop)
     % binarizeimage('threshold', X, threshold, delta_t, crop)
-    nVarargs = length(varargin);
     % Use the trained classifier to enhance and binarize the foreground neuron from v3draw
     [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, '..', 'scripts'));
@@ -32,16 +31,16 @@ function [X, cropregion] = binarizeimage(varargin)
         X = double(X > threshold); 
     else
         cl = varargin{3}
-        featdir = fullfile(pathstr, 'tmp');
-        if ~exist(featdir, 'dir')
-          mkdir(featdir);
+        
+        if ~exist('tmp', 'dir')
+          mkdir('tmp');
         end
-        featextract(X, [], featdir, 3);
-        [X, ~, feats] = featcollect(featdir, []);
+        featextract(X, [], 1.2, fullfile('tmp', 'tmpfeat'));
+        [X, ~, feats] = featcollect('tmp', []);
         pred = predict(cl, X);
         X = reshape(pred, size(feats.I));
-        fprintf('Removing %s\n', featdir);
-        rmdir(featdir, 's');
+        fprintf('Removing %s\n', 'tmp');
+        rmdir('tmp', 's');
     end
 
     if levelset
@@ -51,8 +50,8 @@ function [X, cropregion] = binarizeimage(varargin)
 
     if crop
         [X, cropregion] = imagecrop(X, 0.5);
-        disp('Image Size After Crop: ')
-        disp(size(X));
+        % disp('Image Size After Crop: ')
+        % disp(size(X));
     end
 
     X = X > 0.5;

@@ -22,16 +22,16 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 19-Aug-2015 18:02:13
+% Last Modified by GUIDE v2.5 21-Aug-2015 17:26:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @gui_OpeningFcn, ...
-                   'gui_OutputFcn',  @gui_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @gui_OpeningFcn, ...
+    'gui_OutputFcn',  @gui_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -57,13 +57,16 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
+addpath(fullfile(pathstr, 'util'));
+addpath(genpath(fullfile(pathstr, 'lib')));
 
 % UIWAIT makes gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = gui_OutputFcn(hObject, eventdata, handles) 
+function varargout = gui_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -78,64 +81,89 @@ function selectfilebtn_Callback(hObject, eventdata, handles)
 % hObject    handle to selectfilebtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[filename, pathname] = uigetfile('*.v3draw', 'Select v3draw file');
+[filename, pathname] = uigetfile({'*.v3draw;*.tif;*.mat;*.nii'}, 'Select v3draw file');
 filepath = fullfile(pathname, filename);
 v3dmatdir = getappdata(hObject.Parent, 'v3dmatdir');
 if v3dmatdir
-  fprintf('Adding %s to path\n', v3dmatdir);
-  addpath(v3dmatdir);
+    fprintf('Adding %s to path\n', v3dmatdir);
+    addpath(v3dmatdir);
 end
 
 [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(fullfile(pathstr, 'util'));
-
-% Try to read the image in
+h = msgbox('Loading');
 if filename
-  if exist('load_v3d_raw_img_file')
-    h = msgbox('Loading...')
-    I = load_v3d_raw_img_file(filepath);
-    ax = handles.mainfig;
-    axes(ax);
-    cla(ax, 'reset');
-    v = handles.thresholdslider.Value;
-    if handles.thresholdcheck.Value
-      bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
-    else
-      msgbox('Not yet implemented!')
-    end
+    I = loadraw(filepath);
+else
+    close(h);
+    return
+end
+% Try to read the image in
+if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
+    handles.thresholdslider.Value = 10;
+    handles.thresholdtxt.String = '10';
+end
+v = handles.thresholdslider.Value;
+if handles.filtercheck.Value
+    h2 = msgbox('Filtering');
+    I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
+    close(h2);
+end
 
-    showbox(bI, 0.5);
-    delete(h);
-    hObject.UserData.I = I;
-    hObject.UserData.bI = bI;
-    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
-  else
-    msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
-  end
+%         h = msgbox('classifying voxels');
+%         clf = load('quad.mat');
+%         cl = clf.obj;
+%         [bI, cropregion] = binarizeimage('classification', I, cl, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
+%         close(h)
+[bI, cropregion] = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
 
+I = I(cropregion(1, 1) : cropregion(1, 2), ...
+    cropregion(2, 1) : cropregion(2, 2), ...
+    cropregion(3, 1) : cropregion(3, 2));
+
+delete(h);
+hObject.UserData.I = I;
+hObject.UserData.bI = bI;
+handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
 filepathtext = findobj('Tag', 'filepath');
 filepathtext.String = filepath;
 hObject.UserData.inputpath = filepath;
+refresh_Render(handles);
+
+close(h)
+
+function I = loadraw(filepath)
+% Load raw image file from .v3draw, .tif, .nii, .mat format
+[~, ~, ext] = fileparts(filepath);
+disp(ext)
+if strcmp(ext, '.v3draw')
+    if exist('load_v3d_raw_img_file')
+        I = load_v3d_raw_img_file(filepath);
+    else
+        msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
+    end
+elseif strcmp(ext, '.tif')
+    
+elseif strcmp(ext, '.mat')
+elseif strcmp(ext, '.nii')
+else 
 end
 
 function autocropbtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
-  bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
-  handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
-  ax = handles.mainfig;
-  axes(ax);
-  cla(ax, 'reset')
-  showbox(bI, 0.5);
-  handles.selectfilebtn.UserData.bI = bI;
+    bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+    handles.selectfilebtn.UserData.bI = bI;
+    refresh_Render(handles);
 end
 
-% --- Executes on button press in radiobutton1.
-function radiobutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton1 (see GCBO)
+% --- Executes on button press in classificationcheck.
+function classificationcheck_Callback(hObject, eventdata, handles)
+% hObject    handle to classificationcheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton1
+% Hint: get(hObject,'Value') returns toggle state of classificationcheck
 
 
 % --- Executes on button press in radiobutton2.
@@ -179,13 +207,13 @@ function checkbox1_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of checkbox1
 
 
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
+% --- Executes on button press in dumpcheck.
+function dumpcheck_Callback(hObject, eventdata, handles)
+% hObject    handle to dumpcheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
+% Hint: get(hObject,'Value') returns toggle state of dumpcheck
 
 
 
@@ -221,18 +249,18 @@ function checkbox3_Callback(hObject, eventdata, handles)
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function sigmaedit_Callback(hObject, eventdata, handles)
+% hObject    handle to sigmaedit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% Hints: get(hObject,'String') returns contents of sigmaedit as text
+%        str2double(get(hObject,'String')) returns contents of sigmaedit as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function sigmaedit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to sigmaedit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -328,13 +356,13 @@ function levelsetcheck_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of levelsetcheck
 
 
-% --- Executes on button press in checkbox5.
-function checkbox5_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox5 (see GCBO)
+% --- Executes on button press in filtercheck.
+function filtercheck_Callback(hObject, eventdata, handles)
+% hObject    handle to filtercheck (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox5
+% Hint: get(hObject,'Value') returns toggle state of filtercheck
 
 
 % --- Executes on button press in pushbutton5.
@@ -434,23 +462,19 @@ function segupdatebtn_Callback(hObject, eventdata, handles)
 v = handles.thresholdslider.Value;
 ud = handles.selectfilebtn.UserData;
 
-if isfield(ud, 'I') 
-  h = msgbox('Updating...');
-  I = handles.selectfilebtn.UserData.I;
-
-  if handles.thresholdcheck.Value
-    bI = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
-  else
-    msgbox('Not yet implemented!')
-  end
-
-  ax = handles.mainfig;
-  cla(ax);
-  axes(ax);
-  showbox(bI, 0.5);
-  handles.selectfilebtn.UserData.bI = bI;
-  handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
-  delete(h);
+if isfield(ud, 'I')
+    h = msgbox('Updating...');
+    I = handles.selectfilebtn.UserData.I;
+    
+    [bI, cropregion] = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
+    I = I(cropregion(1, 1) : cropregion(1, 2), ...
+        cropregion(2, 1) : cropregion(2, 2), ...
+        cropregion(3, 1) : cropregion(3, 2));
+    handles.selectfilebtn.UserData.bI = bI;
+    handles.selectfilebtn.UserData.I = I;
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+    delete(h);
+    refresh_Render(handles);
 end
 
 function delta_t_Callback(hObject, eventdata, handles)
@@ -463,27 +487,26 @@ function plottracecheck_Callback(hObject, eventdata, handles)
 
 function tracebtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
-  ax = handles.mainfig;
-  cla(ax);
-  axes(ax);
-  showbox(handles.selectfilebtn.UserData.bI, 0.5);
-  tree = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax);
-  if handles.ignoreradiuscheck.Value
-      tree(:, 6) = 1;
-  end
-  
-  if handles.outputswccheck.Value 
-      if exist('save_v3d_raw_img_file')
-          save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
-          axes(ax);
-          showswc(tree, handles.selectfilebtn.UserData.bI);
-          msgbox(sprintf('The traced swc file has been output to %s', [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
-      else
-          msgbox('Cannot find save_v3d_raw_img_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
-      end
-  end  
+    ax = handles.mainfig;
+    cla(ax);
+    axes(ax);
+    showbox(handles.selectfilebtn.UserData.bI, 0.5);
+    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String));
+    if handles.ignoreradiuscheck.Value
+        tree(:, 6) = 1;
+    end
+    
+    if handles.outputswccheck.Value
+        if exist('save_v3d_raw_img_file')
+            save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
+            msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
+        else
+            msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
+        end        
+    end
+    refresh_Render(handles);
 else
-  msgbox('Sorry, no segmented image found!');
+    msgbox('Sorry, no segmented image found!');
 end
 
 % --- Executes on button press in ignoreradiuscheck.
@@ -504,8 +527,245 @@ function outputswccheck_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of outputswccheck
 
 
-% --- Executes on button press in pushbutton9.
-function pushbutton9_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton9 (see GCBO)
+% --- Executes on button press in filterbtn.
+function filterbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to filterbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'I')
+    h = msgbox('Filtering...')
+    I = handles.selectfilebtn.UserData.I;
+    I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
+    handles.thresholdslider.Value = 0; % Set threshold slider to 0 after filtering
+    handles.thresholdtxt.String = '0';
+    [bI, cropregion] = binarizeimage('threshold', I, handles.thresholdslider.Value, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
+    I = I(cropregion(1, 1) : cropregion(1, 2), ...
+        cropregion(2, 1) : cropregion(2, 2), ...
+        cropregion(3, 1) : cropregion(3, 2));
+    handles.selectfilebtn.UserData.I = I;
+    handles.selectfilebtn.UserData.bI = bI;
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+    refresh_Render(handles);
+else
+    msgbox('Sorry, no segmented image found!');
+end
+
+
+function connectedit_Callback(hObject, eventdata, handles)
+% hObject    handle to connectedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of connectedit as text
+%        str2double(get(hObject,'String')) returns contents of connectedit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function connectedit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to connectedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in classifybtn.
+function classifybtn_Callback(hObject, eventdata, handles)
+% hObject    handle to classifybtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles.selectfilebtn.UserData, 'bI') && ...
+        isfield(handles.selectfilebtn.UserData, 'I')
+    h = msgbox('classifying voxels');
+    I = handles.selectfilebtn.UserData.I;
+    bI = handles.selectfilebtn.UserData.bI;
+    I( bI == 0 ) = 0;
+    I = imagecrop(I, 0);
+    
+    clf = load('quad.mat');
+    cl = clf.obj;
+    [bI, cropregion] = binarizeimage('classification', I, cl, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
+    handles.selectfilebtn.UserData.bI = bI;
+    handles.selectfilebtn.UserData.I = I;
+    refresh_Render(handles);
+    close(h)
+else
+    msgbox('Sorry, no segmented image found!');
+end
+
+
+% --- Executes on button press in pushbutton12.
+function pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in loadswcbtn.
+function loadswcbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to loadswcbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename, pathname] = uigetfile('*.swc', 'Select swc file');
+filepath = fullfile(pathname, filename);
+handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
+refresh_Render(handles);
+
+function refresh_Render(handles)
+shift = handles.shiftslider.Value * 20;
+h = msgbox('Rendering');
+ax = handles.mainfig;
+cla(ax);
+axes(ax);
+
+if handles.treecheck.Value
+    if isfield(handles.selectfilebtn.UserData, 'swc')
+        tree = handles.selectfilebtn.UserData.swc;
+        if shift > 0
+            fprintf('shift with %f\n', shift);
+            tree(:, 3:5) = tree(:, 3:5) + shift;
+        end
+        showswc(tree, false);
+    end
+end
+
+if handles.imagecheck.Value
+    if isfield(handles.selectfilebtn.UserData, 'bI')
+        showbox(handles.selectfilebtn.UserData.bI, 0.5, true);
+    end
+end
+
+
+close(h);
+
+% --- Executes on button press in imagecheck.
+function imagecheck_Callback(hObject, eventdata, handles)
+% hObject    handle to imagecheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of imagecheck
+refresh_Render(handles);
+
+% --- Executes on button press in treecheck.
+function treecheck_Callback(hObject, eventdata, handles)
+% hObject    handle to treecheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of treecheck
+refresh_Render(handles);
+
+% --- Executes on slider movement.
+function shiftslider_Callback(hObject, eventdata, handles)
+% hObject    handle to shiftslider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+refresh_Render(handles);
+
+% --- Executes during object creation, after setting all properties.
+function shiftslider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to shiftslider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+% --- Executes on button press in radiobutton3.
+function radiobutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton3
+
+
+% --- Executes on button press in radiobutton4.
+function radiobutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton4
+
+
+% --- Executes on button press in radiobutton5.
+function radiobutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton5
+
+
+% --- Executes on button press in radiobutton6.
+function radiobutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton6
+
+
+% --- Executes on button press in clearbtn.
+function clearbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to clearbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ax = handles.mainfig;
+cla(ax);
+handles.selectfilebtn.UserData = [];
+
+
+% --- Executes on button press in radiobutton7.
+function radiobutton7_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton7
+
+
+% --- Executes on button press in radiobutton8.
+function radiobutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton8
+
+
+% --- Executes on button press in radiobutton9.
+function radiobutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton9
+
+
+% --- Executes on button press in radiobutton10.
+function radiobutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton10

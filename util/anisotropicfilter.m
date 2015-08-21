@@ -48,7 +48,7 @@ C = reshape(v,[],size(v,2),1);
 newC = reshape(IDX, size(v));
 % fuck = newC==6;
 %fucker = ac_linear_diffusion_AOS(newC == 2, 1);
-safeshowbox(newC,1);
+% safeshowbox(newC,1);
 %afterls = ac_linear_diffusion_AOS(newC == 2, 1);
 %safeshowbox(afterls, 0.5);
 %figure(1);

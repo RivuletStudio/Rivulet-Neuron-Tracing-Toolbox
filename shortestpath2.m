@@ -1,4 +1,4 @@
-function [ShortestLine, dump] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
+function [ShortestLine, dump, merged] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
 % This function SHORTESTPATH traces the shortest path from start point to
 % source point using Runge Kutta 4 in a 2D or 3D distance map.
 %
@@ -44,6 +44,7 @@ if(~exist('Method','var')), Method='rk4'; end
 % GradientVolume = distgradient(DistanceMap);
 
 dump = false;
+merged = false;
 i=0; % Count movemnet 
 j = 0; % Count empty steps
 % Reserve a block of memory for the shortest line array
@@ -66,7 +67,8 @@ while(true)
     end
 
     if dist == -1
-       break 
+        merged = true;
+        break;
     end
 
     % Calculate the next point using runge kutta
@@ -104,8 +106,8 @@ while(true)
         DistancetoEnd=inf;
     end
     
-    % Calculate the movement between current point and point 10 itterations back
-    if(i>10), Movement=sqrt(sum((EndPoint(:)-ShortestLine(i-10,:)').^2));  else Movement=Stepsize+1;  end
+    % Calculate the movement between current point and point 15 itterations back
+    if(i>15), Movement=sqrt(sum((EndPoint(:)-ShortestLine(i-15,:)').^2));  else Movement=Stepsize+1;  end
     
 %     fprintf('I: %f; j: %i\n', I(int16(EndPoint(1)), int16(EndPoint(2)), int16(EndPoint(3))), j);
     [Ixsize, Iysize, Izsize] = size(I);
@@ -131,7 +133,7 @@ while(true)
     if (I(Ixvalue, Iyvalue, Izvalue) == 0), j = j + 1; else j = 0; end
         
     % Stop if out of boundary, distance to end smaller then a pixel or
-    % if we have not moved for 10 itterations
+    % if we have not moved for 15 itterations
     if((EndPoint(1)==0)||(Movement<Stepsize)), break;  end
 
     % Count the number of itterations
@@ -147,7 +149,7 @@ while(true)
         i=i+1;  if(i>ifree), ifree=ifree+10000; ShortestLine(ifree,:)=0; end
         % Add (Last) Source point to the shortest line array
         ShortestLine(i,:)=SourcePoint(:,ind);
-        break, 
+        break 
     end
     
     if (j == Gap), disp('Found broken'); dump = true; break; end

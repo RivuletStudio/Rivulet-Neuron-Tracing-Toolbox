@@ -1,10 +1,17 @@
-function feats = featextract(I, swc, sigma)
+function feats = featextract(varargin)
 % Extract hession features from 1 subject
-	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
-	addpath(fullfile(pathstr, '..', 'util'));
-    addpath(fullfile(pathstr, '..', 'lib', 'dir2'));
-    addpath(fullfile(pathstr, '..', 'lib', 'frangi_filter_version2a'));
-	addpath(fullfile(pathstr, '..', '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
+I = varargin{1};
+swc = varargin{2};
+sigma = varargin{3};
+saveprefix = [];
+if numel(varargin) > 3
+    saveprefix = varargin{4};
+end
+% 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
+	% addpath(fullfile(pathstr, '..', 'util'));
+ %    addpath(fullfile(pathstr, '..', 'lib', 'dir2'));
+ %    addpath(fullfile(pathstr, '..', 'lib', 'frangi_filter_version2a'));
+	% addpath(fullfile(pathstr, '..', '..', '..', 'v3d', 'v3d_external', 'matlab_io_basicdatatype'));
 
 	I = single(I);
     if ndims(I) > 3
@@ -27,14 +34,10 @@ function feats = featextract(I, swc, sigma)
     	              (l3reverse-l1reverse).^2).^0.5) ./ ...
 				    ((l1reverse.^2 + l2reverse.^2 + l3reverse.^2).^0.5);
     
-    gt = [];
-
-    if numel(gtpath) ~= 0
-        gt = binarysphere(I, swc);
-    end
+    gt = binarysphere(I, swc);    
 				    
     if numel(saveprefix) > 0
-        save(fullfile(saveprefix, [filename, '.mat']), 'l1', 'l2', 'l3', 'I', 'fa', 'vess', 'kriss', 'gt'); 
+        save([saveprefix, '.mat'], 'l1', 'l2', 'l3', 'I', 'fa', 'vess', 'kriss', 'gt'); 
     end
 
     feats.l1 = l1;
