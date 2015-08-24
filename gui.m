@@ -91,11 +91,11 @@ end
 
 [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(fullfile(pathstr, 'util'));
-h = msgbox('Loading');
+
 if filename
+    h = msgbox('Loading');    
     I = loadraw(filepath);
 else
-    close(h);
     return
 end
 % Try to read the image in
@@ -121,7 +121,6 @@ I = I(cropregion(1, 1) : cropregion(1, 2), ...
     cropregion(2, 1) : cropregion(2, 2), ...
     cropregion(3, 1) : cropregion(3, 2));
 
-delete(h);
 hObject.UserData.I = I;
 hObject.UserData.bI = bI;
 handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
@@ -129,8 +128,9 @@ filepathtext = findobj('Tag', 'filepath');
 filepathtext.String = filepath;
 hObject.UserData.inputpath = filepath;
 refresh_Render(handles);
-
-close(h)
+if filename
+    close(h)
+end
 
 function I = loadraw(filepath)
 % Load raw image file from .v3draw, .tif, .nii, .mat format
@@ -143,7 +143,7 @@ if strcmp(ext, '.v3draw')
         msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
     end
 elseif strcmp(ext, '.tif')
-    
+    I = tifread(filepath);
 elseif strcmp(ext, '.mat')
 elseif strcmp(ext, '.nii')
 else 
