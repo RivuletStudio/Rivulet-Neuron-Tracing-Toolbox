@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 21-Aug-2015 17:26:13
+% Last Modified by GUIDE v2.5 25-Aug-2015 10:45:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -98,11 +98,21 @@ if filename
 else
     return
 end
+
 % Try to read the image in
 if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
-    handles.thresholdslider.Value = 10;
-    handles.thresholdtxt.String = '10';
+    choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
+             'Danger',...
+             'Go Ahead',...
+             'Oops...Try 10 then', 'Oops...Try 10 then');
+    switch choice
+        case 'Oops...Try 10 then'
+            handles.thresholdslider.Value = 10;
+            handles.thresholdtxt.String = '10';
+        case 'Go ahead'
+    end
 end
+
 v = handles.thresholdslider.Value;
 if handles.filtercheck.Value
     h2 = msgbox('Filtering');
@@ -117,15 +127,20 @@ end
 %         close(h)
 [bI, cropregion] = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
 
-I = I(cropregion(1, 1) : cropregion(1, 2), ...
-    cropregion(2, 1) : cropregion(2, 2), ...
-    cropregion(3, 1) : cropregion(3, 2));
-
+if all(size(cropregion)) ~= 0 % The crop image returns [] if no cropped region is found
+    I = I(cropregion(1, 1) : cropregion(1, 2), ...
+          cropregion(2, 1) : cropregion(2, 2), ...
+          cropregion(3, 1) : cropregion(3, 2));
+else
+    msgbox('No voxel to display. Please check the segmentation threshold.');
+    close(h);
+    return
+end
 hObject.UserData.I = I;
 hObject.UserData.bI = bI;
 handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
 filepathtext = findobj('Tag', 'filepath');
-filepathtext.String = filepath;
+filepathtext.String = filename;
 hObject.UserData.inputpath = filepath;
 refresh_Render(handles);
 if filename
@@ -135,7 +150,6 @@ end
 function I = loadraw(filepath)
 % Load raw image file from .v3draw, .tif, .nii, .mat format
 [~, ~, ext] = fileparts(filepath);
-disp(ext)
 if strcmp(ext, '.v3draw')
     if exist('load_v3d_raw_img_file')
         I = load_v3d_raw_img_file(filepath);
@@ -573,11 +587,34 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton10.
-function pushbutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton10 (see GCBO)
+% --- Executes on button press in savecropbtn.
+function savecropbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to savecropbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% filepath = handles.selectfilebtn.UserData.inputpath;
+% [filedir, filename, ~] = fileparts(filepath);
+[fname, dir] = uiputfile('*.v3draw;*.tif');
+if ~fname
+    return;
+end
+
+[~, n, ext] = fileparts(fname);
+ud = handles.selectfilebtn.UserData;
+disp(ext)
+if strcmp(ext, '.v3draw')
+    if isfield(ud, 'I')
+        save_v3d_raw_img_file(uint8(ud.I), fullfile(dir, fname));
+    end
+    
+    if isfield(ud, 'bI')
+        binarypath = fullfile(dir, [n '-binary' ext]);
+        save_v3d_raw_img_file(uint8(ud.bI), binarypath);
+        msgbox(sprintf('The cropped binary image has been saved to %s', binarypath));
+    end
+else
+    msgbox('Sorry, the support has not been implemented yet...');
+end
 
 
 % --- Executes on button press in classifybtn.

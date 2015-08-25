@@ -156,6 +156,8 @@ function [tree, meanconf] = trace(varargin)
 %             set(0, 'CurrentFigure', gcf);
             axes(ax);
         end
+        
+        fprintf('Tracing percent: %d\n', percent);
         if percent >= percentage
             if plot
                 close(h)
