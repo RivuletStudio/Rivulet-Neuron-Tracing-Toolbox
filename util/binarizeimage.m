@@ -52,6 +52,11 @@ function [X, cropregion] = binarizeimage(varargin)
         [X, cropregion] = imagecrop(X, 0.5);
         % disp('Image Size After Crop: ')
         % disp(size(X));
+    else
+        cropregion = zeros(3,2);
+        cropregion(1,:) = [1, size(X, 1)];
+        cropregion(2,:) = [1, size(X, 2)];
+        cropregion(3,:) = [1, size(X, 3)];
     end
 
     X = X > 0.5;

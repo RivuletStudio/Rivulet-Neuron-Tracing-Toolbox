@@ -18,23 +18,8 @@ function [ShortestLine, dump, merged] = shortestpath2(DistanceMap, GradientVolum
 % Note, first compile the rk4 c-code with compile_c_files
 %   
 % Example,
-%   % Load a maze image
-%   I1=im2double(imread('images/maze.gif'));
-%   % Convert the image to a speed map
-%   SpeedImage=I1*1000+0.001;
-%   % Set the source to end of the maze
-%   SourcePoint=[800;803];
-%   % Calculate the distance map (distance to source)
-%   DistanceMap= msfm(SpeedImage, SourcePoint); 
-%   % Show the distance map
-%   figure, imshow(DistanceMap,[0 3400])
-%   % Trace shortestline from StartPoint to SourcePoint
-%   StartPoint=[9;14];
-%   ShortestLine=shortestpath(DistanceMap,StartPoint,SourcePoint);
-%   % Plot the shortest route
-%   hold on, plot(ShortestLine(:,2),ShortestLine(:,1),'r')
-%
 % Function is written by D.Kroon University of Twente (June 2009)
+% Adapted by Siqi (Aug 2015)
 
 % Process inputs
 if(~exist('Stepsize','var')), Stepsize=0.5; end
@@ -152,15 +137,12 @@ while(true)
         break 
     end
     
-    if (j == Gap), disp('Found broken'); dump = true; break; end
+    if (j == Gap), dump = true; break; end
     
     % Current point is next Starting Point
-    StartPoint=EndPoint;
+    StartPoint = EndPoint;
+    % Remove unused memory from array
+    ShortestLine = ShortestLine(1:i,:);
 end
 
-% if((DistancetoEnd>1)&&(~isempty(SourcePoint)))
-%     disp('The shortest path trace did not finish at the source point');
-% end
-
-% Remove unused memory from array
-ShortestLine=ShortestLine(1:i,:);
+end
