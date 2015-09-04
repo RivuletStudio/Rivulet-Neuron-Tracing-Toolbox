@@ -75,10 +75,6 @@ function [tree, meanconf] = trace(varargin)
     oT = msfm(SpeedImage, SourcePoint, false, false);
     
     disp('Finish marching')
-
-    
-
-    % close all
     if plot
     	hold on 
     	% showbox(I, 0.5);
@@ -97,7 +93,6 @@ function [tree, meanconf] = trace(varargin)
     end
     S = {};
     B = zeros(size(T));
-    i = 1;
 
     lconfidence = [];
     if plot
@@ -137,9 +132,9 @@ function [tree, meanconf] = trace(varargin)
 	    % Add l to the tree
 	    if ~(dump && dumpbranch) 
 		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, plot);
-            if unconnected
-                unconnectedBranches = {unconnectedBranches, newtree};
-            end
+%             if unconnected
+%                 unconnectedBranches = {unconnectedBranches, newtree};
+%             end
             lconfidence = [lconfidence, conf];
 		end
 
@@ -157,7 +152,7 @@ function [tree, meanconf] = trace(varargin)
             axes(ax);
         end
         
-        fprintf('Tracing percent: %d\n', percent);
+        fprintf('Tracing percent: %f%%\n', percent*100);
         if percent >= percentage
             if plot
                 close(h)
@@ -176,41 +171,41 @@ function [tree, meanconf] = trace(varargin)
     % end
 
     % Double check the unconnected terminis
-    for t = unconnectedBranches
-        t1 = t(1, :);
-        t2 = t(end, :);
-        tid = t(:, 1);
-        treeid = tree(:, 1);
-        rest = tree(~ismember(treeid, tid), :);
-        [d1, idx1] = pdist2(t1(3:5), rest(:, 3:5));
-
-        if (d1 < (rest(idx1, 6) + 3) * connectrate || d1 < (t1(6) + 3) * connectrate)
-            fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t1(3:5), rest(idx1, 3:5));
-            tree(treeid == t1(1), 7) = rest(idx1, 1); % Connect to the tree parent
-            if plot
-                plot3([t1(4); rest(idx1, 4)], [t1(3);rest(idx1, 3)], [t1(5);rest(idx1, 5)], 'r-.');
-                drawnow
-            end
-        end
-
-        [d2, idx2] = pdist2(t2(3:5), rest(:, 3:5));
-        if (d2 < (rest(idx2, 6) + 3) * connectrate || d2 < (t1(6) + 3) * connectrate)
-            fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t2(3:5), rest(idx2, 3:5));
-            tree(treeid == t2(1), 7) = rest(idx2, 1); % Connect to the tree parent
-            if plot
-                plot3([t2(4); rest(idx2, 4)], [t2(3);rest(idx2, 3)], [t2(5);rest(idx2, 5)], 'r-.');
-                drawnow
-            end
-        end
-    end
-
-    % Deprecated for now
-    if rewire
-	    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
-	    rewiredtree(:, 6) = 1;
-	    save_v3d_swc_file(rewiredtree, [imgpath, '.rewired.swc']);
-	    tree = rewiredtree;
-	end
+%     for t = unconnectedBranches
+%         t1 = t(1, :);
+%         t2 = t(end, :);
+%         tid = t(:, 1);
+%         treeid = tree(:, 1);
+%         rest = tree(~ismember(treeid, tid), :);
+%         [d1, idx1] = pdist2(t1(3:5), rest(:, 3:5));
+% 
+%         if (d1 < (rest(idx1, 6) + 3) * connectrate || d1 < (t1(6) + 3) * connectrate)
+%             fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t1(3:5), rest(idx1, 3:5));
+%             tree(treeid == t1(1), 7) = rest(idx1, 1); % Connect to the tree parent
+%             if plot
+%                 plot3([t1(4); rest(idx1, 4)], [t1(3);rest(idx1, 3)], [t1(5);rest(idx1, 5)], 'r-.');
+%                 drawnow
+%             end
+%         end
+% 
+%         [d2, idx2] = pdist2(t2(3:5), rest(:, 3:5));
+%         if (d2 < (rest(idx2, 6) + 3) * connectrate || d2 < (t1(6) + 3) * connectrate)
+%             fprintf('Rewire (%f, %f, %f) to (%f, %f, %f)\n', t2(3:5), rest(idx2, 3:5));
+%             tree(treeid == t2(1), 7) = rest(idx2, 1); % Connect to the tree parent
+%             if plot
+%                 plot3([t2(4); rest(idx2, 4)], [t2(3);rest(idx2, 3)], [t2(5);rest(idx2, 5)], 'r-.');
+%                 drawnow
+%             end
+%         end
+%     end
+% 
+%     % Deprecated for now
+%     if rewire
+% 	    rewiredtree = rewiretree(tree, S, I, lconfidence, 0.7);
+% 	    rewiredtree(:, 6) = 1;
+% 	    save_v3d_swc_file(rewiredtree, [imgpath, '.rewired.swc']);
+% 	    tree = rewiredtree;
+% 	end
     meanconf = mean(lconfidence);
 
 	if plot

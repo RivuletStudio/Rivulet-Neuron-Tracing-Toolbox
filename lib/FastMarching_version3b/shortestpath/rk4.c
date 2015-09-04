@@ -324,6 +324,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] ) {
         gradientArraySize[0]=gradientArraySizeC[0];
         gradientArraySize[1]=gradientArraySizeC[1];
         gradientArraySize[2]=gradientArraySizeC[2];
+        /* mexPrintf("RK4 - GradientSize: %d, %d, %d\n", gradientArraySize[0], gradientArraySize[1], gradientArraySize[2]);*/
         startPoint1[0]=startPoint[0]-1.0; 
         startPoint1[1]=startPoint[1]-1.0; 
         startPoint1[2]=startPoint[2]-1.0;

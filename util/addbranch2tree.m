@@ -68,7 +68,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 				drawnow
 			end
 		else
-			newtree(end, 7) = -2; % Remain unconnected
+			newtree(1, 7) = -2; % Remain unconnected
 		end
 
 		% plot3([newtree(end, 4);tree(idx, 4)], [newtree(end, 3);tree(idx, 3)], [newtree(end, 5);tree(idx, 5)], 'b-.');
