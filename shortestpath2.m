@@ -119,7 +119,12 @@ while(true)
         
     % Stop if out of boundary, distance to end smaller then a pixel or
     % if we have not moved for 15 itterations
-    if((EndPoint(1)==0)||(Movement<Stepsize)), break;  end
+    if((EndPoint(1)<1) || (EndPoint(1)>size(I,1)) || EndPoint(2)<1 || EndPoint(2)>size(I,2) ||...
+            EndPoint(3)<1 || EndPoint(3)>size(I,3)...
+        ||(Movement<Stepsize))
+        ShortestLine = ShortestLine(1:i,:);
+        break;  
+    end
 
     % Count the number of itterations
     i=i+1; 
@@ -141,8 +146,11 @@ while(true)
     
     % Current point is next Starting Point
     StartPoint = EndPoint;
-    % Remove unused memory from array
-    ShortestLine = ShortestLine(1:i,:);
+    
+    
 end
+
+% Remove unused memory from array
+ShortestLine = ShortestLine(1:i,:);
 
 end
