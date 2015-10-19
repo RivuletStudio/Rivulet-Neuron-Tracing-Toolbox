@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 25-Aug-2015 10:45:35
+% Last Modified by GUIDE v2.5 10-Sep-2015 15:52:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -95,6 +95,9 @@ addpath(fullfile(pathstr, 'util'));
 if filename
     h = msgbox('Loading');    
     I = loadraw(filepath);
+    if ndims(I) == 4 && size(I,4)>1
+        I = I(:,:,:,1);
+    end
 else
     return
 end
@@ -505,7 +508,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     cla(ax);
     axes(ax);
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
-    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String));
+    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String));
     if handles.ignoreradiuscheck.Value
         tree(:, 6) = 1;
     end
@@ -806,3 +809,27 @@ function radiobutton10_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton10
+function gapedit_Callback(hObject, eventdata, handles)
+
+
+
+function branchlen_Callback(hObject, eventdata, handles)
+% hObject    handle to branchlen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of branchlen as text
+%        str2double(get(hObject,'String')) returns contents of branchlen as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function branchlen_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to branchlen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -46,6 +46,11 @@ function [tree, meanconf] = trace(varargin)
     if numel(varargin) >= 8
         connectrate = varargin{8};
     end
+    
+    branchlen = 4;
+    if numel(varargin) >= 9
+        branchlen = varargin{9};
+    end
 
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
@@ -97,7 +102,7 @@ function [tree, meanconf] = trace(varargin)
     lconfidence = [];
     if plot
 	    [x,y,z] = sphere;
-	    surf(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3));
+	    plot3(x + SourcePoint(2), y + SourcePoint(1), z + SourcePoint(3), 'ro');
 	end
 
     unconnectedBranches = {};
@@ -106,7 +111,7 @@ function [tree, meanconf] = trace(varargin)
 
 	    StartPoint = maxDistancePoint(T, I, true);
 	    if plot
-		    surf(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3));
+		    plot3(x + StartPoint(2), y + StartPoint(1), z + StartPoint(3), 'ro');
 		end
 
 	    if T(StartPoint(1), StartPoint(2), StartPoint(3)) == 0 || I(StartPoint(1), StartPoint(2), StartPoint(3)) == 0
@@ -131,7 +136,7 @@ function [tree, meanconf] = trace(varargin)
 
 	    % Add l to the tree
 	    if ~(dump && dumpbranch) 
-		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, plot);
+		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot);
 %             if unconnected
 %                 unconnectedBranches = {unconnectedBranches, newtree};
 %             end

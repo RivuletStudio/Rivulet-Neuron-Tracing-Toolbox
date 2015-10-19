@@ -1,4 +1,4 @@
-function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, plot)
+function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot)
 % Add a branch with 3D points to a swc tree
 % Return the result swc tree and the confidence score of the newly added branch
     % Get the voxels on this branch and count the empty voxels 
@@ -8,7 +8,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
     ind = sub2ind(size(I), lint(:, 1), lint(:, 2), lint(:, 3));
     vox = I(ind);
     confidence = sum(vox)/numel(vox);
-    if confidence < 0.5 || size(l, 1) < 4
+    if confidence < 0.5 || size(l, 1) < branchlen
     	return
     end
     % fprintf('confidence of this branch %f\n', confidence);
