@@ -8,7 +8,7 @@
     <param.icons />
     <param.summary>Rivulet is an automatic neuron tracing app developped based on the Rivulet algorithm.</param.summary>
     <param.description />
-    <param.screenshot>/home/siqi/Pictures/gui_037.png</param.screenshot>
+    <param.screenshot />
     <param.version>1.0</param.version>
     <param.products.name>
       <item>System Identification Toolbox</item>
@@ -35,6 +35,7 @@
       <param.icon />
       <param.icons />
       <param.description />
+      <param.screenshot />
       <param.version />
       <param.platforms />
     </unset>
@@ -87,7 +88,7 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet.mlappinstall" optional="false">/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.mlappinstall</file>
+      <file location="/home/donghao/Desktop/fishhead" name="Rivulet.mlappinstall" optional="false">/home/donghao/Desktop/fishhead/Rivulet.mlappinstall</file>
     </build-deliverables>
     <workflow />
     <matlab>
@@ -128,7 +129,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>4.0.6-300.fc22.x86_64</osver>
+      <osver>3.16.0-23-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>
