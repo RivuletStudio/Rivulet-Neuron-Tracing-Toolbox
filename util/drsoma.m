@@ -1,13 +1,16 @@
 clc
 clear all
 close all
-imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/09-2902-04R-01C-60x_merge_c1.v3dpbd.v3draw');
+% imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/09-2902-04R-01C-60x_merge_c1.v3dpbd.v3draw');
+imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/OP_2.v3draw');
 
 somamipxy = max(imgsoma, [], 3);
-somamipxydr = directionalRatio(somamipxy, 40, 40);
+somamipxydr = directionalRatio(somamipxy, 20, 20);
 somadrthres = 0.8;
+figure
+imagesc(somamipxydr)
 somamipxydr = somamipxydr > somadrthres;
-somamipxybi = somamipxy > 30; 
+somamipxybi = somamipxy > 20; 
 bixy = somamipxybi & somamipxydr;  
 % figure
 % imagesc(somamipxydr)
@@ -36,22 +39,27 @@ bixy = somamipxybi & somamipxydr;
 % end
 somamipzy = permute(imgsoma,[3 2 1]);
 somamipzy = max(somamipzy, [], 3);
-somamipzydr = directionalRatio(somamipzy, 20, 20);
+somamipzydr = directionalRatio(somamipzy, 20, 10);
+figure
+imagesc(somamipzydr)
 somadrthres = 0.8;
 somamipzydr = somamipzydr > somadrthres;
 somamipzybi = somamipzy > 30; 
 bizy = somamipzybi & somamipzydr;  
-% figure
-% imshow(somamipzy)
+figure
+imshow(bizy)
 
 
 somamipzx = permute(imgsoma,[3 1 2]);
 somamipzx = max(somamipzx, [], 3);
-somamipzxdr = directionalRatio(somamipzx, 20, 20);
+somamipzxdr = directionalRatio(somamipzx, 20, 10);
 somadrthres = 0.8;
 somamipzxdr = somamipzxdr > somadrthres;
 somamipzxbi = somamipzx > 30; 
 bizx = somamipzxbi & somamipzxdr;  
+figure
+imshow(bizx)
+
 % figure
 % imshow(somamipzx)
 
