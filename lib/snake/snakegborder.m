@@ -1,0 +1,11 @@
+function gI = snakegborder(img, simgapara, alphapara)
+img=mat2gray(img);
+[imx,imy]=gaussgradient(img, simgapara);
+gradnorm = imx.^2 + imy.^2;
+gradnorm = sqrt(double(gradnorm));
+gI = 1./sqrt(double(1.0 + alphapara*double(gradnorm)));
+gI = gI / max(gI(:));
+scalepara = 1000; 
+gI = gI * scalepara;
+gI = uint8(gI);
+gI = rgb2gray(gI);
