@@ -48,4 +48,6 @@ u = [3, -1];
 MorphGAC = snakelevelset(MorphGAC, u);
 MorphGAC = snakeupdatemask(MorphGAC);
 MorphGAC = snakeballon(MorphGAC, 3);
+MorphGAC = snakethreshold(MorphGAC, 50);
+MorphGAC = snakedata(MorphGAC, gI);
 
