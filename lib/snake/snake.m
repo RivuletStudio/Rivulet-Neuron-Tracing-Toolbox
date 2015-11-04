@@ -49,9 +49,35 @@ scalerow = 0.75;
 center = [163, 137];
 sqradius = 135;
 u = circlelevelset(shape, center, sqradius, scalerow);
-% MorphGAC = snakelevelset(MorphGAC, u);
+MorphGAC = snakelevelset(MorphGAC, u);
+% figure
+% for i = 1 : 60 
+% 	MorphGAC = snakestep(MorphGAC);
+% 	imshow(MorphGAC.u)
+% 	drawnow;
+% end
+
 % MorphGAC = snakeupdatemask(MorphGAC);
 % MorphGAC = snakeballon(MorphGAC, ballon);
 % MorphGAC = snakethreshold(MorphGAC, threshold);
 % MorphGAC = snakedata(MorphGAC, gI);
+P2{1} = eye(3);
+P2kernel = ones(3);
+P2kernel(:,1) = 0;
+P2kernel(:,3) = 0;
+P2{2} = P2kernel;
+P2{3} = flipud(P2{1});
+P2{4} = P2kernel';
+global P2
+figure
+for i = 1 : 60 
+	MorphGAC = snakestep(MorphGAC);
+	imshow(MorphGAC.u)
+	drawnow;
+end
 
+% figure
+% imshow(u)
+% u = IS(u, P2);
+% figure
+% imshow(u)
