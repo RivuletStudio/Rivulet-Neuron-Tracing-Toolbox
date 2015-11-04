@@ -1,4 +1,4 @@
-clear;close all;
+clear all; close all; clc;
 % im=imread('seastar2.png');
 % fim=mat2gray(im);
 %draw magnitude of gradient
@@ -40,14 +40,18 @@ im=imread('seastar2.png');
 gI = snakegborder(im, 2.5, 1000);
 % figure
 % imshow(gI)
-smoothing = 3;
-threshold = 1;
+smoothing = 2;
+threshold = 0.31;
 ballon = -1;
 MorphGAC = snakeinitialise(gI, smoothing, threshold, ballon);
-u = [3, -1];
-MorphGAC = snakelevelset(MorphGAC, u);
-MorphGAC = snakeupdatemask(MorphGAC);
-MorphGAC = snakeballon(MorphGAC, 3);
-MorphGAC = snakethreshold(MorphGAC, 50);
-MorphGAC = snakedata(MorphGAC, gI);
+shape = size(im);
+scalerow = 0.75;
+center = [163, 137];
+sqradius = 135;
+u = circlelevelset(shape, center, sqradius, scalerow);
+% MorphGAC = snakelevelset(MorphGAC, u);
+% MorphGAC = snakeupdatemask(MorphGAC);
+% MorphGAC = snakeballon(MorphGAC, ballon);
+% MorphGAC = snakethreshold(MorphGAC, threshold);
+% MorphGAC = snakedata(MorphGAC, gI);
 
