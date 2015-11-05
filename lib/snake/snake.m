@@ -41,7 +41,7 @@ gI = snakegborder(im, 2.5, 1000);
 % figure
 % imshow(gI)
 smoothing = 2;
-threshold = 0.31;
+threshold = 0.33 * 255;
 ballon = -1;
 MorphGAC = snakeinitialise(gI, smoothing, threshold, ballon);
 shape = size(im);
@@ -61,6 +61,7 @@ MorphGAC = snakelevelset(MorphGAC, u);
 % MorphGAC = snakeballon(MorphGAC, ballon);
 % MorphGAC = snakethreshold(MorphGAC, threshold);
 % MorphGAC = snakedata(MorphGAC, gI);
+global P2
 P2{1} = eye(3);
 P2kernel = ones(3);
 P2kernel(:,1) = 0;
@@ -68,9 +69,22 @@ P2kernel(:,3) = 0;
 P2{2} = P2kernel;
 P2{3} = flipud(P2{1});
 P2{4} = P2kernel';
-global P2
+
+% figure 
+% imshow(MorphGAC.u)
+
+% figure
+% imshow(MorphGAC.data)
+
+MorphGAC = snakestep(MorphGAC);
+% u = MorphGAC.u;
+% u = SI(u, P2);
+% figure
+% imshow(u)
+
+
 figure
-for i = 1 : 60 
+for i = 1 : 200 
 	MorphGAC = snakestep(MorphGAC);
 	imshow(MorphGAC.u)
 	drawnow;
