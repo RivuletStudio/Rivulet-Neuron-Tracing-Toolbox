@@ -38,10 +38,11 @@ clear all; close all; clc;
 % imshow(gI)
 im=imread('seastar2.png');
 gI = snakegborder(im, 2.5, 1000);
+gI = double(gI) / 255;
 % figure
 % imshow(gI)
 smoothing = 2;
-threshold = 0.33 * 255;
+threshold = 0.3;
 ballon = -1;
 MorphGAC = snakeinitialise(gI, smoothing, threshold, ballon);
 shape = size(im);
@@ -76,17 +77,27 @@ P2{4} = P2kernel';
 % figure
 % imshow(MorphGAC.data)
 
-MorphGAC = snakestep(MorphGAC);
+% MorphGAC = snakestep(MorphGAC);
 % u = MorphGAC.u;
 % u = SI(u, P2);
 % figure
 % imshow(u)
 
+A = [true false false true true;
+     false true true true false;
+     false true false true true;
+true false false true true;
+true true false false false;];
+disp('test IS');
+IS(A, P2);
+disp('test SI');
+SI(A, P2);
+
 
 figure
 for i = 1 : 200 
 	MorphGAC = snakestep(MorphGAC);
-	imshow(MorphGAC.u)
+	imshow(MorphGAC.u);
 	drawnow;
 end
 

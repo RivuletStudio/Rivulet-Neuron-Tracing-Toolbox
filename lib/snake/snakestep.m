@@ -29,11 +29,18 @@ function MorphGAC = snakestep(MorphGAC)
     % imshow(res)
 	% figure
 	% imshow(res)
-    
-	% res = SI(res, P2);
-	res = IS(res, P2);
 	% res = IS(res, P2);
+	
+	% seastar
 	% res = SI(res, P2);
+	% res = IS(res, P2);    
+	% res = IS(res, P2);    
+	% res = SI(res, P2);
+
+	% res = IS(res, P2);
+	% % res = IS(res, P2);
+	% res = SI(res, P2);
+	% res = IS(res, P2);
 
 	% res = IS(res, P2);
 	% figure
