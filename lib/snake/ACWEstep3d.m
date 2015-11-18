@@ -31,9 +31,15 @@ function  MorphGAC = ACWEstep3d(MorphGAC, snakestep)
     res(aux > 0) = 0;
     % res = imdilate(res, ones(3, 3, 3));
     stepjudge = rem(snakestep, 2);
+    res = IS3d(res, P3);
+    % res = IS3d(res, P3);
+
     if stepjudge == 1
+        % res = SI3d(res, P3);
         res = IS3d(res, P3);
         res = SI3d(res, P3);
+        % res = IS3d(res, P3);
+
     else
         res = SI3d(res, P3);
         res = IS3d(res, P3);
