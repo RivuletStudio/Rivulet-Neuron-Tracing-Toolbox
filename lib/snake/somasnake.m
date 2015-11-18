@@ -1,7 +1,7 @@
 clc;
 clear all;
 close all;
-imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/smallsomatwo.v3draw');
+imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/smallsomasix.v3draw');
 % imgsomaindex = imgsoma > 30;
 % imgsoma(imgsomaindex) = imgsoma(imgsomaindex) * 3;
 % somamipxy = max(imgsoma, [], 3);
@@ -161,8 +161,21 @@ P3kernel(2, :, 2) = 1;
 P3kernel(1, :, 3) = 1;
 P3{9} = P3kernel;
 shape = size(imgsoma);
-center = [280/2, 296/2, 70];
+% The parameters are tested for smallsomatwo 
+% center = [280/2, 296/2, 70];
+% sqradius = 4;
+% The parameters are tested for smallsomathree 
+% center = [137, 139, 28];
+% sqradius = 4;
+% The parameters are tested for smallsomafour
+% center = [151, 149, 28];
+% sqradius = 4;
+% The parameters are tested for smallsomafive
+% center = [77, 125, 38];
+% sqradius = 4;
+center = [331, 147, 50];
 sqradius = 4;
+
 u = circlelevelset3d(shape, center, sqradius);
 % soma = double(soma);
 % u = soma;
@@ -178,7 +191,7 @@ for i = 1 : 80
 	A = MorphGAC.u > threshold;  % synthetic data
 	[x y z] = ind2sub(size(A), find(A));
 	plot3(y, x, z, 'r.');
-	axis([0 shape(1) 0 shape(2) 0 shape(3)])
+	axis([0 shape(2) 0 shape(1) 0 shape(3)])
 	i
 	drawnow;
 end
