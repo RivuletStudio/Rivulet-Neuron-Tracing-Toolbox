@@ -13,7 +13,7 @@ smoothing = 3;
 lambda1 = 1;
 lambda2 = 1;
 
-% The initialization of snake
+% The initialization of snake using active contour without edge algorithm
 MorphGAC = ACWEinitialise(gI, smoothing, lambda1, lambda2);
 
 % Basically it creates a logical disk with true elements inside and false elements outside
