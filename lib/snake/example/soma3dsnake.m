@@ -1,7 +1,11 @@
 clc;
 clear all;
 close all;
-imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/smallsomasix.v3draw');
+% read image
+imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/smallsomafive.v3draw');
+
+%%%% The following code will be revised in the future 
+%%%% basically what it does is that it give us a better initialization of soma 
 % imgsomaindex = imgsoma > 30;
 % imgsoma(imgsomaindex) = imgsoma(imgsomaindex) * 3;
 % somamipxy = max(imgsoma, [], 3);
@@ -113,7 +117,8 @@ imgsoma = load_v3d_raw_img_file('/home/donghao/Desktop/smallsomasix.v3draw');
 % zxsomareplicate = permute(zxsomareplicate,[2 3 1]);
 % soma = xysomareplicate & zysomareplicate; 
 % soma = soma & zxsomareplicate;
-% imgsoma = load('np.mat');
+
+% The following kernel is used for the SI and IS operation 
 global P3
 P2kernel = ones(3);
 P2kernel(:,1) = 0;
@@ -161,6 +166,8 @@ P3kernel(2, :, 2) = 1;
 P3kernel(1, :, 3) = 1;
 P3{9} = P3kernel;
 shape = size(imgsoma);
+
+
 % The parameters are tested for smallsomatwo 
 % center = [280/2, 296/2, 70];
 % sqradius = 4;
@@ -170,21 +177,29 @@ shape = size(imgsoma);
 % The parameters are tested for smallsomafour
 % center = [151, 149, 28];
 % sqradius = 4;
-% The parameters are tested for smallsomafive
-% center = [77, 125, 38];
-% sqradius = 4;
-center = [331, 147, 50];
+% The following parameters are tested for smallsomafive
+center = [77, 125, 38];
 sqradius = 4;
+% The following parameters are tested for smallsomasix
+% center = [331, 147, 50];
+% sqradius = 4;
 
+% Basically it creates a logical disk with true elements inside and false elements outside
 u = circlelevelset3d(shape, center, sqradius);
-% soma = double(soma);
-% u = soma;
+
+% lambda one controls the internal energy and lambda two controls the external energy 
 smoothing = 1;
 lambda1 = 1;
 lambda2 = 1.5;
+
 MorphGAC = ACWEinitialise(double(imgsoma), smoothing, lambda1, lambda2);
+
+% the threshold is just for visulisation
+% u is the snake mask which will evolve according to level set equation 
 MorphGAC.u = u;
 threshold = 0.5;
+
+% Each move the snake will evolue one step 
 figure
 for i = 1 : 80
 	MorphGAC = ACWEstep3d(MorphGAC, i);

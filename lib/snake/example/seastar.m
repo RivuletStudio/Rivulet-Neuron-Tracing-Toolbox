@@ -16,7 +16,7 @@ ballon = -1;
 % The initialization of snake using geodesic active contour algorithm
 MorphGAC = snakeinitialise(gI, smoothing, threshold, ballon);
 
-
+% Basically it creates a logical disk with true elements inside and false elements outside
 shape = size(im);
 scalerow = 0.75;
 center = [163, 137];

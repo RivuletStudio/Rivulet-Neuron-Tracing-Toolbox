@@ -37,7 +37,6 @@ P2{3} = flipud(P2{1});
 P2{4} = P2kernel';
 
 % Each move the snake will evolue one step 
-MorphGAC = ACWEstep(MorphGAC);
 figure
 for i = 1 : 200
 	MorphGAC = ACWEstep(MorphGAC);
