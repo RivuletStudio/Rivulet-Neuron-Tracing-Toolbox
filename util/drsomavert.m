@@ -43,9 +43,9 @@ imagesc(boundingsomaslice)
 threshold = 30;
 boundingsomaslice = boundingsomaslice > threshold;
 stat = regionprops(boundingsomaslice, 'centroid');
-soma.x = stat.Centroid(1) + floor(xp);
-soma.y = stat.Centroid(2) + floor(yp);
-soma.z = maxsliceindex;
+somalocation.x = stat.Centroid(1) + floor(xp);
+somalocation.y = stat.Centroid(2) + floor(yp);
+somalocation.z = maxsliceindex;
 disp(stat);
 % figure
 % safeshowbox(soma, 0.5)

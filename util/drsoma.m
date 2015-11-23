@@ -13,31 +13,7 @@ imagesc(somamipxydr)
 somamipxydr = somamipxydr > somadrthres;
 somamipxybi = somamipxy > 20; 
 bixy = somamipxybi & somamipxydr;  
-% figure
-% imagesc(somamipxydr)
-% figure 
-% imshow(somamipxybi)
-% figure
-% imshow(somamipxy)
-% fig_counter = 1;
-% for i = 1 : 2 : 40
-% 	somamipxy = max(imgsoma, [], 3);
-% 	somamipxy = directionalRatio(somamipxy,i,20);
-% 	somamipxy = somamipxy * 255;
-% 	subplot(4, 5, fig_counter);
-% 	imagesc(somamipxy);
-% 	fig_counter = fig_counter + 1; 
-% end
-% fig_counter = 1;
-% figure
-% for i = 1 : 2 : 40
-% 	somamipxy = max(imgsoma, [], 3);
-% 	somamipxy = directionalRatio(somamipxy,20,i);
-% 	somamipxy = somamipxy * 255;
-% 	subplot(4, 5, fig_counter);
-% 	imagesc(somamipxy);
-% 	fig_counter = fig_counter + 1; 
-% end
+
 somamipzy = permute(imgsoma,[3 2 1]);
 somamipzy = max(somamipzy, [], 3);
 somamipzydr = directionalRatio(somamipzy, 20, 10);
@@ -61,21 +37,6 @@ bizx = somamipzxbi & somamipzxdr;
 figure
 imshow(bizx)
 
-% figure
-% imshow(somamipzx)
-
-% figure
-% imshow(somamipxy, []); colormap('jet');
-% somathreshold = 0.5;
-% bixy = somamipxy < somathreshold;
-% bizx = somamipzx < somathreshold;
-% bizy = somamipzy < somathreshold;
-% figure
-% imshow(bixy)
-% figure
-% imshow(bizy)
-% figure
-% imshow(bizx)
 xyregion = regionprops(bixy, 'all');
 [~, maxareaindex] = max([xyregion.Area])
 xysoma = zeros(size(bixy));
