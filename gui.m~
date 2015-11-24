@@ -681,14 +681,10 @@ function refresh_Render(handles)
 shift = handles.shiftslider.Value * 20;
 h = msgbox('Rendering');
 ax = handles.mainfig;
-% clear the single ax with ax
 cla(ax);
-% makes the axis with handle ax current
 axes(ax);
 
 if handles.treecheck.Value
-    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
-    %  field in the structure array S.
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
         if shift > 0
