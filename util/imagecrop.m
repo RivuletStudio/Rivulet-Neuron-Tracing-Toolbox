@@ -1,5 +1,6 @@
 function [croped, cropregion] = imagecrop(srcimg, threshold)
-	srcimg = squeeze(srcimg);
+	% squeeze is a very good way to remove singleton dimensions
+    srcimg = squeeze(srcimg);
     ind = find(srcimg > threshold);
     if numel(ind) == 0
         croped = [];

@@ -210,7 +210,7 @@ for i = 1 : 80
 	i
 	drawnow;
 end
-
+close
 %% The following code is imnplementation of level set 3d in the library 
 % V = double(load_v3d_raw_img_file('/home/donghao/Desktop/smallsoma.v3draw'));
 % margin = 5;

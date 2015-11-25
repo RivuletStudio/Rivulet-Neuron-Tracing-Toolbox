@@ -23,9 +23,9 @@ function  MorphGAC = ACWEstep3d(MorphGAC, snakestep)
     datainside = data(inside);
 
     c0 = sum(dataoutside(:)) / sum(doubleoutside(:));
-    disp(c0);
+    % disp(c0);
     c1 = sum(datainside(:)) / sum(doubleinside(:));
-    disp(c1);
+    % disp(c1);
     % dres = distgradient(u);
     % abs_dres = abs(dres(:,:,:,1)) + abs(dres(:,:,:,2)) + abs(dres(:,:,:,3));
     [Fx, Fy, Fz] = gradient(u);

@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 10-Sep-2015 15:52:11
+% Last Modified by GUIDE v2.5 25-Nov-2015 15:24:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,6 +83,8 @@ function selectfilebtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [filename, pathname] = uigetfile({'*.v3draw;*.tif;*.mat;*.nii'}, 'Select v3draw file');
 filepath = fullfile(pathname, filename);
+% hObject.Parent
+% get data from panel1 whose property is v3dmatdir 
 v3dmatdir = getappdata(hObject.Parent, 'v3dmatdir');
 
 if v3dmatdir
@@ -141,24 +143,41 @@ end
 %         [bI, cropregion] = binarizeimage('classification', I, cl, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
 %         close(h)
 
-% The 
+% The levelset corresponding value is delta
+% The levelset judge value is handles.levelsetcheck.Value
+% The crop operation 
 [bI, cropregion] = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
 
+% the cropregion is basically six vaules, x1 x2, y1 y2, z1 z2
 if all(size(cropregion)) ~= 0 % The crop image returns [] if no cropped region is found
     I = I(cropregion(1, 1) : cropregion(1, 2), ...
           cropregion(2, 1) : cropregion(2, 2), ...
           cropregion(3, 1) : cropregion(3, 2));
 else
     msgbox('No voxel to display. Please check the segmentation threshold.');
+    % close the loading message box anayaway
     close(h);
     return
 end
+
+% The Original image or the filtered image is stored in
+% selectfilebn.UserData.I 
 hObject.UserData.I = I;
+% The binarized image is stored in selectfilebn.UserData.bI  
 hObject.UserData.bI = bI;
+% Store the size of binarized information string in handles.volumesizetxt.String
+% the following operations happens on filepath
 handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+% First findobj returns a handle
+% Find objects with specified property values.
+% 'Tag' == 'P1Name' filepath == 'P1value'
 filepathtext = findobj('Tag', 'filepath');
+% change File not load string to string of current file.  
 filepathtext.String = filename;
+% Store filepath in handles.UserData.inputpath
 hObject.UserData.inputpath = filepath;
+
+% It show the binarizied image surface
 refresh_Render(handles);
 if filename
     close(h)
@@ -409,6 +428,12 @@ function v3dmatlabbtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 dirname = uigetdir;
+% First findobj returns a handle
+% Find objects with specified property values.
+% 'Tag' == 'P1Name' v3dmatdir == 'P1value'
+% These callback do two things :
+% first one is to add path
+% second one is to set panel1 propoerty v3dmatdir to dirname
 filepathtext = findobj('Tag', 'v3dmatdir');
 filepathtext.String = dirname;
 setappdata(hObject.Parent, 'v3dmatdir', dirname);
@@ -678,23 +703,32 @@ handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
 refresh_Render(handles);
 
 function refresh_Render(handles)
+% shift vairable is a single vaule 
+% the shift vaule make swc recontruction and binaryied image do not overlap
+% each other
 shift = handles.shiftslider.Value * 20;
 h = msgbox('Rendering');
 ax = handles.mainfig;
+% clear the single ax with ax
 cla(ax);
+% makes the axis with handle ax current
 axes(ax);
 
 if handles.treecheck.Value
+    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
+    %  field in the structure array S.
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
         if shift > 0
             fprintf('shift with %f\n', shift);
             tree(:, 3:5) = tree(:, 3:5) + shift;
         end
+        % show the swc based reconstructure
         showswc(tree, false);
     end
 end
 
+% If the image tick box is ticked, new bI will be updated. 
 if handles.imagecheck.Value
     if isfield(handles.selectfilebtn.UserData, 'bI')
         showbox(handles.selectfilebtn.UserData.bI, 0.5, true);
@@ -839,6 +873,212 @@ function branchlen_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function branchlen_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to branchlen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xloc_Callback(hObject, eventdata, handles)
+% hObject    handle to xloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xloc as text
+%        str2double(get(hObject,'String')) returns contents of xloc as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function xloc_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function yloc_Callback(hObject, eventdata, handles)
+% hObject    handle to yloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yloc as text
+%        str2double(get(hObject,'String')) returns contents of yloc as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function yloc_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function zloc_Callback(hObject, eventdata, handles)
+% hObject    handle to zloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of zloc as text
+%        str2double(get(hObject,'String')) returns contents of zloc as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function zloc_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to zloc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function sqradiustag_Callback(hObject, eventdata, handles)
+% hObject    handle to sqradiustag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of sqradiustag as text
+%        str2double(get(hObject,'String')) returns contents of sqradiustag as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function sqradiustag_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to sqradiustag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function smoothtag_Callback(hObject, eventdata, handles)
+% hObject    handle to smoothtag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of smoothtag as text
+%        str2double(get(hObject,'String')) returns contents of smoothtag as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function smoothtag_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to smoothtag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function lambda2tag_Callback(hObject, eventdata, handles)
+% hObject    handle to lambda2tag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of lambda2tag as text
+%        str2double(get(hObject,'String')) returns contents of lambda2tag as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function lambda2tag_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lambda2tag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function lambda1tag_Callback(hObject, eventdata, handles)
+% hObject    handle to lambda1tag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of lambda1tag as text
+%        str2double(get(hObject,'String')) returns contents of lambda1tag as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function lambda1tag_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lambda1tag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in crawlbtn.
+function crawlbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to crawlbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    xlocvalue = str2num(handles.xloc.String);               
+    ylocvalue = str2num(handles.yloc.String);               
+    zlocvalue = str2num(handles.zloc.String);               
+    fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
+    sqrvalue  = str2num(handles.sqradiustag.String);
+    smoothvalue = str2num(handles.smoothtag.String);
+    stepnvalue = str2num(handles.stepnum.String);
+    lambda1value = str2num(handles.lambda1tag.String);
+    lambda2value = str2num(handles.lambda2tag.String);
+    fprintf('smooth: %d radius: %d step: %d\n', smoothvalue, sqrvalue, stepnvalue);
+    fprintf('lambda1: %d lambda2: %d\n', lambda1value, lambda2value);
+    center(1) = xlocvalue;
+    center(2) = ylocvalue;
+    
+    somastruc = somagrowth(imgsoma, center, sqrvalue, smoothing, lambda1value, lambda2value, stepnvalue)
+
+
+
+function stepnum_Callback(hObject, eventdata, handles)
+% hObject    handle to stepnum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of stepnum as text
+%        str2double(get(hObject,'String')) returns contents of stepnum as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function stepnum_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to stepnum (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
