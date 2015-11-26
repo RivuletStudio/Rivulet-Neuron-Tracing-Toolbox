@@ -1,4 +1,4 @@
-function somastruc = somagrowth(imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
+function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
 	% The following kernel is used for the SI and IS operation 
 	global P3
 	P2kernel = ones(3);
@@ -55,17 +55,31 @@ function somastruc = somagrowth(imgsoma, center, sqradius, smoothing, lambda1, l
 	% the threshold is just for visulisation
 	% u is the snake mask which will evolve according to level set equation 
 	MorphGAC.u = u;
-	disp(stepnum)
-	figure
+	% disp(stepnum)
+	% figure
+	if plotcheck
+		axes(ax);
+		% hold on;
+	end
 	for i = 1 : stepnum
+		if plotcheck
+			cla(ax);
+			hold on
+		end
+		safeshowbox(imgsoma, showthres);
 		MorphGAC = ACWEstep3d(MorphGAC, i);
 		A = MorphGAC.u > threshold;  % synthetic data
 		[x y z] = ind2sub(size(A), find(A));
-		plot3(y, x, z, 'r.');
-		axis([0 shape(2) 0 shape(1) 0 shape(3)])
-		drawnow
+		fprintf('this is the %d step of the snake\n', i);
+		if plotcheck
+			plot3(y, x, z, 'b.');
+			hold off
+			% axis([0 shape(2) 0 shape(1) 0 shape(3)])
+			drawnow
+		end
 	end
-	close
+	% close
+	hold off
 	somastruc.I = MorphGAC.u;
 	somastruc.x = center(1);
 	somastruc.y = center(2);
