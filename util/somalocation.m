@@ -15,6 +15,8 @@ function somaloc = somalocation(imgsoma, nbands, msize, somadrthres, thresimg, l
 	yp = maxxyregionBoundingBox(1); 
 	figure
 	imshow(xyregion(maxareaindex).FilledImage);
+	pause(0.2)
+	close
 	[xdim, ydim, zdim] = size(imgsoma);
 	for i = 1 : zdim
 		counter = 1;
@@ -37,7 +39,8 @@ function somaloc = somalocation(imgsoma, nbands, msize, somadrthres, thresimg, l
 
 	figure
 	imagesc(boundingsomaslice)
-
+	pause(0.1)
+	close
 	% Find the largest region using regionprops 
 	boundingsomaslice = xyslice > lowthreshold;
 	xyregion = regionprops(boundingsomaslice, 'all');
@@ -45,6 +48,8 @@ function somaloc = somalocation(imgsoma, nbands, msize, somadrthres, thresimg, l
 	maxxyregion = xyregion(maxareaindex);
 	figure
 	imagesc(boundingsomaslice)
+	pause(0.1)
+	close
 	maxxyregionBoundingBox = maxxyregion.BoundingBox;
 
 	% Save the soma location in a structure for fututre use
