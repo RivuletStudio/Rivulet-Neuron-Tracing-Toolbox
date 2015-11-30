@@ -73,7 +73,9 @@ function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqrad
 		fprintf('this is the %d step of the snake\n', i);
 		if plotcheck
 			plot3(y, x, z, 'b.');
+            axis equal
 			hold off
+            
 			% axis([0 shape(2) 0 shape(1) 0 shape(3)])
 			drawnow
 		end

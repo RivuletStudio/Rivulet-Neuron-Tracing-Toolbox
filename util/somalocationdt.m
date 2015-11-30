@@ -10,5 +10,5 @@ function somaloc = somalocationdt(imgsoma, imgthres)
 	somaloc.y = y;
 	somaloc.z = z;
 	transI = double(transI)/ max(double(transI(:)));
-	implay(transI)
+	% implay(transI)
 end

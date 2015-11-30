@@ -58,8 +58,8 @@ function [tree, meanconf] = trace(varargin)
 
     
     if plot
-        h = waitbar(0.2, 'Preprocessing: Distance Tr...');
-        set(h, 'windowstyle', 'modal');
+        % h = waitbar(0.2, 'Preprocessing: Distance Tr...');
+        % set(h, 'windowstyle', 'modal');
         axes(ax);
     end
     disp('Distance transform');
@@ -71,9 +71,9 @@ function [tree, meanconf] = trace(varargin)
     SpeedImage=(bdist/maxD).^4;
 	SpeedImage(SpeedImage==0) = 1e-10;
 	if plot
-        set(0, 'CurrentFigure', h);
-		h = waitbar(0.5, h, 'Preprocessing: Marching...');
-        set(h, 'windowstyle', 'modal');
+  %       set(0, 'CurrentFigure', h);
+		% h = waitbar(0.5, h, 'Preprocessing: Marching...');
+  %       set(h, 'windowstyle', 'modal');
         axes(ax);
 	end	
 	disp('marching...');
@@ -91,9 +91,9 @@ function [tree, meanconf] = trace(varargin)
 	disp('Calculating gradient...')
     grad = distgradient(T);
     if plot
-        set(0, 'CurrentFigure', h);
-		h = waitbar(0.8, h, 'Preprocessing: Calculate Distance Gradients...');
-        set(h, 'windowstyle', 'modal');
+  %       set(0, 'CurrentFigure', h);
+		% h = waitbar(0.8, h, 'Preprocessing: Calculate Distance Gradients...');
+  %       set(h, 'windowstyle', 'modal');
         axes(ax);
     end
     S = {};
@@ -106,7 +106,8 @@ function [tree, meanconf] = trace(varargin)
 	end
 
     unconnectedBranches = {};
-
+    printcount = 0;
+    printn = 0;
     while(true)
 
 	    StartPoint = maxDistancePoint(T, I, true);
@@ -149,19 +150,22 @@ function [tree, meanconf] = trace(varargin)
 %         fprintf('Percent: %.2f/%.2f\n', percent * 100, percentage * 100);
         if plot
 %             disp(percent)
-            set(0, 'CurrentFigure', h);
+            % set(0, 'CurrentFigure', h);
 %             h = waitbar(percent, h, sprintf('Tracing %.2f%%', percent*100 / percentage));
-            h = waitbar(percent, h);
-            set(h, 'windowstyle', 'modal');
+            % h = waitbar(percent, h);
+            % set(h, 'windowstyle', 'modal');
 %             set(0, 'CurrentFigure', gcf);
             axes(ax);
         end
-        
-        fprintf('Tracing percent: %f%%\n', percent*100);
+        printn = printn + 1;
+        if printn > 1
+            fprintf(1, repmat('\b',1,printcount));
+            printcount = fprintf('Tracing percent: %f%%\n', percent*100);
+        end
         if percent >= percentage
-            if plot
-                close(h)
-            end
+            % if plot
+            %     close(h)
+            % end
         	disp('Coverage reached end tracing...')
         	break;
         end

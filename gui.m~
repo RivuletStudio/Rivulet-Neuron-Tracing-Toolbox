@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 30-Nov-2015 15:20:07
+% Last Modified by GUIDE v2.5 27-Nov-2015 17:40:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1092,7 +1092,6 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     center(2) = ylocvalue;
     center(3) = zlocvalue;    
     somastruc = somagrowth(handles.thresholdslider.Value, handles.plottracecheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
-    toc
 
     
 
@@ -1295,13 +1294,13 @@ function dtcheck_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of dtcheck
 
 
-% --- Executes on button press in somainivtag.
-function somainivtag_Callback(hObject, eventdata, handles)
-% hObject    handle to somainivtag (see GCBO)
+% --- Executes on button press in checkbox21.
+function checkbox21_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox21 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of somainivtag
+% Hint: get(hObject,'Value') returns toggle state of checkbox21
 
 
 
