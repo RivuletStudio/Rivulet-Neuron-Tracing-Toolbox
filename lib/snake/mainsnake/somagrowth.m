@@ -65,8 +65,9 @@ function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqrad
 		if plotcheck
 			cla(ax);
 			hold on
+            safeshowbox(imgsoma, showthres);
 		end
-		safeshowbox(imgsoma, showthres);
+		
 		MorphGAC = ACWEstep3d(MorphGAC, i);
 		A = MorphGAC.u > threshold;  % synthetic data
 		[x y z] = ind2sub(size(A), find(A));
@@ -81,7 +82,7 @@ function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqrad
 		end
 	end
 	% close
-	hold off
+	
 	somastruc.I = MorphGAC.u;
 	somastruc.x = center(1);
 	somastruc.y = center(2);

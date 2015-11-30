@@ -1,6 +1,6 @@
 function somaloc = somalocationdt(imgsoma, imgthres)
 	bI = imgsoma > imgthres;
-	safeshowbox(bI, 0.5)
+	% safeshowbox(bI, 0.5)
 	notbI = imgsoma < imgthres;
 	transI = bwdist(notbI, 'Quasi-Euclidean');
 	transI = transI .* double(bI);
