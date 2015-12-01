@@ -1056,7 +1056,7 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     lambda1value = str2num(handles.lambda1tag.String);
     lambda2value = str2num(handles.lambda2tag.String);
     fprintf('smooth: %d radius: %d step: %d\n', smoothvalue, sqrvalue, stepnvalue);
-    fprintf('lambda1: %d lambda2: %4.2d\n', lambda1value, lambda2value);
+    fprintf('lambda1: %d lambda2: %4.0d\n', lambda1value, lambda2value);
     
     ax = handles.mainfig;
     cla(ax);
@@ -1090,7 +1090,7 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     center(1) = xlocvalue;
     center(2) = ylocvalue;
     center(3) = zlocvalue;    
-    somastruc = somagrowth(handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+    somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
     toc
 
     

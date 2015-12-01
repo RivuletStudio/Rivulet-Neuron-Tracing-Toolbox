@@ -1,4 +1,4 @@
-function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
+function somastruc = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
 	% The following kernel is used for the SI and IS operation 
 	global P3
 	P2kernel = ones(3);
@@ -53,8 +53,13 @@ function somastruc = somagrowth(showthres, plotcheck, ax, imgsoma, center, sqrad
 	threshold = 0.5;
 	MorphGAC = ACWEinitialise(double(imgsoma), smoothing, lambda1, lambda2);
 	% the threshold is just for visulisation
-	% u is the snake mask which will evolve according to level set equation 
-	MorphGAC.u = u;
+	% u is the snake mask which will evolve according to level set equation
+    if inivcheck
+        iniu = somaini_v_quick(double(imgsoma), somathres);
+        MorphGAC.u = iniu > 0.5;
+    else
+        MorphGAC.u = u;
+    end
 	% disp(stepnum)
 	% figure
 	if plotcheck
