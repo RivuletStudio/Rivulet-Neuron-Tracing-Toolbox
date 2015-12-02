@@ -63,12 +63,20 @@ function [tree, meanconf] = trace(varargin)
         axes(ax);
     end
     disp('Distance transform');
-    bdist = getBoundaryDistance(I, true);
-    
+    % tic
+    % bdist = getBoundaryDistance(I, true);
+    % toc
+    % class(I)
+    % tic
+    notbI = not(I>0.5);
+    bdist = bwdist(notbI, 'Quasi-Euclidean');
+    bdist = bdist .* double(I);
+    bdist = double(bdist);
+    % toc
     disp('Looking for the source point...')
     [SourcePoint, maxD] = maxDistancePoint(bdist, I, true);
     disp('Make the speed image...')
-    SpeedImage=(bdist/maxD).^4;
+    SpeedImage=(bdist/maxD).^6;
 	SpeedImage(SpeedImage==0) = 1e-10;
 	if plot
   %       set(0, 'CurrentFigure', h);
@@ -132,8 +140,12 @@ function [tree, meanconf] = trace(varargin)
 
 	    % Remove the traced path from the timemap
 	    tB = binarysphere3d(size(T), l, radius);
+        % two point growth start from here
+        startpt = l(1, :);
+        tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
-	    T(tB==1) = -1;
+        T(tB==1) = -1;
+	    T(tBtwo==1) = -1;
 
 	    % Add l to the tree
 	    if ~(dump && dumpbranch) 

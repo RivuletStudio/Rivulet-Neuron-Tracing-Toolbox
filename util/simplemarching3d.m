@@ -13,7 +13,8 @@
 % marchpath = simplemarching(bw, 168, 206)
 % The following line is for marching process visulisation uncomment it if you need
 
-function [xcenter, ycenter, zcenter, volume, new_remain] = simplemarching3d(inputMatrix, input_x, input_y, input_z)
+% function [xcenter, ycenter, zcenter, volume, new_remain] = simplemarching3d(inputMatrix, input_x, input_y, input_z)
+function Frozen = simplemarching3d(inputMatrix, input_x, input_y, input_z, sz)
 %hold on
 % The following four lines are used to create cross shape neighbouring pixels
 % pixels are at boundary condition shold be considered in 3d version of simplemarching
@@ -33,7 +34,8 @@ curposy = I_row;
 curposz = I_stack;
 counter = 1;
 curvalue = 0;
-
+% hold on
+% showbox(inputMatrix, 0.5)
 % Forzen is binary image which records the marched process
 Frozen = zeros(size(inputMatrix));
 % Initialise the neighbouring points with starting point
@@ -42,8 +44,9 @@ neg_list_old = [I_col, I_row, I_stack];
 Frozen(I_col, I_row, I_stack) = 1;
 % Initialise the number of neighbouring points
 negnum = 1;
-for i = 1 : 100  
+for i = 1 : 10  
 	neg_list = [];
+	% fprintf('this is marching step %d\n', uint8(i));
 	for negnum_i = 1 : negnum 
 	curposx = neg_list_old(negnum_i, 1);
 	curposy = neg_list_old(negnum_i, 2);
@@ -52,6 +55,9 @@ for i = 1 : 100
 			xindex = ne(ne_i, 1) + curposx;
 			yindex = ne(ne_i, 2) + curposy;
 			zindex = ne(ne_i, 3) + curposz;
+			xindex = constrain(xindex, 1, sz(1));
+			yindex = constrain(yindex, 1, sz(2));
+			zindex = constrain(zindex, 1, sz(3)); 
 			binaryvalue = inputMatrix(xindex, yindex, zindex);
 			%Check this pixel is true value in the input binary image and we have not visited it yet
 			if (binaryvalue == 1)&&(Frozen(xindex, yindex, zindex) == 0)
@@ -61,8 +67,8 @@ for i = 1 : 100
 			Frozen(xindex, yindex, zindex) = 1;
 			counter = counter + 1;
 			%Uncomment these two lines if you want to view the marching process
-			%plot3(xindex, yindex, zindex, 'g.')
-			%pause(0.001)
+			% plot3(xindex, yindex, zindex, 'g.')
+			% pause(0.001)
 			end
 		end
 	end
@@ -76,18 +82,17 @@ for i = 1 : 100
 	counter = 1;
 	[negnum useless] = size(neg_list);
 end
- %hold off 
+% hold off 
 % uncomment the above is you want to visualise the marching process 
-new_remain = inputMatrix - Frozen;
-Frozenind = find(Frozen);
-[indx, indy, indz] = ind2sub(size(Frozen), Frozenind);
-xcenter = sum(indx(:))/numel(indx);
-ycenter = sum(indy(:))/numel(indx);
-zcenter = sum(indz(:))/numel(indx);
-volume = sum(Frozen(:));
-% point.xcenter = xcenter;
-% point.ycenter = ycenter;
-% point.zcenter = zcenter;
-% point.volume = volume;
-%showbox(new_remain, 0)
+
+% The following code is used to calculate centroid
+% It seems that we do not need them at this moment
+% new_remain = inputMatrix - Frozen;
+% Frozenind = find(Frozen);
+% [indx, indy, indz] = ind2sub(size(Frozen), Frozenind);
+% xcenter = sum(indx(:))/numel(indx);
+% ycenter = sum(indy(:))/numel(indx);
+% zcenter = sum(indz(:))/numel(indx);
+% volume = sum(Frozen(:));
+
 end
