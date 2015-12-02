@@ -548,7 +548,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     axes(ax);
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
     tic
-    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String));
+    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
     toc
     if handles.ignoreradiuscheck.Value
         tree(:, 6) = 1;

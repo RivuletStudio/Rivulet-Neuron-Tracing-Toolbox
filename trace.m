@@ -52,6 +52,12 @@ function [tree, meanconf] = trace(varargin)
         branchlen = varargin{9};
     end
 
+    if numel(varargin) >= 10
+        oriI = varargin{10};
+        sizeI = size(oriI);
+        fprintf('the size of original image is : %d%d%d\n', sizeI(1), sizeI(2), sizeI(3));
+    end
+
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
     addpath(genpath(fullfile(pathstr, 'lib')));
@@ -142,8 +148,9 @@ function [tree, meanconf] = trace(varargin)
 	    tB = binarysphere3d(size(T), l, radius);
         % two point growth start from here
         startpt = l(1, :);
-        tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
+        % tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
 	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
+        tBtwo = axongrowth(oriI, 1, 1, 1.5, 5, tB);
         T(tB==1) = -1;
 	    T(tBtwo==1) = -1;
 
