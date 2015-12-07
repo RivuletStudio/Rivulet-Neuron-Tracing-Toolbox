@@ -61,10 +61,11 @@ function [tree, meanconf] = trace(varargin)
     % somagrowthcheck is the flag whether soma is given or not
     if numel(varargin) >= 10
         somagrowthcheck = varargin{10};
+        somagrowthcheck = somagrowthcheck > 0.5;
         fprintf('the value of somagrowthcheck is : %d\n', somagrowthcheck);
     end
 
-    if numel(varargin) >= 11
+    if numel(varargin) >= 11 & somagrowthcheck
         somastruc = varargin{11};
         fprintf('we found soma label matrix\n');
         somalabel = somastruc.I; 
@@ -74,6 +75,16 @@ function [tree, meanconf] = trace(varargin)
         fprintf('the size of somalabel, x is : %d, y is : %d, z is : %d\n', szsoma(1), szsoma(2), szsoma(3));
     end
 
+    washawayflag = false;
+    if numel(varargin) >= 12
+        washawayflag = varargin{12};
+        if washawayflag == 1
+            fprintf('wash away is on\n');
+        else
+            fprintf('wash away is off\n');
+        end
+        washawayflag = washawayflag > 0.5;                    
+    end
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
     addpath(genpath(fullfile(pathstr, 'lib')));
@@ -180,14 +191,18 @@ function [tree, meanconf] = trace(varargin)
 		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
-	    tB = binarysphere3d(size(T), l, radius);
+	    tB = binarysphere3d(size(T), l, radius, washawayflag);
         % two point growth start from here
         startpt = l(1, :);
-        tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
-	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
+        if washawayflag
+            tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
+	    end
+        tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
         %tBtwo = axongrowth(oriI, 1, 1, 1.5, 5, tB);
         T(tB==1) = -1;
-	    T(tBtwo==1) = -1;
+	    if washawayflag
+            T(tBtwo==1) = -1;
+        end
 
 	    % Add l to the tree
 	    if ~(dump && dumpbranch) 

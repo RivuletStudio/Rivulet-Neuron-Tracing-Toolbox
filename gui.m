@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 07-Dec-2015 15:49:11
+% Last Modified by GUIDE v2.5 07-Dec-2015 16:54:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -550,9 +550,9 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     tic
     %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
     if handles.somaflagtag.Value
-        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc);
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc, handles.washawaytag.Value);
     else 
-        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String));
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), false, false, handles.washawaytag.Value);
     end
     toc
     if handles.ignoreradiuscheck.Value
@@ -1583,10 +1583,10 @@ end
 % Hint: get(hObject,'Value') returns toggle state of somaexperttag
 
 
-% --- Executes on button press in checkbox26.
-function checkbox26_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox26 (see GCBO)
+% --- Executes on button press in washawaytag.
+function washawaytag_Callback(hObject, eventdata, handles)
+% hObject    handle to washawaytag (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox26
+% Hint: get(hObject,'Value') returns toggle state of washawaytag
