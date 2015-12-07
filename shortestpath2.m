@@ -1,4 +1,4 @@
-function [ShortestLine, dump, merged] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
+function [ShortestLine, dump, merged, somamerged] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
 % This function SHORTESTPATH traces the shortest path from start point to
 % source point using Runge Kutta 4 in a 2D or 3D distance map.
 %
@@ -30,6 +30,7 @@ if(~exist('Method','var')), Method='rk4'; end
 
 dump = false;
 merged = false;
+somamerged = false;
 i=0; % Count movemnet 
 j = 0; % Count empty steps
 % Reserve a block of memory for the shortest line array
@@ -54,6 +55,10 @@ while(true)
     if dist == -1
         merged = true;
         break;
+    elseif dist == -2
+        merged = true;
+        somamerged = true;
+        fprintf('time-crossing map is equal to two works.\n');    
     end
 
     % Calculate the next point using runge kutta

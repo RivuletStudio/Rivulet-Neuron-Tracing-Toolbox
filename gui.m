@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 30-Nov-2015 15:20:07
+% Last Modified by GUIDE v2.5 04-Dec-2015 11:58:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -548,7 +548,12 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     axes(ax);
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
     tic
-    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
+    %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
+    if handles.somaflagtag.Value
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc);
+    else 
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String));
+    end
     toc
     if handles.ignoreradiuscheck.Value
         tree(:, 6) = 1;
@@ -1092,8 +1097,15 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     center(1) = xlocvalue;
     center(2) = ylocvalue;
     center(3) = zlocvalue;    
-    somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+    handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
     toc
+    fprintf('Saving the soma mask into v3draw\n');
+    somaI = handles.selectfilebtn.UserData.somastruc.I;
+    somaI = somaI * 30;
+    somaI = uint8(somaI);
+    save_v3d_raw_img_file(somaI, 'somamask.v3draw');
+    clear somaI;
+  
 
     
 
@@ -1528,3 +1540,12 @@ function stumsizezx_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in somaflagtag.
+function somaflagtag_Callback(hObject, eventdata, handles)
+% hObject    handle to somaflagtag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of somaflagtag

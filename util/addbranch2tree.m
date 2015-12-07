@@ -1,4 +1,4 @@
-function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot)
+function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot, somamerged)
 % Add a branch with 3D points to a swc tree
 % Return the result swc tree and the confidence score of the newly added branch
     % Get the voxels on this branch and count the empty voxels 
@@ -16,7 +16,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
     % disp([size(l, 1), size(radius, 1)]);
 	assert(size(l, 1) == size(radius, 1));
 	newtree = zeros(size(l, 1), 7);
-	if size(tree, 1) == 0
+	if size(tree, 1) == 0 
 		newtree(:, 1) = 1 : size(l, 1);
 		newtree(:, 2) = 2;
 		newtree(:, 3:5) = l;
@@ -28,6 +28,15 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			drawnow
 		end
 		tree = newtree;
+	elseif somamerged == true
+		newtree(:, 1) = tree(end, 1) + 1 : tree(end, 1) + size(l, 1);
+		newtree(:, 2) = 2;
+		newtree(:, 3:5) = l;
+		newtree(:, 6) = radius;
+		newtree(1:end-1, 7) = newtree(2:end, 1);
+		newtree(end, 7) = 1;
+		tree = [tree; newtree];
+		fprintf('add branch to soma is working.\n');
 	else
 		termini1 = l(end, :);
 		termini2 = l(1, :);

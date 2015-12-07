@@ -14,7 +14,7 @@ function binarygt = binarysphere3d(sz, pts, radius)
 		ind = sub2ind(sz, int16(neighbours(:, 1)), int16(neighbours(:, 2)), int16(neighbours(:, 3)));
 		binarygt(ind) = 1;
 	end
-	% binarygt = imdilate(binarygt, ones([5, 5, 5]));
+	binarygt = imdilate(binarygt, ones([5, 5, 5]));
 end
 
 function neighours = neighourpoints3d(x, y, z, radius)
