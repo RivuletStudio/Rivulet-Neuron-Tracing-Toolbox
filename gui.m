@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 04-Dec-2015 11:58:40
+% Last Modified by GUIDE v2.5 07-Dec-2015 15:49:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1103,7 +1103,7 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     somaI = handles.selectfilebtn.UserData.somastruc.I;
     somaI = somaI * 30;
     somaI = uint8(somaI);
-    save_v3d_raw_img_file(somaI, 'somamask.v3draw');
+    save_v3d_raw_img_file(somaI, [handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.v3draw']);
     clear somaI;
   
 
@@ -1549,3 +1549,44 @@ function somaflagtag_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of somaflagtag
+
+
+% --- Executes on button press in togglebutton3.
+function togglebutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton3
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over togglebutton3.
+function togglebutton3_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in somaexperttag.
+function somaexperttag_Callback(hObject, eventdata, handles)
+% hObject    handle to somaexperttag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if handles.somaexperttag.Value == 1
+    set(handles.somaexpertpanel,'visible','on')
+else
+    set(handles.somaexpertpanel,'visible','off')
+end
+
+
+% Hint: get(hObject,'Value') returns toggle state of somaexperttag
+
+
+% --- Executes on button press in checkbox26.
+function checkbox26_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox26 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox26
