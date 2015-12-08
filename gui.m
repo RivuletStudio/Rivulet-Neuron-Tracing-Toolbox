@@ -107,20 +107,24 @@ if filename
 else
     return
 end
-
+xyI = max(I, [], 3);
+maxintensity = max(xyI(:));
+levelvalue = graythresh(xyI);
+handles.thresholdslider.Value = levelvalue * maxintensity;
+handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 % Try to read the image in
-if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
-    choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
-             'Danger',...
-             'Go Ahead',...
-             'Oops...Try 10 then', 'Oops...Try 10 then');
-    switch choice
-        case 'Oops...Try 10 then'
-            handles.thresholdslider.Value = 10;
-            handles.thresholdtxt.String = '10';
-        case 'Go ahead'
-    end
-end
+% if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
+%     choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
+%              'Danger',...
+%              'Go Ahead',...
+%              'Oops...Try 10 then', 'Oops...Try 10 then');
+%     switch choice
+%         case 'Oops...Try 10 then'
+%             handles.thresholdslider.Value = 10;
+%             handles.thresholdtxt.String = '10';
+%         case 'Go ahead'
+%     end
+% end
 
 % Assign threshold vaule to variable v
 v = handles.thresholdslider.Value;
