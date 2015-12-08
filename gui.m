@@ -22,7 +22,6 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 07-Dec-2015 16:54:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -201,6 +200,11 @@ if strcmp(ext, '.v3draw')
 elseif strcmp(ext, '.tif')
     I = tifread(filepath);
 elseif strcmp(ext, '.mat')
+    f = load(filepath);
+    fields = fieldnames(f)
+    if numel(fields) > 0
+        I = f.(fields{1});
+    end
 elseif strcmp(ext, '.nii')
 else 
 end
