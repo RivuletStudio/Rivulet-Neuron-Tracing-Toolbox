@@ -1,4 +1,4 @@
-function binarygt = binarysphere3d(sz, pts, radius)
+function binarygt = binarysphere3d(sz, pts, radius, washaway)
 % Generate a mask with 3d spheres to cover a list of 2d points 
 % sz: the size of the original image
 % pts: a list of 3d point coordinates < N * D>
@@ -14,7 +14,9 @@ function binarygt = binarysphere3d(sz, pts, radius)
 		ind = sub2ind(sz, int16(neighbours(:, 1)), int16(neighbours(:, 2)), int16(neighbours(:, 3)));
 		binarygt(ind) = 1;
 	end
-
+	if washaway
+		binarygt = imdilate(binarygt, ones([5, 5, 5]));
+	end
 end
 
 function neighours = neighourpoints3d(x, y, z, radius)

@@ -22,7 +22,6 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 01-Dec-2015 12:30:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -107,20 +106,24 @@ if filename
 else
     return
 end
-
+xyI = max(I, [], 3);
+maxintensity = max(xyI(:));
+levelvalue = graythresh(xyI);
+handles.thresholdslider.Value = levelvalue * maxintensity;
+handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 % Try to read the image in
-if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
-    choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
-             'Danger',...
-             'Go Ahead',...
-             'Oops...Try 10 then', 'Oops...Try 10 then');
-    switch choice
-        case 'Oops...Try 10 then'
-            handles.thresholdslider.Value = 10;
-            handles.thresholdtxt.String = '10';
-        case 'Go ahead'
-    end
-end
+% if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
+%     choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
+%              'Danger',...
+%              'Go Ahead',...
+%              'Oops...Try 10 then', 'Oops...Try 10 then');
+%     switch choice
+%         case 'Oops...Try 10 then'
+%             handles.thresholdslider.Value = 10;
+%             handles.thresholdtxt.String = '10';
+%         case 'Go ahead'
+%     end
+% end
 
 % Assign threshold vaule to variable v
 v = handles.thresholdslider.Value;
@@ -552,7 +555,14 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     cla(ax);
     axes(ax);
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
-    [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String));
+    tic
+    %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
+    if handles.somaflagtag.Value
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc, handles.washawaytag.Value);
+    else 
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), false, false, handles.washawaytag.Value);
+    end
+    toc
     if handles.ignoreradiuscheck.Value
         tree(:, 6) = 1;
     end
@@ -1095,8 +1105,15 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     center(1) = xlocvalue;
     center(2) = ylocvalue;
     center(3) = zlocvalue;    
-    somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+    handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
     toc
+    fprintf('Saving the soma mask into v3draw\n');
+    somaI = handles.selectfilebtn.UserData.somastruc.I;
+    somaI = somaI * 30;
+    somaI = uint8(somaI);
+    save_v3d_raw_img_file(somaI, [handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.v3draw']);
+    clear somaI;
+  
 
     
 
@@ -1533,24 +1550,51 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
+% --- Executes on button press in somaflagtag.
+function somaflagtag_Callback(hObject, eventdata, handles)
+% hObject    handle to somaflagtag (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+% Hint: get(hObject,'Value') returns toggle state of somaflagtag
 
 
-% --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
+% --- Executes on button press in togglebutton3.
+function togglebutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% handles    structure with handles and user data (see GUIDATA)
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+% Hint: get(hObject,'Value') returns toggle state of togglebutton3
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over togglebutton3.
+function togglebutton3_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in somaexperttag.
+function somaexperttag_Callback(hObject, eventdata, handles)
+% hObject    handle to somaexperttag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if handles.somaexperttag.Value == 1
+    set(handles.somaexpertpanel,'visible','on')
+else
+    set(handles.somaexpertpanel,'visible','off')
 end
+
+
+% Hint: get(hObject,'Value') returns toggle state of somaexperttag
+
+
+% --- Executes on button press in washawaytag.
+function washawaytag_Callback(hObject, eventdata, handles)
+% hObject    handle to washawaytag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of washawaytag

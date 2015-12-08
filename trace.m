@@ -52,6 +52,39 @@ function [tree, meanconf] = trace(varargin)
         branchlen = varargin{9};
     end
 
+    % if numel(varargin) >= 10
+    %     oriI = varargin{10};
+    %     sizeI = size(oriI);
+    %     fprintf('the size of original image is : %d%d%d\n', sizeI(1), sizeI(2), sizeI(3));
+    % end
+
+    % somagrowthcheck is the flag whether soma is given or not
+    if numel(varargin) >= 10
+        somagrowthcheck = varargin{10};
+        somagrowthcheck = somagrowthcheck > 0.5;
+        fprintf('the value of somagrowthcheck is : %d\n', somagrowthcheck);
+    end
+
+    if numel(varargin) >= 11 & somagrowthcheck
+        somastruc = varargin{11};
+        fprintf('we found soma label matrix\n');
+        somalabel = somastruc.I; 
+        clear somastruc
+        fprintf('soma is extracted\n');
+        szsoma = size(somalabel);
+        fprintf('the size of somalabel, x is : %d, y is : %d, z is : %d\n', szsoma(1), szsoma(2), szsoma(3));
+    end
+
+    washawayflag = false;
+    if numel(varargin) >= 12
+        washawayflag = varargin{12};
+        if washawayflag == 1
+            fprintf('wash away is on\n');
+        else
+            fprintf('wash away is off\n');
+        end
+        washawayflag = washawayflag > 0.5;                    
+    end
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
     addpath(genpath(fullfile(pathstr, 'lib')));
@@ -63,13 +96,22 @@ function [tree, meanconf] = trace(varargin)
         axes(ax);
     end
     disp('Distance transform');
-    bdist = getBoundaryDistance(I, true);
-    
+    % tic
+    % bdist = getBoundaryDistance(I, true);
+    % toc
+    % class(I)
+    % tic
+    notbI = not(I>0.5);
+    bdist = bwdist(notbI, 'Quasi-Euclidean');
+    bdist = bdist .* double(I);
+    bdist = double(bdist);
+    % toc
     disp('Looking for the source point...')
     [SourcePoint, maxD] = maxDistancePoint(bdist, I, true);
     disp('Make the speed image...')
-    SpeedImage=(bdist/maxD).^4;
-	SpeedImage(SpeedImage==0) = 1e-10;
+    SpeedImage=(bdist/maxD).^6;
+    clear bdist;
+    SpeedImage(SpeedImage==0) = 1e-10;
 	if plot
   %       set(0, 'CurrentFigure', h);
 		% h = waitbar(0.5, h, 'Preprocessing: Marching...');
@@ -77,15 +119,29 @@ function [tree, meanconf] = trace(varargin)
         axes(ax);
 	end	
 	disp('marching...');
-    oT = msfm(SpeedImage, SourcePoint, false, false);
-    
+    T = msfm(SpeedImage, SourcePoint, false, false);
+    szT = size(T);
+    fprintf('the size of time map, x is : %d, y is : %d, z is : %d\n', szT(1), szT(2), szT(3));
     disp('Finish marching')
+    if somagrowthcheck
+        fprintf('Mark soma label on time-crossing map\n')
+        T(somalabel==1) = -2;
+    end
     if plot
     	hold on 
     	% showbox(I, 0.5);
     end
-    T = oT;
     tree = []; % swc tree
+    if somagrowthcheck
+        fprintf('Initialization of swc tree.\n'); 
+        tree(1, 1) = 1;
+        tree(1, 2) = 2;
+        tree(1, 3:5) = SourcePoint;
+        fprintf('source point x : %d, y : %d, z : %d.\n', uint8(SourcePoint(1)), uint8(SourcePoint(2)), uint8(SourcePoint(3)));         
+        tree(1, 6) = 20;
+        tree(1, 7) = -1;
+    end
+
     prune = true;
 	% Calculate gradient of DistanceMap
 	disp('Calculating gradient...')
@@ -98,7 +154,11 @@ function [tree, meanconf] = trace(varargin)
     end
     S = {};
     B = zeros(size(T));
-
+    if somagrowthcheck
+        B = B | (somalabel>0.5);
+        clear somalabel;
+        fprintf('clearing somalabel works.\n');
+    end
     lconfidence = [];
     if plot
 	    [x,y,z] = sphere;
@@ -119,7 +179,7 @@ function [tree, meanconf] = trace(varargin)
 	    	break;
 	    end
 
-	    [l, dump, merged] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
+	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
 
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
@@ -131,13 +191,22 @@ function [tree, meanconf] = trace(varargin)
 		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
-	    tB = binarysphere3d(size(T), l, radius);
-	    tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
-	    T(tB==1) = -1;
+	    tB = binarysphere3d(size(T), l, radius, washawayflag);
+        % two point growth start from here
+        startpt = l(1, :);
+        if washawayflag
+            tBtwo = simplemarching3d(I, floor(startpt(1)), floor(startpt(2)), floor(startpt(3)), size(T));
+	    end
+        tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
+        %tBtwo = axongrowth(oriI, 1, 1, 1.5, 5, tB);
+        T(tB==1) = -1;
+	    if washawayflag
+            T(tBtwo==1) = -1;
+        end
 
 	    % Add l to the tree
 	    if ~(dump && dumpbranch) 
-		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot);
+		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot, somamerged);
 %             if unconnected
 %                 unconnectedBranches = {unconnectedBranches, newtree};
 %             end
