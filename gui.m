@@ -109,8 +109,10 @@ else
 end
 xyI = max(I, [], 3);
 maxintensity = max(xyI(:));
+minintensity = abs(min(xyI(:)));
 levelvalue = graythresh(xyI);
 handles.thresholdslider.Value = levelvalue * maxintensity;
+set(handles.thresholdslider,'Max',maxintensity,'Min',minintensity); 
 handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 % Try to read the image in
 % if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
