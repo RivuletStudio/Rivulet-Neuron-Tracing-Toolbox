@@ -1600,3 +1600,12 @@ function washawaytag_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of washawaytag
+
+
+% --- Executes on button press in dtimagetag.
+function dtimagetag_Callback(hObject, eventdata, handles)
+% hObject    handle to dtimagetag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of dtimagetag
