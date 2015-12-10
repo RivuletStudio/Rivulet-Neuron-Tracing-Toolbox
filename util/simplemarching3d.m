@@ -44,7 +44,7 @@ neg_list_old = [I_col, I_row, I_stack];
 Frozen(I_col, I_row, I_stack) = 1;
 % Initialise the number of neighbouring points
 negnum = 1;
-for i = 1 : 10  
+for i = 1 : 5  
 	neg_list = [];
 	% fprintf('this is marching step %d\n', uint8(i));
 	for negnum_i = 1 : negnum 

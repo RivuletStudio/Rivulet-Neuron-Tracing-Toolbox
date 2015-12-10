@@ -85,6 +85,18 @@ function [tree, meanconf] = trace(varargin)
         end
         washawayflag = washawayflag > 0.5;                    
     end
+    % dtimageflag load distance transform image directly without computing distance transform
+    dtimageflag = false;
+    if numel(varargin) >= 13
+        dtimageflag = varargin{13};
+        dtimageflag = dtimageflag > 0.5;
+    end
+    if dtimageflag
+        disp('Loading distance transformed image');
+        bdist = varargin{14};
+        bdist = double(bdist);
+    end                        
+    
 	[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
     addpath(fullfile(pathstr, 'util'));
     addpath(genpath(fullfile(pathstr, 'lib')));
@@ -95,16 +107,18 @@ function [tree, meanconf] = trace(varargin)
         % set(h, 'windowstyle', 'modal');
         axes(ax);
     end
-    disp('Distance transform');
-    % tic
-    % bdist = getBoundaryDistance(I, true);
-    % toc
-    % class(I)
-    % tic
-    notbI = not(I>0.5);
-    bdist = bwdist(notbI, 'Quasi-Euclidean');
-    bdist = bdist .* double(I);
-    bdist = double(bdist);
+    if (~dtimageflag)
+        disp('Distance transform');
+        % tic
+        % bdist = getBoundaryDistance(I, true);
+        % toc
+        % class(I)
+        % tic
+        notbI = not(I>0.5);
+        bdist = bwdist(notbI, 'Quasi-Euclidean');
+        bdist = bdist .* double(I);
+        bdist = double(bdist);
+    end
     % toc
     disp('Looking for the source point...')
     [SourcePoint, maxD] = maxDistancePoint(bdist, I, true);
