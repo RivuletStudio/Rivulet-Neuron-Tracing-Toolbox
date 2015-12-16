@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2919768222" file="/home/donghao/Desktop/fishhead/Rivulet.prj" location="/home/donghao/Desktop/fishhead" name="Rivulet" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="130346759" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
     <param.appname>Rivulet</param.appname>
     <param.authnamewatermark>Siqi Liu, Donghao Zhang</param.authnamewatermark>
     <param.email>lsqshr@gmail.com</param.email>
@@ -106,7 +106,7 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="/home/donghao/Desktop/fishhead" name="Rivulet.mlappinstall" optional="false">/home/donghao/Desktop/fishhead/Rivulet.mlappinstall</file>
+      <file location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet.mlappinstall" optional="false">/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.mlappinstall</file>
     </build-deliverables>
     <workflow />
     <matlab>
@@ -141,7 +141,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>3.16.0-23-generic</osver>
+      <osver>3.19.0-39-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

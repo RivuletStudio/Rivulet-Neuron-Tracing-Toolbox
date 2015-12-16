@@ -80,9 +80,20 @@ function selectfilebtn_Callback(hObject, eventdata, handles)
 % hObject    handle to selectfilebtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[filename, pathname] = uigetfile({'*.v3draw;*.tif;*.mat;*.nii'}, 'Select v3draw file');
+if isfield(hObject.UserData, 'default')
+    disp(hObject.UserData.default)
+end
+if ~isfield(hObject.UserData, 'default') || ~ischar(hObject.UserData.default)
+    hObject.UserData.default = '.';
+end
+
+[filename, pathname] = uigetfile({'*.v3draw;*.tif;*.mat;*.nii'},...
+    'Select Input File', hObject.UserData.default);
+if pathname ~= 0
+    hObject.UserData.default = pathname;
+end
 filepath = fullfile(pathname, filename);
-% hObject.Parent
+
 % get data from panel1 whose property is v3dmatdir 
 v3dmatdir = getappdata(hObject.Parent, 'v3dmatdir');
 
@@ -92,7 +103,6 @@ if v3dmatdir
 end
 
 [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
-%fprintf('I try to understand the the meaning of pathstr, pathstr: %s\n', pathstr);
 addpath(fullfile(pathstr, 'util'));
 
 % Basically if it is four dimensions, something must have went wrong.
@@ -113,19 +123,6 @@ levelvalue = graythresh(xyI);
 handles.thresholdslider.Value = levelvalue * maxintensity;
 set(handles.thresholdslider,'Max',maxintensity,'Min',minintensity); 
 handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
-% Try to read the image in
-% if handles.thresholdslider.Value < 10 % To protect the rendering from too many noise points
-%     choice = questdlg('The segmentation threshold is very low. Are you sure to proceed? (May cause performance problem)', ...
-%              'Danger',...
-%              'Go Ahead',...
-%              'Oops...Try 10 then', 'Oops...Try 10 then');
-%     switch choice
-%         case 'Oops...Try 10 then'
-%             handles.thresholdslider.Value = 10;
-%             handles.thresholdtxt.String = '10';
-%         case 'Go ahead'
-%     end
-% end
 
 % Assign threshold vaule to variable v
 v = handles.thresholdslider.Value;
@@ -141,12 +138,6 @@ if handles.filtercheck.Value
     % when the filtering process finished, the message box will be closed
     close(h2);
 end
-
-%         h = msgbox('classifying voxels');
-%         clf = load('quad.mat');
-%         cl = clf.obj;
-%         [bI, cropregion] = binarizeimage('classification', I, cl, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
-%         close(h)
 
 % The levelset corresponding value is delta
 % The levelset judge value is handles.levelsetcheck.Value
@@ -201,7 +192,7 @@ elseif strcmp(ext, '.tif')
     I = tifread(filepath);
 elseif strcmp(ext, '.mat')
     f = load(filepath);
-    fields = fieldnames(f)
+    fields = fieldnames(f);
     if numel(fields) > 0
         I = f.(fields{1});
     end
@@ -217,35 +208,11 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     refresh_Render(handles);
 end
 
-% --- Executes on button press in classificationcheck.
+
 function classificationcheck_Callback(hObject, eventdata, handles)
-% hObject    handle to classificationcheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of classificationcheck
-
-
-% --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-
-
-
 function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-
-
-% --- Executes during object creation, after setting all properties.
 function edit1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -260,179 +227,42 @@ end
 
 % --- Executes on button press in checkbox1.
 function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-
-
-% --- Executes on button press in dumpcheck.
 function dumpcheck_Callback(hObject, eventdata, handles)
-% hObject    handle to dumpcheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of dumpcheck
-
-
-
 function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox3.
 function checkbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox3
-
-
-
 function sigmaedit_Callback(hObject, eventdata, handles)
-% hObject    handle to sigmaedit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function pushbutton4_Callback(hObject, eventdata, handles)
+function edit4_Callback(hObject, eventdata, handles)
+function edit2_CreateFcn(hObject, eventdata, handles)
+function cropcheck_Callback(hObject, eventdata, handles)
+function pushbutton2_Callback(hObject, eventdata, handles)
+function pushbutton3_Callback(hObject, eventdata, handles)
+function levelsetcheck_Callback(hObject, eventdata, handles)
+function filtercheck_Callback(hObject, eventdata, handles)
+function pushbutton5_Callback(hObject, eventdata, handles)
 
-% Hints: get(hObject,'String') returns contents of sigmaedit as text
-%        str2double(get(hObject,'String')) returns contents of sigmaedit as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function sigmaedit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sigmaedit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-
+function sigmaedit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 % --- Executes during object creation, after setting all properties.
 function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 
 function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-
-
-% --- Executes during object creation, after setting all properties.
 function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
-% --- Executes on button press in cropcheck.
-function cropcheck_Callback(hObject, eventdata, handles)
-% hObject    handle to cropcheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of cropcheck
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in levelsetcheck.
-function levelsetcheck_Callback(hObject, eventdata, handles)
-% hObject    handle to levelsetcheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of levelsetcheck
-
-
-% --- Executes on button press in filtercheck.
-function filtercheck_Callback(hObject, eventdata, handles)
-% hObject    handle to filtercheck (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of filtercheck
-
-
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in v3dmatlabbtn.
 function v3dmatlabbtn_Callback(hObject, eventdata, handles)
 % hObject    handle to v3dmatlabbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -560,6 +390,10 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     tic
     %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
     if handles.somaflagtag.Value
+        if ~isfield(handles.selectfilebtn.UserData, 'somastruc')
+            msgbox('To use soma mask, please Click Craw in the Soma Detection panel at first...')
+            return
+        end
         [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
     else 
         [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), false, false, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
