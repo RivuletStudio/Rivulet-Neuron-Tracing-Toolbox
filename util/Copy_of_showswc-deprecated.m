@@ -9,16 +9,14 @@ if numel(varargin) >= 2
 	endplot = varargin{2};
 end
 
+[x,y,z] = sphere();
+camlight('headlight')
 colormap([0.7 0.7 1]);
-
+surfl(x,y,z, 'light')  % sphere centered at origin
 hold on
 for i = 1 : size(tree, 1)
-    % Draw a line between the current node and its parent
-    cnode = tree(i, 3:5);
-    parent = tree(i, 7);
-    [pidx] = find(tree(:, 1) == parent);
-    pnode = tree(pidx, 3:5);
-    plot3([cnode(3);pnode(3)], [cnode(4);pnode(4)], [cnode(5); pnode(5)]);    
+    surf(tree(i,6) * y + tree(i, 4), tree(i,6) * x + tree(i, 3), tree(i,6) * z + tree(i, 5),...
+        'FaceColor','interp','FaceLighting','gouraud', 'EdgeColor','none');
 end
 %The following line  of code can adjust axis ratio
 daspect([1 1 1])

@@ -1,4 +1,5 @@
 function showbox(varargin)
+
 X = varargin{1};
 threshold = varargin{2};
 endplot = true;
@@ -15,4 +16,5 @@ drawnow
 if endplot
 	hold off
 end
+
 end
