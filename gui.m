@@ -411,6 +411,11 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
             msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
         end        
     end
+    
+    if handles.treecheck.Value
+        showswc(permute(tree, [2 1 3]));
+    end
+    handles.selectfilebtn.UserData.swc = tree;
     refresh_Render(handles);
 else
     msgbox('Sorry, no segmented image found!');
@@ -548,7 +553,13 @@ function loadswcbtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadswcbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[filename, pathname] = uigetfile('*.swc', 'Select swc file');
+if ~isfield(hObject.UserData, 'default')
+    hObject.UserData.default = '.';
+end
+[filename, pathname] = uigetfile('*.swc', 'Select swc file', hObject.UserData.default);
+if pathname ~= 0
+    hObject.UserData.default = pathname;
+end
 filepath = fullfile(pathname, filename);
 handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
 refresh_Render(handles);
