@@ -19,4 +19,4 @@ Implementation
 
 References
 ==========
-Rivulet paper will be avaiable soon. It can be downloaded at [Tom Homepage](http://rp-www.cs.usyd.edu.au/~tomc/)
+Rivulet paper will be avaiable soon. It can be downloaded at
