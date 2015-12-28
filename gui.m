@@ -116,12 +116,12 @@ if filename
 else
     return
 end
-xyI = max(I, [], 3);
-maxintensity = max(xyI(:));
-minintensity = abs(min(xyI(:)));
-levelvalue = graythresh(xyI);
-handles.thresholdslider.Value = levelvalue * maxintensity;
-set(handles.thresholdslider,'Max',maxintensity,'Min',minintensity); 
+
+maxp = max(I(:));
+minp = min(I(:));
+t = graythresh(I);
+handles.thresholdslider.Value = t * maxp;
+set(handles.thresholdslider,'Max',maxp,'Min',minp); 
 handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 
 % Assign threshold vaule to variable v
@@ -135,6 +135,12 @@ if handles.filtercheck.Value
     h2 = msgbox('Filtering');
     % result I is not binary 
     I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
+    maxp = max(I(:));
+    minp = min(I(:));
+    t = graythresh(I);
+    handles.thresholdslider.Value = t * maxp;
+    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
+    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
     % when the filtering process finished, the message box will be closed
     close(h2);
 end
@@ -411,9 +417,12 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
             msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
         end        
     end
+    t = tree(:,4);
+    tree(:, 4) = tree(:, 3);
+    tree(:, 3) = t;
     
     if handles.treecheck.Value
-        showswc(permute(tree, [2 1 3]));
+        showswc(tree);
     end
     handles.selectfilebtn.UserData.swc = tree;
     refresh_Render(handles);
@@ -445,19 +454,27 @@ function filterbtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles.selectfilebtn.UserData, 'I')
-    h = msgbox('Filtering...')
+    h = msgbox('Filtering...');
     I = handles.selectfilebtn.UserData.I;
     I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
-    handles.thresholdslider.Value = 0; % Set threshold slider to 0 after filtering
-    handles.thresholdtxt.String = '0';
-    [bI, cropregion] = binarizeimage('threshold', I, handles.thresholdslider.Value, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
+     % Update the thresholding bar
+    maxp = max(I(:));
+    minp = min(I(:));
+    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
+    handles.thresholdslider.Value = 0;
+    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
+    [bI, cropregion] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
+                                     handles.delta_t.Value, handles.cropcheck.Value,...
+                                     handles.levelsetcheck.Value);
     I = I(cropregion(1, 1) : cropregion(1, 2), ...
         cropregion(2, 1) : cropregion(2, 2), ...
         cropregion(3, 1) : cropregion(3, 2));
     handles.selectfilebtn.UserData.I = I;
     handles.selectfilebtn.UserData.bI = bI;
-    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));   
+   
     refresh_Render(handles);
+    close(h);
 else
     msgbox('Sorry, no segmented image found!');
 end
@@ -597,8 +614,8 @@ if handles.imagecheck.Value
     end
 end
 
-
 close(h);
+
 
 % --- Executes on button press in imagecheck.
 function imagecheck_Callback(hObject, eventdata, handles)
