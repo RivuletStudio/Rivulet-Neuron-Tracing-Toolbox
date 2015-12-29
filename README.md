@@ -13,7 +13,7 @@ Brief theoretical description
 
 Examples
 ========
-
+Tracing plot ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/traceplot.gif)
 Implementation
 ==============
 
