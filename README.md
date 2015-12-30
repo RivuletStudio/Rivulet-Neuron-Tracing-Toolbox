@@ -20,23 +20,21 @@ Rivulet-Neuron-Tracing-Toobox
   * **Red Sphere** : represents the startig point of each rivulet back tracing. 
   As you may already notice, most of rivulet tracing starts from the axon terminal or the dendrites termini of
   neuron.
-
   * **Blue Line** : represents the traced path of neuron.
-
   * **Red Line** : represents the swc structure ignoring the radius. We ignored radius deliberately to reveal the all potentialmiswiring connections.
 2. **Soma detection visualisation explanation**
   * **Blue particles swarm** : represents the growing soma.
-  
   * **Red particles swarm** : represents the foreground neuron signal.  
 3. **Rivulet Toolbox illustration**
   * **Input and Ouput Panel**
+    * **V3D Matlab I/O button** : you should select the dirctionary which contains  v3d matlab io files. If you do not have this dictinary, do not worry about it. We supprt other format of files.
   * **Render Panel**
   * **Prepocessing Panel**
   * **Segmentation Panel**
   * **Soma Detection Panel**  
     * **Soma check box under Tracing Parameters Panel** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
-  * **File Metadata Panel
-  * **Tracing Parameters Panel
+  * **File Metadata Panel**
+  * **Tracing Parameters Panel**
     * **Plot check box under Tracing Parameters Panel** : Basically, click it means you want to visualise the tracing process. You just want to get swc as soon as possible, you should consider untick it.
     * **Washaway check box** : You've got to crack a few eggs to make an omelette. There is no free lunch in comuter vision area. This button increases the tracing process dramatically, but you have suffer some loss of detailed dendrites reconstructions.
     * **Trace button** : Press it, Rivulet start to trace. It is that simple. Believe it or not?
