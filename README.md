@@ -29,6 +29,7 @@ miswiring connections.
 **Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show.
 Background
 ==========
+To acquire profound knowledge of the neuron structure is vital for efficient and accurate diagnosis and treatment of both neurological and psychiatric disorders. Due to the increasingly relying on bioimage assistance in medical practice, 3D neuron reconstruction will provide reliable and accurate data for neuron morphology study. There are few powerful automatic algorithms to trace a complete neuron. The most current algorithms are semi-automatic, so it is significant to propose an automatic neuron reconstruction method. The reconstruction result is barely satisfactory due to the appearance of irrelevant structure, background gradients, and inhomogeneous contrast of neuron image stacks. The fuzzy and discontinuous neuron structure is another challenge. Most of the current algorithms can only achieve satisfactory reconstruction results of single neuron. When the neuron structure is complex and complicated, most current algorithms fail. For example, any close neuron structures will lead to biased reconstruction results. The new automatic and robust neuron reconstruction method is required. We propose a fast, robust and automatic algorithm, which can generate reasonable satisfactory 3D reconstructions of complex and complicated neuron structure in a short time.  
 
 Brief theoretical description
 =============================
@@ -38,6 +39,10 @@ Examples
 The gif below show the animation of tracing process. 
   
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/traceplot.gif)
+
+The gif below show the animation of soma detection process. 
+  
+![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/somadetection.gif)
 Implementation
 ==============
 
