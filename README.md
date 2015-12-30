@@ -1,4 +1,7 @@
-Rivulet logo 
+Rivulet logo
+============
+The reason why we choose red R is that red represents a pioneer spirit. The red is also the color of blood and sun. The blood and sun is like force awaken.  
+
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
 =============================
 Rivulet-Neuron-Tracing-Toobox
@@ -41,3 +44,24 @@ Implementation
 References
 ==========
 Rivulet paper will be avaiable soon. It can be downloaded at xxxxx.(Not available yet)
+The follwoing links are the libraries we are using now or used before. 
+
+[Snake Link](https://github.com/pmneila/morphsnakes)
+
+[Accurate fast marching](http://au.mathworks.com/matlabcentral/fileexchange/24531-accurate-fast-marching)
+
+[Tree Toolbox](http://www.treestoolbox.org/)
+
+[Vesselness filter](http://au.mathworks.com/matlabcentral/fileexchange/24409-hessian-based-frangi-vesselness-filter)
+
+[Level set](http://uk.mathworks.com/matlabcentral/fileexchange/24998-2d-3d-image-segmentation-toolbox)
+
+[Otsu Link](http://www.mathworks.com/matlabcentral/fileexchange/26532-image-segmentation-using-otsu-thresholding/content/otsu.m)
+
+[Loops link](http://au.mathworks.com/matlabcentral/fileexchange/10722-count-loops-in-a-graph/)
+
+[dir2](http://au.mathworks.com/matlabcentral/fileexchange/40016-recursive-directory-searching-for-multiple-file-specs/content/dir2.m)
+
+[fm_tool_1.7](http://au.mathworks.com/matlabcentral/fileexchange/30853-field-mapping-toolbox)
+
+
