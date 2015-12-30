@@ -1,19 +1,8 @@
-# Rivulet-Neuron-Tracing-Toobox
-
-Rivulet logo ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
+Rivulet logo 
+![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
 =============================
-Rivulet Neuron Reconstruction 
+Rivulet-Neuron-Tracing-Toobox
 =============================
-
-Background
-==========
-
-Brief theoretical description
-=============================
-
-Examples
-========
-The gif below show the animation of tracing process. 
 
 **Red Sphere** : represents the startig point of each rivulet back tracing. 
 As you may already notice, most of rivulet tracing starts from the axon terminal or the dendrites termini of
@@ -34,7 +23,17 @@ miswiring connections.
 
 **Threshold slider bar** : Drag it horizontally to achieve the segmentation result. Do not forget to press update button. 
 
-**Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show.  
+**Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show.
+Background
+==========
+
+Brief theoretical description
+=============================
+
+Examples
+========
+The gif below show the animation of tracing process. 
+  
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/traceplot.gif)
 Implementation
 ==============
