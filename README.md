@@ -2,7 +2,7 @@ Rivulet logo
 ============
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
 
-The reason why we choose red R is that red represents a pioneer spirit. The red is also the color of blood and sun. The blood and sun is like force awaken.  
+The reason why we choose red R is that red represents a pioneer spirit. The red is also the color of blood and sun. The blood and sun is like force awaken. R is the first letter of rivulet. The curvature of R symbolizes the curved connections of neurons. We name our algorithm rivulet, because it is just like all streams flowing back to the sea. When you visualise the tracing process, you may understand what I am talking about.   
 Examples
 ========
 The gif below show the animation of tracing process. 
@@ -29,30 +29,36 @@ Rivulet-Neuron-Tracing-Toobox
   * **Input and Ouput Panel**
     * **V3D Matlab I/O button** : you should select the dirctionary which contains  v3d matlab io files. If you do not have this dictinary, do not worry about it. We supprt other format of files.
   * **Render Panel**
+    * **Image check box** When you want to visualise the original iamge, we suggest you tick this box.
+    * **Tree check box** tick it make you can see swc reconstruction.
   * **Prepocessing Panel**
+    * **Auto crop** Tick it if you want crop the redundant background of cube.  
   * **Segmentation Panel**
+    * **Threshold slider bar** : Drag it horizontally to achieve the segmentation result. Do not forget to press update button.
+    * **Level set check box** Normally, we suggest you do level set operation(tick the level set check box) only when there is strong noises. 
+    * **classification button** Press this button if you want to remove noise using the machine learning method. This method's training data from vesselness, similar tensor based methods and the eigenvalues. It works very fast, because it just use quadratic regression. It do not make sense if quadratic regression solve and we insists on support vector machine.
   * **Soma Detection Panel**  
     * **Soma check box under Tracing Parameters Panel** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
   * **File Metadata Panel**
+    * Basically, file metadata panel provides information about the size of input neuron image and name of file. 
   * **Tracing Parameters Panel**
     * **Plot check box under Tracing Parameters Panel** : Basically, click it means you want to visualise the tracing process. You just want to get swc as soon as possible, you should consider untick it.
     * **Washaway check box** : You've got to crack a few eggs to make an omelette. There is no free lunch in comuter vision area. This button increases the tracing process dramatically, but you have suffer some loss of detailed dendrites reconstructions.
     * **Trace button** : Press it, Rivulet start to trace. It is that simple. Believe it or not?
-
-**Threshold slider bar** : Drag it horizontally to achieve the segmentation result. Do not forget to press update button. 
-
 **Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show.
+
 Background
 ==========
 To acquire profound knowledge of the neuron structure is vital for efficient and accurate diagnosis and treatment of both neurological and psychiatric disorders. Due to the increasingly relying on bioimage assistance in medical practice, 3D neuron reconstruction will provide reliable and accurate data for neuron morphology study. There are few powerful automatic algorithms to trace a complete neuron. The most current algorithms are semi-automatic, so it is significant to propose an automatic neuron reconstruction method. The reconstruction result is barely satisfactory due to the appearance of irrelevant structure, background gradients, and inhomogeneous contrast of neuron image stacks. The fuzzy and discontinuous neuron structure is another challenge. Most of the current algorithms can only achieve satisfactory reconstruction results of single neuron. When the neuron structure is complex and complicated, most current algorithms fail. For example, any close neuron structures will lead to biased reconstruction results. The new automatic and robust neuron reconstruction method is required. We propose a fast, robust and automatic algorithm, which can generate reasonable satisfactory 3D reconstructions of complex and complicated neuron structure in a short time.  
 
 Brief theoretical description
 =============================
-
+It is time to reveal the mystery of Rivulet Tracing Toolbox. We will use flowchart diagram to illustrate our Rivulet tracing. The formulas description will be released in the near future. The academic are fans of formulas, are not they?
+Nonetheless, understanding the reason why we use these formulas are far more important than understanding the usage of these formulas. 
 
 Implementation
 ==============
-
+This is a basic guide of hacking our code. The more detailed documentation might come in the future.  
 References
 ==========
 Rivulet paper will be avaiable soon. It can be downloaded at xxxxx.(Not available yet)
