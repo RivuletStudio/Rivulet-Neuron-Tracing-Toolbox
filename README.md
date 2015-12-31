@@ -16,36 +16,42 @@ The gif below show the animation of soma detection process.
 =============================
 Rivulet-Neuron-Tracing-Toobox
 =============================
-1. **Tracing visualisation explanation**
-  * **Red Sphere** : represents the startig point of each rivulet back tracing. 
-  As you may already notice, most of rivulet tracing starts from the axon terminal or the dendrites termini of
-  neuron.
-  * **Blue Line** : represents the traced path of neuron.
-  * **Red Line** : represents the swc structure ignoring the radius. We ignored radius deliberately to reveal the all potentialmiswiring connections.
-2. **Soma detection visualisation explanation**
-  * **Blue particles swarm** : represents the growing soma.
-  * **Red particles swarm** : represents the foreground neuron signal.  
-3. **Rivulet Toolbox illustration**
+1. **Rivulet Toolbox illustration**
   * **Input and Ouput Panel**
     * **V3D Matlab I/O button** : you should select the dirctionary which contains  v3d matlab io files. If you do not have this dictinary, do not worry about it. We supprt other format of files.
+    * **Load Image** As its name suggests, load neuron image using this button.
+    * **Load swc** As its name suggests, load swc using this button.
+    * **Save Cropped** As its name suggests, it store the automatic cropped image.
   * **Render Panel**
     * **Image check box** When you want to visualise the original iamge, we suggest you tick this box.
     * **Tree check box** tick it make you can see swc reconstruction.
+    * **Shift slider** The shift slkider can avoid the overlapping between the neuron reconstruction and original neuron image. In order words, it generates a better reconstruction visualization.
   * **Prepocessing Panel**
-    * **Auto crop** Tick it if you want crop the redundant background of cube.  
+    * **Auto crop** Tick it if you want crop the redundant background of cube.
+    * **Diffusion filter** when the image quality is not perfect, this option is always your loyal backup. 
   * **Segmentation Panel**
     * **Threshold slider bar** : Drag it horizontally to achieve the segmentation result. Do not forget to press update button.
     * **Level set check box** Normally, we suggest you do level set operation(tick the level set check box) only when there is strong noises. 
     * **classification button** Press this button if you want to remove noise using the machine learning method. This method's training data from vesselness, similar tensor based methods and the eigenvalues. It works very fast, because it just use quadratic regression. It do not make sense if quadratic regression solve and we insists on support vector machine.
   * **Soma Detection Panel**  
-    * **Soma check box under Tracing Parameters Panel** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
+    
   * **File Metadata Panel**
     * Basically, file metadata panel provides information about the size of input neuron image and name of file. 
   * **Tracing Parameters Panel**
     * **Plot check box under Tracing Parameters Panel** : Basically, click it means you want to visualise the tracing process. You just want to get swc as soon as possible, you should consider untick it.
     * **Washaway check box** : You've got to crack a few eggs to make an omelette. There is no free lunch in comuter vision area. This button increases the tracing process dramatically, but you have suffer some loss of detailed dendrites reconstructions.
+    * **Soma check box under Tracing Parameters Panel** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
     * **Trace button** : Press it, Rivulet start to trace. It is that simple. Believe it or not?
-**Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show.
+2. **Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show. The text are marked as green are the pararmeters you might consider to change to achieve best result. The text marked as aureate means that you may not consider changing it if you are are an expert.
+3. **Tracing visualisation explanation**
+  * **Red Sphere** : represents the startig point of each rivulet back tracing. 
+  As you may already notice, most of rivulet tracing starts from the axon terminal or the dendrites termini of
+  neuron.
+  * **Blue Line** : represents the traced path of neuron.
+  * **Red Line** : represents the swc structure ignoring the radius. We ignored radius deliberately to reveal the all potentialmiswiring connections.
+4. **Soma detection visualisation explanation**
+  * **Blue particles swarm** : represents the growing soma.
+  * **Red particles swarm** : represents the foreground neuron signal.  
 
 Background
 ==========
@@ -58,7 +64,14 @@ Nonetheless, understanding the reason why we use these formulas are far more imp
 
 Implementation
 ==============
-This is a basic guide of hacking our code. The more detailed documentation might come in the future.  
+This is a basic guide of hacking our code. The more detailed documentation might come in the future.
+util/anisotropicfilter.m anisotropicfilter   
+util/binarizeimage.m Segment the 3D v3draw uint image to binary image with a classifier or threshold  
+trace.m it is the main trace function  
+util/showswc.m it shows swc reconstruction  
+lib/FastMarching_version3b/msfm.m fast marching  
+util/ addbranch2tree add branch to tree  
+lib/snake/mainsnake/somagrowth.m main soma detection file   
 References
 ==========
 Rivulet paper will be avaiable soon. It can be downloaded at xxxxx.(Not available yet)
