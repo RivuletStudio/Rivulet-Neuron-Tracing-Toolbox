@@ -72,7 +72,9 @@ To acquire profound knowledge of the neuron structure is vital for efficient and
 
 Brief theoretical description
 =============================
-It is time to reveal the mystery of Rivulet Tracing Toolbox. We will use flowchart diagram to illustrate our Rivulet tracing. The formulas description will be released in the near future. The academic are fans of formulas, are not they?
+It is time to reveal the mystery of Rivulet Tracing Toolbox. We will use flowchart diagram to illustrate our Rivulet tracing.  
+![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/rivuletflowchart.png)
+The formulas description will be released in the near future. The academic are fans of formulas, are not they?
 Nonetheless, understanding the reason why we use these formulas are far more important than understanding the usage of these formulas. 
 
 Implementation
