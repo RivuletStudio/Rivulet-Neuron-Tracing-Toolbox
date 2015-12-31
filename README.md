@@ -34,13 +34,26 @@ Rivulet-Neuron-Tracing-Toobox
     * **Level set check box** Normally, we suggest you do level set operation(tick the level set check box) only when there is strong noises. 
     * **classification button** Press this button if you want to remove noise using the machine learning method. This method's training data from vesselness, similar tensor based methods and the eigenvalues. It works very fast, because it just use quadratic regression. It do not make sense if quadratic regression solve and we insists on support vector machine.
   * **Soma Detection Panel**  
-    
+    * **Radius** : the size of initialization sphere
+    * **Step** : the number step soma snake grows before it stops
+    * **Smoooth** : the smoothness of each step
+    * **threshold** : is the threshold used to find the center of soma location. We might consider remove it in the future.
+    * **Soma expert** : do not tick it until you are expert and know exactly what you are doing.
+    * **lambda 1 and lambda 2** : the strength of internal energy and external energy
+    * **DT method** : use distance transform method to soma center
+    * **soma plot** : the visuliazation of soma growth
   * **File Metadata Panel**
     * Basically, file metadata panel provides information about the size of input neuron image and name of file. 
   * **Tracing Parameters Panel**
-    * **Plot check box under Tracing Parameters Panel** : Basically, click it means you want to visualise the tracing process. You just want to get swc as soon as possible, you should consider untick it.
+    * **Plot check box** : Basically, click it means you want to visualise the tracing process. You just want to get swc as soon as possible, you should consider untick it.
     * **Washaway check box** : You've got to crack a few eggs to make an omelette. There is no free lunch in comuter vision area. This button increases the tracing process dramatically, but you have suffer some loss of detailed dendrites reconstructions.
-    * **Soma check box under Tracing Parameters Panel** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
+    * **Soma check box** : Untick it if you do not have soma in this image. If you have soma in this image, you should do soma detection first. Although you can choose to do neuron reconstruction directly without soma detection, it is not recommended.
+    * **Output swc** tick it if you want the swc file. Untick it if you do not.
+    * **dump** there is redundant noises in the image you should tick it
+    * **Coverage percentage** a high value means more detailed description
+    * **Gap** the largest gap it can jump
+    * **Connect** the threshold of connecting tracing part into swc tree
+    * **Length** the shortest branch we have in our swc tree
     * **Trace button** : Press it, Rivulet start to trace. It is that simple. Believe it or not?
 2. **Friendly reminder** : If you need help about specfic button, put your mouse on the name of button. And hang on a  few seconds and magic will show. The text are marked as green are the pararmeters you might consider to change to achieve best result. The text marked as aureate means that you may not consider changing it if you are are an expert.
 3. **Tracing visualisation explanation**
