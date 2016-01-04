@@ -1,3 +1,5 @@
+We will provide the first ready to install package for different platforms.
+
 Rivulet logo
 ============
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
@@ -14,7 +16,7 @@ The gif below show the animation of soma detection process.
 ![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/somadetection.gif)
 
 =============================
-Rivulet-Neuron-Tracing-Toobox
+Rivulet-Neuron-Tracing-Toobox (WIP)
 =============================
 1. **Rivulet Toolbox illustration**
   * **Input and Ouput Panel**
