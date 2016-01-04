@@ -63,6 +63,29 @@ addpath(genpath(fullfile(pathstr, 'lib')));
 % UIWAIT makes gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+function I = hessianfilter(I, handles)
+    h = msgbox('Filtering...');
+    I = handles.selectfilebtn.UserData.I;
+    sigma_max = str2num(handles.sigmaedit.String);
+    lsigma = [0.8:0.2:sigma_max];
+    fprintf('Filtering image with size: %d, %d, %d\n', size(I,1), size(I, 2), size(I, 3));
+    I = anisotropicfilter(I, lsigma);
+     % Update the thresholding bar
+    maxp = max(I(:));
+    minp = min(I(:));
+    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
+    handles.thresholdslider.Value = graythresh(I) * maxp;
+    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
+    [bI, ~] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
+                                     handles.delta_t.Value, handles.cropcheck.Value,...
+                                     handles.levelsetcheck.Value);
+    handles.selectfilebtn.UserData.I = I;
+    handles.selectfilebtn.UserData.bI = bI;
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));   
+   
+    refresh_Render(handles);
+    close(h);
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = gui_OutputFcn(hObject, eventdata, handles)
@@ -128,21 +151,9 @@ handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 v = handles.thresholdslider.Value;
 
 % If the Diffusion filter box is ticked, 
-% then the image I will filtered by sigma value
-% The box is 
+% then the image I will filtered by sigma values smaller than the one in the editbox
 if handles.filtercheck.Value
-    % h2 is a message box displaying Filtering
-    h2 = msgbox('Filtering');
-    % result I is not binary 
-    I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
-    maxp = max(I(:));
-    minp = min(I(:));
-    t = graythresh(I);
-    handles.thresholdslider.Value = t * maxp;
-    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
-    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
-    % when the filtering process finished, the message box will be closed
-    close(h2);
+    I = hessianfilter(I, handles);
 end
 
 % The levelset corresponding value is delta
@@ -210,7 +221,8 @@ function autocropbtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
     bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
     handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
-    handles.selectfilebtn.UserData.bI = bI;
+    handles.selectfilebtn.UserData.bI = bI;    
+    handles.selectfilebtn.UserData.I = imagecrop(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
     refresh_Render(handles);
 end
 
@@ -454,27 +466,7 @@ function filterbtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles.selectfilebtn.UserData, 'I')
-    h = msgbox('Filtering...');
-    I = handles.selectfilebtn.UserData.I;
-    I = anisotropicfilter(I, str2num(handles.sigmaedit.String));
-     % Update the thresholding bar
-    maxp = max(I(:));
-    minp = min(I(:));
-    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
-    handles.thresholdslider.Value = graythresh(I) * maxp;
-    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
-    [bI, cropregion] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
-                                     handles.delta_t.Value, handles.cropcheck.Value,...
-                                     handles.levelsetcheck.Value);
-%     I = I(cropregion(1, 1) : cropregion(1, 2), ...
-%         cropregion(2, 1) : cropregion(2, 2), ...
-%         cropregion(3, 1) : cropregion(3, 2));
-    handles.selectfilebtn.UserData.I = I;
-    handles.selectfilebtn.UserData.bI = bI;
-    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));   
-   
-    refresh_Render(handles);
-    close(h);
+    hessianfilter(handles.selectfilebtn.UserData.I, handles);
 else
     msgbox('Sorry, no segmented image found!');
 end
@@ -972,18 +964,12 @@ function crawlbtn_Callback(hObject, eventdata, handles)
     handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
     toc
     fprintf('Saving the soma mask into v3draw\n');
-    somaI = handles.selectfilebtn.UserData.somastruc.I;
-    somaI = somaI * 30;
-    somaI = uint8(somaI);
-    save_v3d_raw_img_file(somaI, [handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.v3draw']);
-    clear somaI;
-  
-
+    somamask = handles.selectfilebtn.UserData.somastruc.I;
+    somamask = somamask * 30;
+    somamask = uint8(somamask);
+    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'somamask');
+        
     
-
-
-
-
 function stepnum_Callback(hObject, eventdata, handles)
 % hObject    handle to stepnum (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1180,13 +1166,13 @@ function dtcheck_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of dtcheck
 
 
-% --- Executes on button press in somainivtag.
-function somainivtag_Callback(hObject, eventdata, handles)
-% hObject    handle to somainivtag (see GCBO)
+% --- Executes on button press in somamasknivtag.
+function somamasknivtag_Callback(hObject, eventdata, handles)
+% hObject    handle to somamasknivtag (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of somainivtag
+% Hint: get(hObject,'Value') returns toggle state of somamasknivtag
 
 
 
