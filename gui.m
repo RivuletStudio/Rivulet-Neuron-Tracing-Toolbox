@@ -59,32 +59,46 @@ guidata(hObject, handles);
 [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(fullfile(pathstr, 'util'));
 addpath(genpath(fullfile(pathstr, 'lib')));
+if exist(fullfile(pathstr, 'config.mat'), 'file')
+    load(fullfile(pathstr, 'config.mat'), 'v3dmatpath');
+    addpath(v3dmatpath);
+end
 
+reloadworkspacebtn_Callback(hObject, eventdata, handles)
 % UIWAIT makes gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 function I = hessianfilter(I, handles)
-    h = msgbox('Filtering...');
-    I = handles.selectfilebtn.UserData.I;
-    sigma_max = str2num(handles.sigmaedit.String);
-    lsigma = [0.8:0.2:sigma_max];
-    fprintf('Filtering image with size: %d, %d, %d\n', size(I,1), size(I, 2), size(I, 3));
-    I = anisotropicfilter(I, lsigma);
-     % Update the thresholding bar
-    maxp = max(I(:));
-    minp = min(I(:));
-    set(handles.thresholdslider,'Max',maxp,'Min',minp); 
-    handles.thresholdslider.Value = graythresh(I) * maxp;
-    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
-    [bI, ~] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
-                                     handles.delta_t.Value, handles.cropcheck.Value,...
-                                     handles.levelsetcheck.Value);
-    handles.selectfilebtn.UserData.I = I;
-    handles.selectfilebtn.UserData.bI = bI;
-    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));   
-   
-    refresh_Render(handles);
-    close(h);
+h = msgbox('Filtering...');
+I = handles.selectfilebtn.UserData.I;
+sigma_max = str2num(handles.sigmaedit.String);
+lsigma = [0.3:0.2:sigma_max];
+fprintf('Filtering image with size: %d, %d, %d\n', size(I,1), size(I, 2), size(I, 3));
+I = anisotropicfilter(I, lsigma);
+% Update the thresholding bar
+maxp = max(I(:));
+minp = min(I(:));
+set(handles.thresholdslider,'Max',maxp,'Min',minp);
+handles.thresholdslider.Value = graythresh(I) * maxp;
+handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
+[bI, ~] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
+    handles.delta_t.Value, handles.cropcheck.Value,...
+    handles.levelsetcheck.Value);
+handles.selectfilebtn.UserData.I = I;
+handles.selectfilebtn.UserData.bI = bI;
+handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+
+refresh_render(handles);
+close(h);
+
+
+function autothreshold(I, handles)
+maxp = max(I(:));
+minp = min(I(:));
+t = graythresh(I);
+handles.thresholdslider.Value = t * maxp;
+set(handles.thresholdslider,'Max',maxp,'Min',minp);
+handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -117,13 +131,13 @@ if pathname ~= 0
 end
 filepath = fullfile(pathname, filename);
 
-% get data from panel1 whose property is v3dmatdir 
-v3dmatdir = getappdata(hObject.Parent, 'v3dmatdir');
-
-if v3dmatdir
-    fprintf('Adding %s to path\n', v3dmatdir);
-    addpath(v3dmatdir);
-end
+% get data from panel1 whose property is v3dmatdir
+% v3dmatdir = getappdata(hObject.Parent, 'v3dmatdir');
+%
+% if v3dmatdir
+%     fprintf('Adding %s to path\n', v3dmatdir);
+%     addpath(v3dmatdir);
+% end
 
 [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
 addpath(fullfile(pathstr, 'util'));
@@ -131,7 +145,7 @@ addpath(fullfile(pathstr, 'util'));
 % Basically if it is four dimensions, something must have went wrong.
 % We try to correct it into three dimensions
 if filename
-    h = msgbox('Loading');    
+    h = msgbox('Loading');
     I = loadraw(filepath);
     if ndims(I) == 4 && size(I,4)>1
         I = I(:,:,:,1);
@@ -140,17 +154,12 @@ else
     return
 end
 
-maxp = max(I(:));
-minp = min(I(:));
-t = graythresh(I);
-handles.thresholdslider.Value = t * maxp;
-set(handles.thresholdslider,'Max',maxp,'Min',minp); 
-handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
+autothreshold(I, handles);
 
 % Assign threshold vaule to variable v
 v = handles.thresholdslider.Value;
 
-% If the Diffusion filter box is ticked, 
+% If the Diffusion filter box is ticked,
 % then the image I will filtered by sigma values smaller than the one in the editbox
 if handles.filtercheck.Value
     I = hessianfilter(I, handles);
@@ -158,14 +167,14 @@ end
 
 % The levelset corresponding value is delta
 % The levelset judge value is handles.levelsetcheck.Value
-% The crop operation 
+% The crop operation
 [bI, cropregion] = binarizeimage('threshold', I, v, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
 
 % the cropregion is basically six vaules, x1 x2, y1 y2, z1 z2
 if all(size(cropregion)) ~= 0 % The crop image returns [] if no cropped region is found
     I = I(cropregion(1, 1) : cropregion(1, 2), ...
-          cropregion(2, 1) : cropregion(2, 2), ...
-          cropregion(3, 1) : cropregion(3, 2));
+        cropregion(2, 1) : cropregion(2, 2), ...
+        cropregion(3, 1) : cropregion(3, 2));
 else
     msgbox('No voxel to display. Please check the segmentation threshold.');
     % close the loading message box anayaway
@@ -174,9 +183,9 @@ else
 end
 
 % The Original image or the filtered image is stored in
-% selectfilebn.UserData.I 
+% selectfilebn.UserData.I
 hObject.UserData.I = I;
-% The binarized image is stored in selectfilebn.UserData.bI  
+% The binarized image is stored in selectfilebn.UserData.bI
 hObject.UserData.bI = bI;
 % Store the size of binarized information string in handles.volumesizetxt.String
 % the following operations happens on filepath
@@ -185,13 +194,13 @@ handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), s
 % Find objects with specified property values.
 % 'Tag' == 'P1Name' filepath == 'P1value'
 filepathtext = findobj('Tag', 'filepath');
-% change File not load string to string of current file.  
+% change File not load string to string of current file.
 filepathtext.String = filename;
 % Store filepath in handles.UserData.inputpath
 hObject.UserData.inputpath = filepath;
 
 % It show the binarizied image surface
-refresh_Render(handles);
+refresh_render(handles);
 if filename
     close(h)
 end
@@ -214,16 +223,16 @@ elseif strcmp(ext, '.mat')
         I = f.(fields{1});
     end
 elseif strcmp(ext, '.nii')
-else 
+else
 end
 
 function autocropbtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
     bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
     handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
-    handles.selectfilebtn.UserData.bI = bI;    
+    handles.selectfilebtn.UserData.bI = bI;
     handles.selectfilebtn.UserData.I = imagecrop(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
-    refresh_Render(handles);
+    refresh_render(handles);
 end
 
 
@@ -285,7 +294,7 @@ function v3dmatlabbtn_Callback(hObject, eventdata, handles)
 % hObject    handle to v3dmatlabbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-dirname = uigetdir;
+v3dmatpath = uigetdir;
 % First findobj returns a handle
 % Find objects with specified property values.
 % 'Tag' == 'P1Name' v3dmatdir == 'P1value'
@@ -293,9 +302,11 @@ dirname = uigetdir;
 % first one is to add path
 % second one is to set panel1 propoerty v3dmatdir to dirname
 filepathtext = findobj('Tag', 'v3dmatdir');
-filepathtext.String = dirname;
-setappdata(hObject.Parent, 'v3dmatdir', dirname);
-addpath(dirname)
+filepathtext.String = v3dmatpath;
+setappdata(hObject.Parent, 'v3dmatdir', v3dmatpath);
+addpath(v3dmatpath)
+[pathstr, ~, ~] = fileparts(mfilename('fullpath'));
+save(fullfile(pathstr, 'config.mat'), 'v3dmatpath');
 
 
 % --- Executes on slider movement.
@@ -388,7 +399,7 @@ if isfield(ud, 'I')
     handles.selectfilebtn.UserData.I = I;
     handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
     delete(h);
-    refresh_Render(handles);
+    refresh_render(handles);
 end
 
 function delta_t_Callback(hObject, eventdata, handles)
@@ -413,7 +424,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
             return
         end
         [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
-    else 
+    else
         [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), false, false, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
     end
     toc
@@ -422,12 +433,12 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     end
     
     if handles.outputswccheck.Value
-        if exist('save_v3d_raw_img_file')
+        if exist('save_v3d_raw_img_file') && isfield(handles.selectfilebtn.UserData, 'inputpath')
             save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
             msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
         else
-            msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...');
-        end        
+            msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...\nHowever you can save the results with ''All To Workspace''');
+        end
     end
     t = tree(:,4);
     tree(:, 4) = tree(:, 3);
@@ -437,7 +448,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
         showswc(tree);
     end
     handles.selectfilebtn.UserData.swc = tree;
-    refresh_Render(handles);
+    refresh_render(handles);
 else
     msgbox('Sorry, no segmented image found!');
 end
@@ -543,7 +554,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI') && ...
     [bI, cropregion] = binarizeimage('classification', I, cl, handles.delta_t.Value, handles.cropcheck.Value, handles.levelsetcheck.Value);
     handles.selectfilebtn.UserData.bI = bI;
     handles.selectfilebtn.UserData.I = I;
-    refresh_Render(handles);
+    refresh_render(handles);
     close(h)
 else
     msgbox('Sorry, no segmented image found!');
@@ -571,10 +582,10 @@ if pathname ~= 0
 end
 filepath = fullfile(pathname, filename);
 handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
-refresh_Render(handles);
+refresh_render(handles);
 
-function refresh_Render(handles)
-% shift vairable is a single vaule 
+function refresh_render(handles)
+% shift vairable is a single vaule
 % the shift vaule make swc recontruction and binaryied image do not overlap
 % each other
 shift = handles.shiftslider.Value * 20;
@@ -599,7 +610,7 @@ if handles.treecheck.Value
     end
 end
 
-% If the image tick box is ticked, new bI will be updated. 
+% If the image tick box is ticked, new bI will be updated.
 if handles.imagecheck.Value
     if isfield(handles.selectfilebtn.UserData, 'bI')
         showbox(handles.selectfilebtn.UserData.bI, 0.5, true);
@@ -616,7 +627,7 @@ function imagecheck_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of imagecheck
-refresh_Render(handles);
+refresh_render(handles);
 
 % --- Executes on button press in treecheck.
 function treecheck_Callback(hObject, eventdata, handles)
@@ -625,7 +636,7 @@ function treecheck_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of treecheck
-refresh_Render(handles);
+refresh_render(handles);
 
 % --- Executes on slider movement.
 function shiftslider_Callback(hObject, eventdata, handles)
@@ -635,7 +646,7 @@ function shiftslider_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-refresh_Render(handles);
+refresh_render(handles);
 
 % --- Executes during object creation, after setting all properties.
 function shiftslider_CreateFcn(hObject, eventdata, handles)
@@ -920,56 +931,56 @@ function crawlbtn_Callback(hObject, eventdata, handles)
 % hObject    handle to crawlbtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    tic
-    sqrvalue  = str2num(handles.sqradiustag.String);
-    smoothvalue = str2num(handles.smoothtag.String);
-    stepnvalue = str2num(handles.stepnum.String);
-    lambda1value = str2num(handles.lambda1tag.String);
-    lambda2value = str2num(handles.lambda2tag.String);
-    fprintf('smooth: %d radius: %d step: %d\n', smoothvalue, sqrvalue, stepnvalue);
-    fprintf('lambda1: %d lambda2: %4.0d\n', lambda1value, lambda2value);
-    
-    ax = handles.mainfig;
-    cla(ax);
-    axes(ax);
-    if isfield(handles.selectfilebtn.UserData, 'bI')
-        showbox(handles.selectfilebtn.UserData.bI, 0.5);
-    end
-    if (handles.autosomacheck.Value&handles.dtcheck.Value)
-        somaloc = somalocationdt(handles.selectfilebtn.UserData.I, str2num(handles.dtthres.String));
-        xlocvalue = somaloc.x;
-        ylocvalue = somaloc.y;
-        zlocvalue = somaloc.z;
-        fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
-    elseif (handles.autosomacheck.Value&handles.drcheck.Value)
-        sdbands  = str2num(handles.sdonebands.String);
-        sdmsize  = str2num(handles.sdonemsize.String);
-        sddrthres  = str2num(handles.sdonedrthres.String);
-        sdneuthres  = str2num(handles.sdoneneuthres.String);
-        sdsomathres  = str2num(handles.sdonesomathres.String);
-        somaloc = somalocation(handles.selectfilebtn.UserData.I, sdbands, sdmsize, sddrthres, sdsomathres, sdneuthres);
-        xlocvalue = somaloc.x;
-        ylocvalue = somaloc.y;
-        zlocvalue = somaloc.z;
-        fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
-    elseif (~handles.autosomacheck.Value)
-        xlocvalue = str2num(handles.xloc.String);               
-        ylocvalue = str2num(handles.yloc.String);               
-        zlocvalue = str2num(handles.zloc.String);               
-        fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
-    end   
-    center(1) = xlocvalue;
-    center(2) = ylocvalue;
-    center(3) = zlocvalue;    
-    handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
-    toc
-    fprintf('Saving the soma mask into v3draw\n');
-    somamask = handles.selectfilebtn.UserData.somastruc.I;
-    somamask = somamask * 30;
-    somamask = uint8(somamask);
-    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'somamask');
-        
-    
+tic
+sqrvalue  = str2num(handles.sqradiustag.String);
+smoothvalue = str2num(handles.smoothtag.String);
+stepnvalue = str2num(handles.stepnum.String);
+lambda1value = str2num(handles.lambda1tag.String);
+lambda2value = str2num(handles.lambda2tag.String);
+fprintf('smooth: %d radius: %d step: %d\n', smoothvalue, sqrvalue, stepnvalue);
+fprintf('lambda1: %d lambda2: %4.0d\n', lambda1value, lambda2value);
+
+ax = handles.mainfig;
+cla(ax);
+axes(ax);
+if isfield(handles.selectfilebtn.UserData, 'bI')
+    showbox(handles.selectfilebtn.UserData.bI, 0.5);
+end
+if (handles.autosomacheck.Value&handles.dtcheck.Value)
+    somaloc = somalocationdt(handles.selectfilebtn.UserData.I, str2num(handles.dtthres.String));
+    xlocvalue = somaloc.x;
+    ylocvalue = somaloc.y;
+    zlocvalue = somaloc.z;
+    fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
+elseif (handles.autosomacheck.Value&handles.drcheck.Value)
+    sdbands  = str2num(handles.sdonebands.String);
+    sdmsize  = str2num(handles.sdonemsize.String);
+    sddrthres  = str2num(handles.sdonedrthres.String);
+    sdneuthres  = str2num(handles.sdoneneuthres.String);
+    sdsomathres  = str2num(handles.sdonesomathres.String);
+    somaloc = somalocation(handles.selectfilebtn.UserData.I, sdbands, sdmsize, sddrthres, sdsomathres, sdneuthres);
+    xlocvalue = somaloc.x;
+    ylocvalue = somaloc.y;
+    zlocvalue = somaloc.z;
+    fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
+elseif (~handles.autosomacheck.Value)
+    xlocvalue = str2num(handles.xloc.String);
+    ylocvalue = str2num(handles.yloc.String);
+    zlocvalue = str2num(handles.zloc.String);
+    fprintf('xloc: %d yloc: %d zloc: %d\n', xlocvalue, ylocvalue, zlocvalue);
+end
+center(1) = xlocvalue;
+center(2) = ylocvalue;
+center(3) = zlocvalue;
+handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+toc
+fprintf('Saving the soma mask into v3draw\n');
+somamask = handles.selectfilebtn.UserData.somastruc.I;
+somamask = somamask * 30;
+somamask = uint8(somamask);
+% save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'somamask');
+
+
 function stepnum_Callback(hObject, eventdata, handles)
 % hObject    handle to stepnum (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1457,3 +1468,91 @@ function dtimagetag_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of dtimagetag
+
+
+% --- Executes on selection change in workspacelist.
+function workspacelist_Callback(hObject, eventdata, handles)
+% hObject    handle to workspacelist (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns workspacelist contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from workspacelist
+contents = cellstr(get(hObject,'String'));
+varname = contents{get(hObject,'Value')};
+I = evalin('base', varname);
+try
+    if ndims(I) == 3 % 3D image
+        fprintf('Trying to load %s as 3D image', varname);
+        autothreshold(I, handles);
+
+        [bI, ~] = binarizeimage('threshold', I,...
+            handles.thresholdslider.Value,...
+            handles.delta_t.Value, handles.cropcheck.Value,...
+            handles.levelsetcheck.Value);
+        handles.selectfilebtn.UserData.I = I;
+        handles.selectfilebtn.UserData.bI = bI;
+        refresh_render(handles);
+    elseif ndims(I) == 2 && size(I, 2) == 7 % swc
+        fprintf('Trying to load %s as swc tree', varname);
+        handles.selectfilebtn.UserData.swc = I;
+        refresh_render(handles);
+    end
+catch exception
+    fprintf('Cannot read variable %s\n', varname);
+    disp(exception);
+    return
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function workspacelist_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to workspacelist (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in reloadworkspacebtn.
+function reloadworkspacebtn_Callback(hObject, eventdata, handles)
+% hObject    handle to reloadworkspacebtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+vlist = evalin('base', 'who');
+set(handles.workspacelist, 'String', vlist, 'Value', 1);
+
+% --- Executes on key press with focus on reloadworkspacebtn and none of its controls.
+function reloadworkspacebtn_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to reloadworkspacebtn (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in saveallbtn.
+function saveallbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to saveallbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+vars2save = fields(handles.selectfilebtn.UserData);
+for i = 1 : numel(vars2save)
+    field = vars2save{i};
+    eval(sprintf('%s = handles.selectfilebtn.UserData.%s;', field, field));
+    eval(sprintf('assignin (''base'', ''%s'', %s);', field, field));
+end
+
+% --- Executes on key press with focus on saveallbtn and none of its controls.
+function saveallbtn_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to saveallbtn (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
