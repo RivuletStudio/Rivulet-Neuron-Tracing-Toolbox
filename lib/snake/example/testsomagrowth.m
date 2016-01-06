@@ -11,4 +11,4 @@ smoothing = 1;
 lambda1 = 1;
 lambda2 = 1.5;
 stepnum = 30;
-somastruc = somagrowth(imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum);
+soma = somagrowth(imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum);

@@ -1,4 +1,4 @@
-function somastruc = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
+function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgsoma, center, sqradius, smoothing, lambda1, lambda2, stepnum)
 	% The following kernel is used for the SI and IS operation 
 	global P3
 	P2kernel = ones(3);
@@ -88,8 +88,8 @@ function somastruc = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, 
 	end
 	% close
 	
-	somastruc.I = MorphGAC.u;
-	somastruc.x = center(1);
-	somastruc.y = center(2);
-	somastruc.z = center(3);
+	soma.I = MorphGAC.u;
+	soma.x = center(1);
+	soma.y = center(2);
+	soma.z = center(3);
 end

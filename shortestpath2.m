@@ -58,7 +58,8 @@ while(true)
     elseif dist == -2
         merged = true;
         somamerged = true;
-        fprintf('time-crossing map is equal to two works.\n');    
+        disp('Reached Soma');
+        break;
     end
 
     % Calculate the next point using runge kutta

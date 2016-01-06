@@ -3,7 +3,9 @@ function tree = showswc(varargin)
 %This matrix can be obtained using branch2swc function
 %radiuslist is the set storing radius
 tree = varargin{1};
-
+t = tree(:,4);
+tree(:, 4) = tree(:, 3);
+tree(:, 3) = t;
 endplot = true;
 if numel(varargin) >= 2
 	endplot = varargin{2};

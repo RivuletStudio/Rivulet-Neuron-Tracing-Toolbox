@@ -419,11 +419,11 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     tic
     %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
     if handles.somaflagtag.Value
-        if ~isfield(handles.selectfilebtn.UserData, 'somastruc')
+        if ~isfield(handles.selectfilebtn.UserData, 'soma')
             msgbox('To use soma mask, please Click Craw in the Soma Detection panel at first...')
             return
         end
-        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.somastruc, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
+        [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.somaflagtag.Value, handles.selectfilebtn.UserData.soma, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
     else
         [tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), false, false, handles.washawaytag.Value, handles.dtimagetag.Value, handles.selectfilebtn.UserData.I);
     end
@@ -440,9 +440,9 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
             msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...\nHowever you can save the results with ''All To Workspace''');
         end
     end
-    t = tree(:,4);
-    tree(:, 4) = tree(:, 3);
-    tree(:, 3) = t;
+%     t = tree(:,4);
+%     tree(:, 4) = tree(:, 3);
+%     tree(:, 3) = t;
     
     if handles.treecheck.Value
         showswc(tree);
@@ -947,7 +947,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
 end
 if (handles.autosomacheck.Value&handles.dtcheck.Value)
-    somaloc = somalocationdt(handles.selectfilebtn.UserData.I, str2num(handles.dtthres.String));
+    somaloc = somalocationdt(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
     xlocvalue = somaloc.x;
     ylocvalue = somaloc.y;
     zlocvalue = somaloc.z;
@@ -972,10 +972,10 @@ end
 center(1) = xlocvalue;
 center(2) = ylocvalue;
 center(3) = zlocvalue;
-handles.selectfilebtn.UserData.somastruc = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+handles.selectfilebtn.UserData.soma = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
 toc
 fprintf('Saving the soma mask into v3draw\n');
-somamask = handles.selectfilebtn.UserData.somastruc.I;
+somamask = handles.selectfilebtn.UserData.soma.I;
 somamask = somamask * 30;
 somamask = uint8(somamask);
 % save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'somamask');
@@ -1556,3 +1556,13 @@ function saveallbtn_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in implaybtn.
+function implaybtn_Callback(hObject, eventdata, handles)
+% hObject    handle to implaybtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'I')
+    implay(handles.selectfilebtn.UserData.I);
+end
