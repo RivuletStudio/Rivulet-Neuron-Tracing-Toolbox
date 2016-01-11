@@ -1566,3 +1566,54 @@ function implaybtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'I')
     implay(handles.selectfilebtn.UserData.I);
 end
+
+
+% --- Executes on button press in resamplebtn.
+function resamplebtn_Callback(hObject, eventdata, handles)
+% hObject    handle to resamplebtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+scale = str2num(handles.resamplescaleedit.String);
+
+if isfield(handles.selectfilebtn.UserData, 'I')
+
+    I = rescale3D(handles.selectfilebtn.UserData.I, scale);
+    maxp = max(I(:));
+    minp = min(I(:));
+    set(handles.thresholdslider,'Max',maxp,'Min',minp);
+    handles.thresholdslider.Value = graythresh(I) * maxp;
+    handles.thresholdtxt.String = num2str(handles.thresholdslider.Value);
+    [bI, ~] = binarizeimage('threshold', I, handles.thresholdslider.Value,...
+        handles.delta_t.Value, handles.cropcheck.Value,...
+        handles.levelsetcheck.Value);
+    handles.selectfilebtn.UserData.I = I;
+    handles.selectfilebtn.UserData.bI = bI;
+    handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
+
+    refresh_render(handles);
+end
+
+if isfield(handles.selectfilebtn.UserData, 'swc')
+    handles.selectfilebtn.UserData.swc(:,3:5) = handles.selectfilebtn.UserData.swc(:, 3:5) * scale;
+end
+
+function resamplescaleedit_Callback(hObject, eventdata, handles)
+% hObject    handle to resamplescaleedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of resamplescaleedit as text
+%        str2double(get(hObject,'String')) returns contents of resamplescaleedit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function resamplescaleedit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to resamplescaleedit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
