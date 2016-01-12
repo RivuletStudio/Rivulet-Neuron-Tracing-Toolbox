@@ -24,8 +24,8 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		newtree(1:end-1, 7) = newtree(2:end, 1);
 
 		if somamerged
-		    disp('connect to soma')	
-			newtree(end, 7) = -3; % Soma ID
+		    disp('connect to soma id 0')	
+			newtree(end, 7) = 0; % Soma ID
 		else
 			newtree(end, 7) = -1;
 		end
@@ -35,7 +35,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			drawnow
 		end
 
-		tree = newtree;
+		tree = [tree;newtree];
 	else
 		termini1 = l(end, :);
 		termini2 = l(1, :);
@@ -60,8 +60,8 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		end
 
 		if somamerged
-		    disp('connect to soma')	
-			newtree(end, 7) = -3; % Soma ID
+		    disp('connect to soma id 0')	
+			newtree(end, 7) = 0; % Soma ID
 		else
 		    if (d1 < (tree(idx1, 6) + 3) * connectrate || d1 < (newtree(end, 6) + 3) * connectrate) && merged
 				newtree(end, 7) = tree(idx1, 1); % Connect to the tree parent
@@ -91,5 +91,5 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			unconnected = true;
 		end
 	end
-	% waitforbuttonpress
+
 end

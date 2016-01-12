@@ -89,7 +89,11 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% close
 	
 	soma.I = MorphGAC.u;
-	soma.x = center(1);
-	soma.y = center(2);
-	soma.z = center(3);
+	% Recalculate soma centre
+	somaidx = find(soma.I == 1);
+	[x, y, z] = ind2sub(size(soma.I), somaidx);
+	soma.x = mean(x);
+	soma.y = mean(y);
+	soma.z = mean(z);
+	fprintf('The soma centre is recalculated as (%f, %f, %f)', soma.x, soma.y, soma.z);
 end

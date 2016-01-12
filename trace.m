@@ -133,24 +133,27 @@ function [tree, meanconf] = trace(varargin)
     szT = size(T);
     fprintf('the size of time map, x is : %d, y is : %d, z is : %d\n', szT(1), szT(2), szT(3));
     disp('Finish marching')
+
     if somagrowthcheck
         fprintf('Mark soma label on time-crossing map\n')
         T(soma.I==1) = -2;
     end
+
     if plot
     	hold on 
     end
+
     tree = []; % swc tree
     if somagrowthcheck
         fprintf('Initialization of swc tree.\n'); 
-        tree(1, 1) = -3;
+        tree(1, 1) = 0;
         tree(1, 2) = 2;
         tree(1, 3) = soma.x;
         tree(1, 4) = soma.y;
         tree(1, 5) = soma.z;
         % fprintf('source point x : %d, y : %d, z : %d.\n', uint8(SourcePoint(1)), uint8(SourcePoint(2)), uint8(SourcePoint(3)));         
         tree(1, 6) = 1;
-        tree(1, 7) = -3;
+        tree(1, 7) = -1;
     end
 
     prune = true;

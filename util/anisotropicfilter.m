@@ -1,4 +1,4 @@
-function [v, lambda1, lambda2, lambda3] = anisotropicfilter(I, lsigma)
+function [vess, lambda1, lambda2, lambda3] = anisotropicfilter(I, lsigma)
 
 I = double(I);
 vess = zeros(size(I, 1), size(I, 2), size(I, 3));
