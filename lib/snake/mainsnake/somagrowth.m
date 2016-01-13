@@ -46,8 +46,25 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	P3kernel(2, :, 2) = 1;
 	P3kernel(1, :, 3) = 1;
 	P3{9} = P3kernel;
+	startpoint = zeros(1, 3);
+	startpoint = center - 3 * sqradius;
+	disp(startpoint)
+    endpoint = zeros(1, 3);
+	endpoint = center + 3 * sqradius;
+	disp(endpoint);
 	shape = size(imgsoma);
-
+	startpoint(1) = constrain(startpoint(1), 1, shape(1));
+	startpoint(2) = constrain(startpoint(2), 1, shape(2));
+	startpoint(3) = constrain(startpoint(3), 1, shape(3));
+	endpoint(1) = constrain(endpoint(1), 1, shape(1));
+	endpoint(2) = constrain(endpoint(2), 1, shape(2));
+	endpoint(3) = constrain(endpoint(3), 1, shape(3));
+	oriI = imgsoma;
+	imgsoma = imgsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3));
+	shape = size(imgsoma);
+	oldcenter = center;
+	center = shape/2;
+	center = floor(center);
 	% Basically it creates a logical disk with true elements inside and false elements outside
 	u = circlelevelset3d(shape, center, sqradius);
 	threshold = 0.5;
@@ -70,12 +87,15 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		if plotcheck
 			cla(ax);
 			hold on
-            safeshowbox(imgsoma, showthres);
+            safeshowbox(oriI, showthres);
 		end
 		
 		MorphGAC = ACWEstep3d(MorphGAC, i);
 		A = MorphGAC.u > threshold;  % synthetic data
 		[x y z] = ind2sub(size(A), find(A));
+		x = x - center(1) + oldcenter(1);
+		y = y - center(2) + oldcenter(2);
+		z = z - center(3) + oldcenter(3);
 		fprintf('this is the %d step of the snake\n', i);
 		if plotcheck
 			plot3(y, x, z, 'b.');
@@ -87,8 +107,10 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		end
 	end
 	% close
-	
-	soma.I = MorphGAC.u;
+	disp(class(MorphGAC.u));
+	backsoma = zeros(size(oriI));
+	backsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3)) = MorphGAC.u;
+	soma.I = double(backsoma);
 	% Recalculate soma centre
 	somaidx = find(soma.I == 1);
 	[x, y, z] = ind2sub(size(soma.I), somaidx);
