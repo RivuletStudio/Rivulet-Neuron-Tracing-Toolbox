@@ -10,6 +10,13 @@ endplot = true;
 if numel(varargin) >= 2
 	endplot = varargin{2};
 end
+
+color = [0.8 0 0];
+if numel(varargin) >= 3
+	color = varargin{3};
+end
+
+
 whitebg(gcf, 'black')
 colormap([0.7 0.7 1]);
 
@@ -22,7 +29,7 @@ for i = 1 : size(tree, 1)
     if numel(pidx) == 1
         pnode = tree(pidx, 3:5);
         plot3([cnode(1);pnode(1)], [cnode(2);pnode(2)], [cnode(3); pnode(3)],...
-              'Color', [0.8 0 0]);
+              'Color', color);
     end
 end
 %The following line  of code can adjust axis ratio
