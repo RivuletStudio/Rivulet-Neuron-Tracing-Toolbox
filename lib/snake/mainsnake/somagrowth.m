@@ -93,9 +93,9 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		MorphGAC = ACWEstep3d(MorphGAC, i);
 		A = MorphGAC.u > threshold;  % synthetic data
 		[x y z] = ind2sub(size(A), find(A));
-		x = x - center(1) + oldcenter(1);
-		y = y - center(2) + oldcenter(2);
-		z = z - center(3) + oldcenter(3);
+		x = x + startpoint(1);
+		y = y + startpoint(2);
+		z = z + startpoint(3);
 		fprintf('this is the %d step of the snake\n', i);
 		if plotcheck
 			plot3(y, x, z, 'b.');
