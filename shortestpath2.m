@@ -58,7 +58,7 @@ while(true)
     elseif dist == -2
         merged = true;
         somamerged = true;
-        disp('Reached Soma');
+        % disp('Reached Soma');
         break;
     end
 

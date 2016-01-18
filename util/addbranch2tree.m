@@ -11,9 +11,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
     if confidence < 0.5 || size(l, 1) < branchlen
     	return
     end
-    % fprintf('confidence of this branch %f\n', confidence);
 
-    % disp([size(l, 1), size(radius, 1)]);
 	assert(size(l, 1) == size(radius, 1));
 	newtree = zeros(size(l, 1), 7);
 	if size(tree, 1) == 0 || size(tree, 1) == 1 % 1 When soma location is used 
@@ -24,7 +22,6 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		newtree(1:end-1, 7) = newtree(2:end, 1);
 
 		if somamerged
-		    disp('connect to soma id 0')	
 			newtree(end, 7) = 0; % Soma ID
 		else
 			newtree(end, 7) = -1;
@@ -60,7 +57,6 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		end
 
 		if somamerged
-		    disp('connect to soma id 0')	
 			newtree(end, 7) = 0; % Soma ID
 		else
 		    if (d1 < (tree(idx1, 6) + 3) * connectrate || d1 < (newtree(end, 6) + 3) * connectrate) && merged
