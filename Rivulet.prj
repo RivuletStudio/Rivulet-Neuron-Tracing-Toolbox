@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="3371862244" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1314543974" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
     <param.appname>Rivulet</param.appname>
     <param.authnamewatermark>Siqi Liu, Donghao Zhang</param.authnamewatermark>
     <param.email>lsqshr@gmail.com</param.email>
@@ -63,6 +63,8 @@
       <file>${PROJECT_ROOT}/lib/dir2/dir2.m</file>
       <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/FrangiFilter3D.m</file>
       <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/Hessian3D.m</file>
+      <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/eig3volume.m</file>
+      <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/eig3volume.mexa64</file>
       <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/imgaussian.m</file>
       <file>${PROJECT_ROOT}/lib/frangi_filter_version2a/imgaussian.mexa64</file>
       <file>${PROJECT_ROOT}/lib/snake/ACWE/ACWEinitialise.m</file>
@@ -71,9 +73,7 @@
       <file>${PROJECT_ROOT}/lib/snake/kernel/SI3d.m</file>
       <file>${PROJECT_ROOT}/lib/snake/mainsnake/circlelevelset3d.m</file>
       <file>${PROJECT_ROOT}/lib/snake/mainsnake/somagrowth.m</file>
-      <file>${PROJECT_ROOT}/scripts/featcollect.m</file>
       <file>${PROJECT_ROOT}/shortestpath2.m</file>
-      <file>${PROJECT_ROOT}/test/somaini_v_quick.m</file>
       <file>${PROJECT_ROOT}/trace.m</file>
       <file>${PROJECT_ROOT}/util/VessFilters.m</file>
       <file>${PROJECT_ROOT}/util/addbranch2tree.m</file>
@@ -85,10 +85,11 @@
       <file>${PROJECT_ROOT}/util/constrain.m</file>
       <file>${PROJECT_ROOT}/util/distgradient.m</file>
       <file>${PROJECT_ROOT}/util/eigextract.m</file>
-      <file>${PROJECT_ROOT}/util/featextract.m</file>
+      <file>${PROJECT_ROOT}/util/fixtopology.m</file>
       <file>${PROJECT_ROOT}/util/getradius.m</file>
       <file>${PROJECT_ROOT}/util/imagecrop.m</file>
       <file>${PROJECT_ROOT}/util/maxDistancePoint.m</file>
+      <file>${PROJECT_ROOT}/util/prunetree.m</file>
       <file>${PROJECT_ROOT}/util/rescale3D.m</file>
       <file>${PROJECT_ROOT}/util/safeshowbox.m</file>
       <file>${PROJECT_ROOT}/util/showbox.m</file>
@@ -98,16 +99,6 @@
       <file>${PROJECT_ROOT}/util/somalocationdt.m</file>
       <file>${PROJECT_ROOT}/util/spherepoint.m</file>
       <file>${PROJECT_ROOT}/util/tifread.m</file>
-      <file>/home/siqi/hpc-data1/SQ-Workspace/eig3volume.mexa64</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/loadRaw2Stack.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/loadRaw2Stack_c.mexa64</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/load_v3d_neuron_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/load_v3d_raw_img_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/load_v3d_swc_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/loadfilelist.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/saveStack2File_c.mexa64</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/save_v3d_raw_img_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d/v3d_external/matlab_io_basicdatatype/save_v3d_swc_file.m</file>
     </fileset.depfun>
     <fileset.resources>
       <file>${PROJECT_ROOT}/gui.fig</file>

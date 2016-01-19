@@ -58,7 +58,6 @@ function axonvol = axongrowth(imgsoma, smoothing, lambda1, lambda2, stepnum, ini
 	% figure
 	for i = 1 : stepnum
 		MorphGAC = ACWEstep3d(MorphGAC, i);
-		fprintf('this is the %d step of the snake\n', i);
 	end
 	% close	
 	axonvol = MorphGAC.u;

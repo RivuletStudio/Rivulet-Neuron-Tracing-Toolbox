@@ -1,11 +1,11 @@
-function [ShortestLine, dump, merged, somamerged] = shortestpath2(DistanceMap, GradientVolume, I, StartPoint,SourcePoint,Stepsize,Method, Gap)
+function [ShortestLine, dump, merged, somamerged] = shortestpath2(T, G, I, swc, StartPoint, SourcePoint, Stepsize, Method, Gap)
 % This function SHORTESTPATH traces the shortest path from start point to
 % source point using Runge Kutta 4 in a 2D or 3D distance map.
 %
-% ShortestLine=shortestpath(DistanceMap,StartPoint,SourcePoint,Stepsize,Method)
+% ShortestLine=shortestpath(T,StartPoint,SourcePoint,Stepsize,Method)
 % 
 % inputs,
-%   DistanceMap : A 2D or 3D distance map (from the functions msfm2d or msfm3d)
+%   T : A 2D or 3D distance map (from the functions msfm2d or msfm3d)
 %   StartPoint : Start point of the shortest path
 %   SourcePoint : (Optional), End point of the shortest path
 %   Stepsize: (Optional), Line trace step size 
@@ -26,7 +26,7 @@ if(~exist('Stepsize','var')), Stepsize=0.5; end
 if(~exist('SourcePoint','var')), SourcePoint=[]; end
 if(~exist('Method','var')), Method='rk4'; end
 
-% GradientVolume = distgradient(DistanceMap);
+% G = distgradient(T);
 
 dump = false;
 merged = false;
@@ -35,41 +35,55 @@ i=0; % Count movemnet
 j = 0; % Count empty steps
 % Reserve a block of memory for the shortest line array
 ifree=10000;
-ShortestLine=zeros(ifree,ndims(DistanceMap));
+ShortestLine=zeros(ifree,ndims(T));
+stepsremain = -1; % It is only used when it touched the surface of any previously traced neuron
 
 % Iteratively trace the shortest line
 while(true)
-    if (ndims(DistanceMap) == 2)
+    if (ndims(T) == 2)
         disp([ceil(StartPoint(1)), ceil(StartPoint(2))]);
         if isnan(ceil(StartPoint(1))) || isnan(ceil(StartPoint(2)))
             break;
         end
-        dist = DistanceMap(ceil(StartPoint(1)), ceil(StartPoint(2)));
+        dist = T(ceil(StartPoint(1)), ceil(StartPoint(2)));
     else
         if isnan(ceil(StartPoint(1))) || isnan(ceil(StartPoint(2))) || isnan(ceil(StartPoint(3)))
             break;
         end
-        dist = DistanceMap(ceil(StartPoint(1)), ceil(StartPoint(2)), ceil(StartPoint(3)));
+        dist = T(ceil(StartPoint(1)), ceil(StartPoint(2)), ceil(StartPoint(3)));
+    end
+    
+    if dist == -3 % It reaches the centreline mask
+        break;
     end
 
-    if dist == -1
-        merged = true;
+    if stepsremain == 0 % if it did not reach any surface of traced neuron, it decrelent as a negative value
         break;
+    end
+
+    stepsremain = stepsremain - 1;
+
+    if dist == -1 && stepsremain < 0
+        merged = true;
+
+        % Find the closest traced node to current node
+        d = pdist2(StartPoint', swc(:,3:5));
+        [~, idx] = min(d);
+        stepsremain = ceil(swc(idx, 6));
     elseif dist == -2
         merged = true;
         somamerged = true;
-        % disp('Reached Soma');
         break;
     end
 
     % Calculate the next point using runge kutta
     switch(lower(Method))
         case 'rk4'
-            EndPoint=rk4(StartPoint, GradientVolume, Stepsize);
+            EndPoint=rk4(StartPoint, G, Stepsize);
         case 'euler'
-            EndPoint=e1(StartPoint, GradientVolume, Stepsize);
+            EndPoint=e1(StartPoint, G, Stepsize);
         case 'simple'
-            EndPoint=s1(StartPoint,DistanceMap);
+            EndPoint=s1(StartPoint,T);
         otherwise
             error('shortestpath:input','unknown method');
     end
@@ -78,7 +92,7 @@ while(true)
     % plot3([EndPoint(2);StartPoint(2)], [EndPoint(1);StartPoint(1)], [EndPoint(3); StartPoint(3)], 'b.');
     % drawnow
 
-    if (ndims(DistanceMap) == 2)
+    if (ndims(T) == 2)
         if isnan(ceil(EndPoint(1))) || isnan(ceil(EndPoint(2)))
             break;
         end
