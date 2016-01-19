@@ -192,7 +192,7 @@ function [tree, meanconf] = trace(varargin)
 
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
-	    for r = 1 : size(l, 1)
+	    parfor r = 1 : size(l, 1)
 		    radius(r) = getradius(I, l(r, 1), l(r, 2), l(r, 3));
 		end
 	    radius(radius < 1) = 1;
