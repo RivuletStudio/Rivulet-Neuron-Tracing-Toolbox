@@ -1,4 +1,4 @@
-function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
+function [Frozen, Label]= simplemarching(I, startx, starty)
 %SIMPLEMARCHING Summary of this function goes here
 %   Detailed explanation goes here
 % ne =[-1  0  0;
@@ -7,8 +7,8 @@ function [Frozen, Label]= simplemarching(inputMatrix, input_x, input_y)
 %       0  1  0;
 %       0  0 -1
 %       0  0  1];
-% input_x and input_y define the location of sourcepoint or you may call it starting point
-% inputMatrix is wall image used for marching 
+% startx and starty define the location of sourcepoint or you may call it starting point
+% I is wall image used for marching 
 % The following code shows how to use simplemarching function 
 % assume you already add fish head folder to the path and test image is in the test folder  
 % image = imread('binary.png');
@@ -26,45 +26,45 @@ ne = [-1  0;
        0 -1;
        0  1;];
 % Initialise the starting process       
-I_col = input_x;
-I_row = input_y;
-curposx = I_col;
-curposy = I_row;
+% I_col = startx;
+% I_row = starty;
+% dx = I_col;
+% dy = I_row;
 counter = 1;
 curvalue = 0;
 
 % Forzen is binary image which records the marched process
-Frozen = zeros(size(inputMatrix));
-Label = zeros(size(inputMatrix));
+Frozen = zeros(size(I));
+Label = zeros(size(I));
 % Initialise the neighbouring points with starting point
 neg_list = zeros(1000,2);
-neg_list(1,1) = I_col;
-neg_list(2,1) = I_row;
-neg_list_old = [I_col, I_row];
+neg_list(1,1) = startx;
+neg_list(2,1) = starty;
+neg_list_old = [startx, starty];
 
 
 % Initialise the number of neighbouring points
 negnum = 1;
-for i = 1 : 10000  
+while(true)  
 %	neg_list = [];
 	for negnum_i = 1 : negnum 
-	curposx = neg_list_old(negnum_i, 1);
-	curposy = neg_list_old(negnum_i, 2);
+		dx = neg_list_old(negnum_i, 1);
+		dy = neg_list_old(negnum_i, 2);
 		for ne_i = 1 : 4
-			xindex = ne(ne_i, 1) + curposx;
-			yindex = ne(ne_i, 2) + curposy;
-			binaryvalue = inputMatrix(xindex, yindex);
-			%Check this pixel is true value in the input binary image and we have not visited it yet
-			if (binaryvalue == 1)&&(Frozen(xindex, yindex) == 0)
-			neg_list(counter, 1) = xindex;
-			neg_list(counter, 2) = yindex;
-			Frozen(xindex, yindex) = 1;
-			Label(xindex, yindex) = i;
-			counter = counter + 1;
-			%Uncomment these two lines if you want to view the marching process
-			%plot(yindex, xindex, 'r.')
-			%pause(0.01);
-            %drawnow
+			x = ne(ne_i, 1) + dx;
+			y = ne(ne_i, 2) + dy;
+
+			%Check this pixel is true value in I and we have not visited it yet
+			if I(x, y) && ~Frozen(x, y)
+				neg_list(counter, 1) = x;
+				neg_list(counter, 2) = y;
+				Frozen(x, y) = 1;
+				Label(x, y) = i;
+				counter = counter + 1;
+				%Uncomment these two lines if you want to view the marching process
+				%plot(y, x, 'r.')
+				%pause(0.01);
+	            %drawnow
 			end
 		end
 	end
@@ -72,10 +72,11 @@ for i = 1 : 10000
 	neg_list_old = neg_list(1:counter-1, :);
 	neg_list_old = unique(neg_list_old,'rows');
 
-	% There are no more new pixels, so it is the right time to stop
+	% Stop when no more new pixels to discover
 	if counter == 1
-		return;
+		break;
 	end
+	
 	counter = 1;
 	[negnum useless] = size(neg_list_old);
 end

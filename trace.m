@@ -196,7 +196,6 @@ function [tree, meanconf] = trace(varargin)
 		    radius(r) = getradius(I, l(r, 1), l(r, 2), l(r, 3));
 		end
 	    radius(radius < 1) = 1;
-	    % disp([size(l, 1), size(radius, 1)]);
 		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
@@ -206,7 +205,7 @@ function [tree, meanconf] = trace(varargin)
             wash = simplemarching3d(I, floor(StartPoint(1)), floor(StartPoint(2)), floor(StartPoint(3)), size(T));
 	    end
 
-        covermask(StartPoint(1), StartPoint(2), StartPoint(3)) = 3; % Why?
+        covermask(StartPoint(1), StartPoint(2), StartPoint(3)) = 3; % Why? Double check if it is nessensary
 
         T(covermask==1) = -1;
         T(centremask==1) = -3;

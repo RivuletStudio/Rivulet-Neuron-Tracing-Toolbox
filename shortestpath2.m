@@ -67,9 +67,13 @@ while(true)
         merged = true;
 
         % Find the closest traced node to current node
-        d = pdist2(StartPoint', swc(:,3:5));
-        [~, idx] = min(d);
-        stepsremain = ceil(swc(idx, 6));
+        if size(swc, 1) == 0
+            break;
+        else
+            d = pdist2(StartPoint', swc(:,3:5));
+            [~, idx] = min(d);
+            stepsremain = ceil(swc(idx, 6));
+        end
     elseif dist == -2
         merged = true;
         somamerged = true;
