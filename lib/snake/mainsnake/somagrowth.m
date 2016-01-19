@@ -96,7 +96,6 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		x = x + startpoint(1);
 		y = y + startpoint(2);
 		z = z + startpoint(3);
-		fprintf('this is the %d step of the snake\n', i);
 		if plotcheck
 			plot3(y, x, z, 'b.');
             axis equal

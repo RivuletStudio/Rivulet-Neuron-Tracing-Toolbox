@@ -37,9 +37,9 @@ function [tree, meanconf] = trace(varargin)
 		ax = varargin{6};
 	end
 
-    dumpbranch = false;
+    dumpcheck = false;
     if numel(varargin) >= 7
-        dumpbranch = varargin{7};
+        dumpcheck = varargin{7};
     end
 
     connectrate = false;
@@ -188,7 +188,7 @@ function [tree, meanconf] = trace(varargin)
 	    	break;
 	    end
 
-	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, StartPoint, SourcePoint, 1, 'rk4', gap);
+	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, tree, StartPoint, SourcePoint, 1, 'rk4', gap);
 
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
@@ -200,39 +200,38 @@ function [tree, meanconf] = trace(varargin)
 		assert(size(l, 1) == size(radius, 1));
 
 	    % Remove the traced path from the timemap
-	    tB = binarysphere3d(size(T), l, radius, washawayflag);
-        % two point growth start from here
+	    [covermask, centremask] = binarysphere3d(size(T), l, radius, washawayflag);
         
         if washawayflag
-            tBtwo = simplemarching3d(I, floor(StartPoint(1)), floor(StartPoint(2)), floor(StartPoint(3)), size(T));
+            wash = simplemarching3d(I, floor(StartPoint(1)), floor(StartPoint(2)), floor(StartPoint(3)), size(T));
 	    end
-        tB(StartPoint(1), StartPoint(2), StartPoint(3)) = 3;
-        %tBtwo = axongrowth(oriI, 1, 1, 1.5, 5, tB);
-        T(tB==1) = -1;
+
+        covermask(StartPoint(1), StartPoint(2), StartPoint(3)) = 3; % Why?
+
+        T(covermask==1) = -1;
+        T(centremask==1) = -3;
+
 	    if washawayflag
-            T(tBtwo==1) = -1;
+            T(wash==1) = -1;
         end
 
 	    % Add l to the tree
-	    if ~(dump && dumpbranch) 
+	    if ~((dump || ~merged) && dumpcheck) 
 		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot, somamerged);
-%             if unconnected
-%                 unconnectedBranches = {unconnectedBranches, newtree};
-%             end
             lconfidence = [lconfidence, conf];
 		end
 
-        B = B | tB;
+        B = B | covermask;
 
         percent = sum(B(:) & I(:)) / sum(I(:));
         if plot
             axes(ax);
         end
         printn = printn + 1;
-        if printn > 1
-            fprintf(1, repmat('\b',1,printcount));
-            printcount = fprintf('Tracing percent: %f%%\n', percent*100);
-        end
+        % if printn > 1
+        %     fprintf(1, repmat('\b',1,printcount));
+        %     printcount = fprintf('Tracing percent: %f%%\n', percent*100);
+        % end
         if percent >= percentage
         	disp('Coverage reached end tracing...')
         	break;
@@ -241,6 +240,9 @@ function [tree, meanconf] = trace(varargin)
     end
 
     meanconf = mean(lconfidence);
+
+    tree = fixtopology(tree);
+    prunetree(tree, branchlen);
 
 	if plot
 		hold off

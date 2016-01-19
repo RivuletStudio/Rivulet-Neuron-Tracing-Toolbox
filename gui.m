@@ -1483,7 +1483,7 @@ varname = contents{get(hObject,'Value')};
 I = evalin('base', varname);
 try
     if ndims(I) == 3 % 3D image
-        fprintf('Trying to load %s as 3D image', varname);
+        fprintf('Trying to load %s as 3D image\n', varname);
         autothreshold(I, handles);
 
         [bI, ~] = binarizeimage('threshold', I,...
@@ -1494,7 +1494,7 @@ try
         handles.selectfilebtn.UserData.bI = bI;
         refresh_render(handles);
     elseif ndims(I) == 2 && size(I, 2) == 7 % swc
-        fprintf('Trying to load %s as swc tree', varname);
+        fprintf('Trying to load %s as swc tree\n', varname);
         handles.selectfilebtn.UserData.swc = I;
         refresh_render(handles);
     end
