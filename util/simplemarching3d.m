@@ -1,4 +1,4 @@
-%function Frozen = simplemarching3d(I, startx, starty, startz)
+%function seedmask = simplemarching3d(I, startx, starty, startz)
 %SIMPLEMARCHING Summary of this function goes here
 %   Detailed explanation goes here
 % startx and starty define the location of sourcepoint or you may call it starting point
@@ -14,11 +14,12 @@
 % The following line is for marching process visulisation uncomment it if you need
 
 % function [xcenter, ycenter, zcenter, volume, new_remain] = simplemarching3d(I, startx, starty, startz)
-function Frozen = simplemarching3d(I, startx, starty, startz, sz, iter)
+function seedmask = simplemarching3d(I, seedmask, iter)
 %hold on
 % The following four lines are used to create cross shape neighbouring pixels
 % pixels are at boundary condition shold be considered in 3d version of simplemarching
 
+sz = size(I);
 ne =[-1  0  0;
       1  0  0;
       0 -1  0;
@@ -26,69 +27,73 @@ ne =[-1  0  0;
       0  0 -1;
       0  0  1];
 % Initialise the starting process       
-dx = startx;
-dy = starty;
-dz = startz;
-ctr = 1;
 % hold on
 % showbox(I, 0.5)
-% Forzen is binary image which records the marched process
-Frozen = zeros(size(I));
 % Initialise the neighbouring points with starting point
-neg_list = [startx, starty, startz];
-neg_list_old = [startx, starty, startz];
-Frozen(startx, starty, startz) = 1;
+ind = find(seedmask);
+[startx, starty, startz] = ind2sub(size(I), ind);
+nlist1 = [startx, starty, startz];
+
+
 % Initialise the number of neighbouring points
-negnum = 1;
-for i = 1 : iter
-	neg_list = [];
-	% fprintf('this is marching step %d\n', uint8(i));
-	for negnum_i = 1 : negnum 
-		dx = neg_list_old(negnum_i, 1);
-		dy = neg_list_old(negnum_i, 2);
-		dz = neg_list_old(negnum_i, 3);
-		for ne_i = 1 : 6
-			x = ne(ne_i, 1) + dx;
-			y = ne(ne_i, 2) + dy;
-			z = ne(ne_i, 3) + dz;
-			x = constrain(x, 1, sz(1));
-			y = constrain(y, 1, sz(2));
-			z = constrain(z, 1, sz(3)); 
-			binaryvalue = I(x, y, z);
-			%Check this pixel is true value in the input binary image and we have not visited it yet
-			if (binaryvalue == 1)&&(Frozen(x, y, z) == 0)
-			neg_list(ctr, 1) = x;
-			neg_list(ctr, 2) = y;
-			neg_list(ctr, 3) = z;
-			Frozen(x, y, z) = 1;
-			ctr = ctr + 1;
-			%Uncomment these two lines if you want to view the marching process
-			% plot3(x, y, z, 'g.')
-			% pause(0.001)
-			end
-		end
+for i = 1 : iter % Iterations
+	% fprintf('iter: %d\n', i);
+	nlist2 = [];
+
+	for j = 1 : size(nlist1, 1) % Iterate boundary voxels 
+		% x = nlist1(j, 1); y = nlist1(j, 2); z = nlist1(j, 3);
+		K = repmat(nlist1(j, :), 6, 1) + ne;
+		K(:, 1) = constrain(K(:, 1), 1, sz(1));
+		K(:, 2) = constrain(K(:, 2), 1, sz(2));
+		K(:, 3) = constrain(K(:, 3), 1, sz(3)); 
+        kind = sub2ind(size(I), K(:, 1), K(:, 2), K(:, 3));
+		add = I(kind) & ~seedmask(kind);
+		nlist2 = [nlist2; K(add, :)];
+        ind2add = sub2ind(size(I), K(add, 1), K(add, 2), K(add, 3));
+        seedmask(ind2add) = 1;
+
+		% for k = 1 : 6 % Iterate Kernel
+		% 	kx = ne(k, 1) + x; ky = ne(k, 2) + y; kz = ne(k, 3) + z;
+		% 	kx = constrain(kx, 1, sz(1));
+		% 	ky = constrain(ky, 1, sz(2));
+		% 	kz = constrain(kz, 1, sz(3)); 
+
+		% 	% Check this voxel is positive in I and has not been visited
+		% 	if I(kx, ky, kz) & ~seedmask(kx, ky, kz)
+		% 		% Add this new position to the neighbour list in new iteration 
+		% 		nlist2(nctr, 1) = x;
+		% 		nlist2(nctr, 2) = y;
+		% 		nlist2(nctr, 3) = z;
+		% 		seedmask(kx, ky, kz) = 1;
+		% 		nctr = nctr + 1;
+		% 	%Uncomment these two lines if you want to view the marching process
+		% 	% plot3(x, y, z, 'g.')
+		% 	% pause(0.001)
+		% 	end
+		% end
 	end
+
 	% Make points in the neighbouring points are not redundant  
-	neg_list = unique(neg_list, 'rows');
-	neg_list_old = neg_list;
+	% nlist2 = unique(nlist2, 'rows'); % Might not be nessensary
+	nlist1 = nlist2; % Refresh the neighbour list to the new generation
+
 	% There are no more new pixels, so it is the right time to stop
-	if ctr == 1
+	if size(nlist1, 1) == 0
 		break;
 	end
-	ctr = 1;
-	[negnum useless] = size(neg_list);
 end
+
 % hold off 
 % uncomment the above is you want to visualise the marching process 
 
 % The following code is used to calculate centroid
 % It seems that we do not need them at this moment
-% new_remain = I - Frozen;
-% Frozenind = find(Frozen);
-% [indx, indy, indz] = ind2sub(size(Frozen), Frozenind);
+% new_remain = I - seedmask;
+% seedmaskind = find(seedmask);
+% [indx, indy, indz] = ind2sub(size(seedmask), seedmaskind);
 % xcenter = sum(indx(:))/numel(indx);
 % ycenter = sum(indy(:))/numel(indx);
 % zcenter = sum(indz(:))/numel(indx);
-% volume = sum(Frozen(:));
+% volume = sum(seedmask(:));
 
 end

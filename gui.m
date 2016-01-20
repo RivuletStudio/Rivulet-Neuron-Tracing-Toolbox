@@ -613,7 +613,7 @@ end
 % If the image tick box is ticked, new bI will be updated.
 if handles.imagecheck.Value
     if isfield(handles.selectfilebtn.UserData, 'bI')
-        showbox(handles.selectfilebtn.UserData.bI, 0.5, true);
+        showbox(handles.selectfilebtn.UserData.bI, 0.5, ~handles.lightcheck.Value, true);
     end
 end
 
@@ -1617,3 +1617,13 @@ function resamplescaleedit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in lightcheck.
+function lightcheck_Callback(hObject, eventdata, handles)
+% hObject    handle to lightcheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of lightcheck
+refresh_render(handles);

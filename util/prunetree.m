@@ -1,6 +1,9 @@
 function swc = prunetree(swc, l)
 % Prune leaf branches with #nodes  < l
     
+    hold on
+    
+    showswc(swc, false);
     % Calculate the order of each node
     nnode = size(swc, 1);
     order = zeros(nnode, 1);
@@ -16,45 +19,58 @@ function swc = prunetree(swc, l)
     end
 
     % Cluster nodes with order == 1 into branches
-    ind = find(order == 1);
-    leafbranchnodes = swc(ind, :);
-    cluster = zeros(nnode, 1);
+    leafidx = find(order == 1);
+    plot3(swc(leafidx, 4),...
+          swc(leafidx, 3),...
+          swc(leafidx, 5),...
+          '.',...
+          'Color',...
+          [0 0 1]); axis equal;    
+    
+    discard = zeros(nnode, 1);
 
     % Go up from leaf until it reaches a node with order > 2
-    for i = 1 : size(leafbranchnodes, 1)
-        n = leafbranchnodes(i, :);
-        c = max(cluster) + 1;
-        cluster(i) = c;
+    for i = 1 : size(leafidx, 1)
+        n = swc(leafidx(i), :);
+        branch = [leafidx(i)];
 
         while(true)
-            pind = find(swc(i, 1) == n(7));
-            if numel(pind) > 0
-                n = swc(pind, :);
+            pidx = find(swc(:, 1) == n(7));
+                  
+            if numel(pidx) > 0
+                n = swc(pidx, :);
+
+                if order(pidx) ~= 2
+                    if size(branch, 1) < l
+                        discard(branch) = 1;
+
+                        plot3(n(:, 4),...
+                              n(:, 3),...
+                              n(:, 5),...
+                              '.',...
+                              'Color',...
+                              [1 0 1]); axis equal;
+                        nodes2del = swc(branch, :);
+                        plot3(nodes2del(:, 4),...
+                              nodes2del(:, 3),...
+                              nodes2del(:, 5),...
+                              '.',...
+                              'Color',...
+                              [1 1 1]); axis equal;
+                    end
                 
-                if cluster(pind) ~= 0
-                    cluster(cluster == c) = cluster(pind);
                     break;
-                else
-                    cluster(pind) = c;
-                end
+                end                
+
+                branch = [branch; pidx]; % add parent to branch if not burification
                 
-                if order(pind) > 2 
-                    break;
-                end
             else
                 break;
             end
         end
     end    
 
-    discard = zeros(nnode, 1);
-
-    % Discard the cluster with #nodes < l
-    for i = 1 : numel(cluster)
-    	if sum(cluster == cluster(i)) < l 
-            discard(i) = 1;
-    	end
-    end
-
     swc = swc(discard == 0,:);
+    
+    hold off
 end

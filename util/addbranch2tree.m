@@ -15,16 +15,16 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 	assert(size(l, 1) == size(radius, 1));
 	newtree = zeros(size(l, 1), 7);
 	if size(tree, 1) == 0 || size(tree, 1) == 1 % 1 When soma location is used 
-		newtree(:, 1) = 1 : size(l, 1);
+		newtree(:, 1) = 2 : size(l, 1)+1;
 		newtree(:, 2) = 2;
 		newtree(:, 3:5) = l;
 		newtree(:, 6) = radius;
 		newtree(1:end-1, 7) = newtree(2:end, 1);
 
-		if somamerged
-			newtree(end, 7) = 0; % Soma ID
+		if size(tree, 1) == 0
+			newtree(end, 7) = -1; % Make it the root
 		else
-			newtree(end, 7) = -1;
+			newtree(end, 7) = 1; % Soma ID
 		end
 
 		if plot
@@ -57,7 +57,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		end
 
 		if somamerged
-			newtree(end, 7) = 0; % Soma ID
+			newtree(end, 7) = 1; % Soma ID
 		else
 		    if (d1 < (tree(idx1, 6) + 3) * connectrate || d1 < (newtree(end, 6) + 3) * connectrate) && merged
 				newtree(end, 7) = tree(idx1, 1); % Connect to the tree parent

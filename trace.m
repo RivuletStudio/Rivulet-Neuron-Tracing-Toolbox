@@ -146,7 +146,7 @@ function [tree, meanconf] = trace(varargin)
     tree = []; % swc tree
     if somagrowthcheck
         fprintf('Initialization of swc tree.\n'); 
-        tree(1, 1) = 0;
+        tree(1, 1) = 1;
         tree(1, 2) = 2;
         tree(1, 3) = soma.x;
         tree(1, 4) = soma.y;
@@ -198,21 +198,20 @@ function [tree, meanconf] = trace(varargin)
 	    radius(radius < 1) = 1;
 		assert(size(l, 1) == size(radius, 1));
 
+        [covermask, centremask] = binarysphere3d(size(T), l, radius);
 	    % Remove the traced path from the timemap
-	    [covermask, centremask] = binarysphere3d(size(T), l, radius, washawayflag);
-        
-        if washawayflag
-            wash = simplemarching3d(I, floor(StartPoint(1)), floor(StartPoint(2)), floor(StartPoint(3)), size(T));
-	    end
-
-        covermask(StartPoint(1), StartPoint(2), StartPoint(3)) = 3; % Why? Double check if it is nessensary
-
-        T(covermask==1) = -1;
-        T(centremask==1) = -3;
-
-	    if washawayflag
-            T(wash==1) = -1;
+        if washawayflag & size(l, 1) > branchlen
+            covermask = augmask(covermask, I, l, radius);
         end
+
+        % covermask(StartPoint(1), StartPoint(2), StartPoint(3)) = 3; % Why? Double check if it is nessensary - SQ
+
+        T(covermask) = -1;
+        T(centremask) = -3;
+
+	    % if washawayflag
+     %        T(wash==1) = -1;
+     %    end
 
 	    % Add l to the tree
 	    if ~((dump || ~merged) && dumpcheck) 
@@ -227,10 +226,10 @@ function [tree, meanconf] = trace(varargin)
             axes(ax);
         end
         printn = printn + 1;
-        % if printn > 1
-        %     fprintf(1, repmat('\b',1,printcount));
-        %     printcount = fprintf('Tracing percent: %f%%\n', percent*100);
-        % end
+        if printn > 1
+            fprintf(1, repmat('\b',1,printcount));
+            printcount = fprintf('Tracing percent: %f%%\n', percent*100);
+        end
         if percent >= percentage
         	disp('Coverage reached end tracing...')
         	break;
@@ -241,7 +240,7 @@ function [tree, meanconf] = trace(varargin)
     meanconf = mean(lconfidence);
 
     tree = fixtopology(tree);
-    prunetree(tree, branchlen);
+    tree = prunetree(tree, branchlen);
 
 	if plot
 		hold off

@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="1314543974" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1914422464" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
     <param.appname>Rivulet</param.appname>
     <param.authnamewatermark>Siqi Liu, Donghao Zhang</param.authnamewatermark>
     <param.email>lsqshr@gmail.com</param.email>
