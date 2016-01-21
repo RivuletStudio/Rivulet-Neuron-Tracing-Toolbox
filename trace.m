@@ -62,25 +62,26 @@ function [tree, meanconf] = trace(varargin)
     if numel(varargin) >= 10
         somagrowthcheck = varargin{10};
         somagrowthcheck = somagrowthcheck > 0.5;
-        fprintf('the value of somagrowthcheck is : %d\n', somagrowthcheck);
+        % fprintf('the value of somagrowthcheck is : %d\n', somagrowthcheck);
     end
 
     if numel(varargin) >= 11 && somagrowthcheck
         soma = varargin{11};
-        fprintf('we found soma label matrix\n');
+        % fprintf('we found soma label matrix\n');
         szsoma = size(soma.I);
-        fprintf('the size of soma.I, x is : %d, y is : %d, z is : %d\n', szsoma(1), szsoma(2), szsoma(3));
+        I = I | soma.I;
+        % fprintf('the size of soma.I, x is : %d, y is : %d, z is : %d\n', szsoma(1), szsoma(2), szsoma(3));
     end
 
-    washawayflag = false;
+    cleanercheck = false;
     if numel(varargin) >= 12
-        washawayflag = varargin{12};
-        if washawayflag == 1
+        cleanercheck = varargin{12};
+        if cleanercheck == 1
             fprintf('wash away is on\n');
         else
             fprintf('wash away is off\n');
         end
-        washawayflag = washawayflag > 0.5;                    
+        cleanercheck = cleanercheck > 0.5;                    
     end
     % dtimageflag load distance transform image directly without computing distance transform
     dtimageflag = false;
@@ -200,7 +201,7 @@ function [tree, meanconf] = trace(varargin)
 
         [covermask, centremask] = binarysphere3d(size(T), l, radius);
 	    % Remove the traced path from the timemap
-        if washawayflag & size(l, 1) > branchlen
+        if cleanercheck & size(l, 1) > branchlen
             covermask = augmask(covermask, I, l, radius);
         end
 
@@ -209,12 +210,12 @@ function [tree, meanconf] = trace(varargin)
         T(covermask) = -1;
         T(centremask) = -3;
 
-	    % if washawayflag
+	    % if cleanercheck
      %        T(wash==1) = -1;
      %    end
 
 	    % Add l to the tree
-	    if ~((dump || ~merged) && dumpcheck) 
+	    if ~((dump) && dumpcheck) 
 		    [tree, newtree, conf, unconnected] = addbranch2tree(tree, l, merged, connectrate, radius, I, branchlen, plot, somamerged);
             lconfidence = [lconfidence, conf];
 		end
@@ -239,7 +240,10 @@ function [tree, meanconf] = trace(varargin)
 
     meanconf = mean(lconfidence);
 
-    tree = fixtopology(tree);
+    if cleanercheck
+        disp('Fixing topology')
+        tree = fixtopology(tree);
+    end 
     tree = prunetree(tree, branchlen);
 
 	if plot

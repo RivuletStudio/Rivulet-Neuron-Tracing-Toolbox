@@ -413,9 +413,9 @@ function plottracecheck_Callback(hObject, eventdata, handles)
 function tracebtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
     ax = handles.mainfig;
-    cla(ax);
+%     cla(ax);
     axes(ax);
-    showbox(handles.selectfilebtn.UserData.bI, 0.5);
+%     showbox(handles.selectfilebtn.UserData.bI, 0.5, handles.lightcheck.Value);
     tic
     %[tree, meanconf] = trace(handles.selectfilebtn.UserData.bI, handles.plottracecheck.Value, str2num(handles.coverageedit.String), false, str2num(handles.gapedit.String), ax, handles.dumpcheck.Value, str2num(handles.connectedit.String), str2num(handles.branchlen.String), handles.selectfilebtn.UserData.I);
     if handles.somaflagtag.Value
@@ -435,7 +435,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     if handles.outputswccheck.Value
         if exist('save_v3d_raw_img_file') && isfield(handles.selectfilebtn.UserData, 'inputpath')
             save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
-            msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
+%             msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
         else
             msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...\nHowever you can save the results with ''All To Workspace''');
         end
@@ -1627,3 +1627,55 @@ function lightcheck_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of lightcheck
 refresh_render(handles);
+
+
+% --- Executes on button press in dilatesoma.
+function dilatesoma_Callback(hObject, eventdata, handles)
+% hObject    handle to dilatesoma (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'soma')
+    hold on    
+    handles.selectfilebtn.UserData.soma.I = imdilate(handles.selectfilebtn.UserData.soma.I, ones(3,3,3));
+    [y, x, z] = ind2sub(size(handles.selectfilebtn.UserData.soma.I), ...
+                        find(handles.selectfilebtn.UserData.soma.I));
+    plot3(x, y, z, 'b.');
+    axis equal
+	drawnow
+    hold off
+end
+
+
+% --- Executes on button press in erodesoma.
+function erodesoma_Callback(hObject, eventdata, handles)
+% hObject    handle to erodesoma (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'soma')
+    hold on
+    [y, x, z] = ind2sub(size(handles.selectfilebtn.UserData.soma.I), ...
+                        find(handles.selectfilebtn.UserData.soma.I));
+    plot3(x, y, z, 'r.');
+    axis equal
+    handles.selectfilebtn.UserData.soma.I = imerode(handles.selectfilebtn.UserData.soma.I, ones(3,3,3));
+    [y, x, z] = ind2sub(size(handles.selectfilebtn.UserData.soma.I), ...
+                        find(handles.selectfilebtn.UserData.soma.I));
+    plot3(x, y, z, 'b.');
+    axis equal
+	drawnow
+    hold off
+end
+
+
+% --- Executes on button press in showsoma.
+function showsoma_Callback(hObject, eventdata, handles)
+% hObject    handle to showsoma (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'soma')
+    hold on
+    [y, x, z] = ind2sub(size(handles.selectfilebtn.UserData.soma.I), ...
+                        find(handles.selectfilebtn.UserData.soma.I));
+    plot3(x, y, z, 'b.');
+    axis equal
+end

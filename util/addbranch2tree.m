@@ -21,10 +21,10 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 		newtree(:, 6) = radius;
 		newtree(1:end-1, 7) = newtree(2:end, 1);
 
-		if size(tree, 1) == 0
-			newtree(end, 7) = -1; % Make it the root
+		if somamerged
+			newtree(end, 7) = 1;  % Soma ID
 		else
-			newtree(end, 7) = 1; % Soma ID
+			newtree(end, 7) = -1; % Make it the root
 		end
 
 		if plot
@@ -84,7 +84,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 
 		if newtree(end, 7) == -2 && newtree(1, 7) == -2
 			unconnected = true;
-			return
+			% return
 		end
 
 		tree = [tree; newtree];

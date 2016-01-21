@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="1914422464" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1180625639" file="/home/siqi/hpc-data1/SQ-Workspace/FishHead/Rivulet.prj" location="/home/siqi/hpc-data1/SQ-Workspace/FishHead" name="Rivulet" target="target.mlapps" target-name="Package App">
     <param.appname>Rivulet</param.appname>
     <param.authnamewatermark>Siqi Liu, Donghao Zhang</param.authnamewatermark>
     <param.email>lsqshr@gmail.com</param.email>
@@ -45,9 +45,9 @@
       <file>${PROJECT_ROOT}/gui.m</file>
     </fileset.main>
     <fileset.depfun>
-      <file>${PROJECT_ROOT}/lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/ac_linear_diffusion_AOS.m</file>
-      <file>${PROJECT_ROOT}/lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/private/ac_linear_diffusion_AOS_2D_dll.mexa64</file>
-      <file>${PROJECT_ROOT}/lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/private/ac_linear_diffusion_AOS_3D_dll.mexa64</file>
+      <file>/home/siqi/Documents/MATLAB/Apps/Rivulet - 3/util/../lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/ac_linear_diffusion_AOS.m</file>
+      <file>/home/siqi/Documents/MATLAB/Apps/Rivulet - 3/util/../lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/private/ac_linear_diffusion_AOS_2D_dll.mexa64</file>
+      <file>/home/siqi/Documents/MATLAB/Apps/Rivulet - 3/util/../lib/AOSLevelsetSegmentationToolboxM/AOSLevelsetSegmentationToolboxM/private/ac_linear_diffusion_AOS_3D_dll.mexa64</file>
       <file>${PROJECT_ROOT}/lib/DirectionalRatio/Demo/directionalRatio.m</file>
       <file>${PROJECT_ROOT}/lib/DirectionalRatio/Demo/gen2DFeats.m</file>
       <file>${PROJECT_ROOT}/lib/FastMarching_version3b/functions/msfm2d.m</file>
@@ -75,9 +75,11 @@
       <file>${PROJECT_ROOT}/lib/snake/mainsnake/somagrowth.m</file>
       <file>${PROJECT_ROOT}/shortestpath2.m</file>
       <file>${PROJECT_ROOT}/trace.m</file>
+      <file>${PROJECT_ROOT}/util/../scripts/featcollect.m</file>
       <file>${PROJECT_ROOT}/util/VessFilters.m</file>
       <file>${PROJECT_ROOT}/util/addbranch2tree.m</file>
       <file>${PROJECT_ROOT}/util/anisotropicfilter.m</file>
+      <file>${PROJECT_ROOT}/util/augmask.m</file>
       <file>${PROJECT_ROOT}/util/binarizeimage.m</file>
       <file>${PROJECT_ROOT}/util/binarysphere.m</file>
       <file>${PROJECT_ROOT}/util/binarysphere3d.m</file>
@@ -85,10 +87,12 @@
       <file>${PROJECT_ROOT}/util/constrain.m</file>
       <file>${PROJECT_ROOT}/util/distgradient.m</file>
       <file>${PROJECT_ROOT}/util/eigextract.m</file>
+      <file>${PROJECT_ROOT}/util/featextract.m</file>
       <file>${PROJECT_ROOT}/util/fixtopology.m</file>
       <file>${PROJECT_ROOT}/util/getradius.m</file>
       <file>${PROJECT_ROOT}/util/imagecrop.m</file>
       <file>${PROJECT_ROOT}/util/maxDistancePoint.m</file>
+      <file>${PROJECT_ROOT}/util/neighbourpoints3d.m</file>
       <file>${PROJECT_ROOT}/util/prunetree.m</file>
       <file>${PROJECT_ROOT}/util/rescale3D.m</file>
       <file>${PROJECT_ROOT}/util/safeshowbox.m</file>
@@ -99,6 +103,15 @@
       <file>${PROJECT_ROOT}/util/somalocationdt.m</file>
       <file>${PROJECT_ROOT}/util/spherepoint.m</file>
       <file>${PROJECT_ROOT}/util/tifread.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadRaw2Stack.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadRaw2Stack_c.mexa64</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_neuron_file.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_raw_img_file.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_swc_file.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadfilelist.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/saveStack2File_c.mexa64</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/save_v3d_raw_img_file.m</file>
+      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/save_v3d_swc_file.m</file>
     </fileset.depfun>
     <fileset.resources>
       <file>${PROJECT_ROOT}/gui.fig</file>
