@@ -2,7 +2,7 @@ We will provide the first ready to install package for different platforms.
 
 Rivulet logo
 ============
-![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/icon_48.png)
+![Build Status](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/Rivulet-Logo2.png)
 
 The reason why we choose red R is that red represents a pioneer spirit. The red is also the color of blood and sun. The blood and sun is like force awaken. R is the first letter of rivulet. The curvature of R symbolizes the curved connections of neurons. We name our algorithm rivulet, because it is just like all streams flowing back to the sea. When you visualise the tracing process, you may understand what I am talking about.   
 Examples
