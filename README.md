@@ -1,7 +1,8 @@
-We will provide the first ready to install package for different platforms.
+We will provide the first ready to install package for different platforms very soon.
 
-Rivulet logo
-============
+=============================
+Rivulet-Neuron-Tracing-Toobox (WIP)
+=============================
 ![logo](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/Rivulet-Logo2.png)
 
 A big R is all we need!
@@ -16,9 +17,7 @@ The gif below show the animation of soma detection process.
   
 ![soma](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/somadetection.gif)
 
-=============================
-Rivulet-Neuron-Tracing-Toobox (WIP)
-=============================
+
 1. **Rivulet Toolbox illustration**
   * **Input and Ouput Panel**
     * **V3D Matlab I/O button** : you should select the dirctionary which contains  v3d matlab io files. If you do not have this dictinary, do not worry about it. We supprt other format of files.
