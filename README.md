@@ -1,8 +1,20 @@
-We will provide the first ready to install package for different platforms very soon.
-
 =============================
 Rivulet-Neuron-Tracing-Toobox (WIP)
 =============================
+Rivulet is a Matlab GUI App for automatic reconstruction of single neuron cells. It is capable of automatic filternig 3D microscopic image stacks, segmenting neuron structures, reconstructing soma surface and neuron tracing. It has direct communication between the GUI interface and the Matlab workspace. It is currently actively being maintained and updated.
+
+Please cite the following paper for research use of Rivulet:
+
+*Donghao Zhang, Siqi Liu, Sidong Liu, Dagan Feng, Hanchuan Peng, Weidong Cai, 
+"Sub-Voxel Reconstruction of 3D Neuron Morphology using RIVULET Back-Tracking", 
+The IEEE International Symposium on Biomedical Imaging: From Nano to Macro (ISBI 2016), 2016.*
+
+For questions and bug reporting please post all in [Issues](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/issues) with the approperiate label assigned.
+
+Pull Requests are also welcomed.
+
+We will provide the first ready to install package for different platforms very soon.
+
 ![logo](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/Rivulet-Logo2.png)
 
 A big R is all we need!
