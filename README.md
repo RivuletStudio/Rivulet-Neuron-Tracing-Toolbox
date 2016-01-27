@@ -13,6 +13,8 @@ For questions and bug reporting please post all in [Issues](https://github.com/l
 
 Pull Requests are also welcomed.
 
+A vaa3d version of the Rivulet tracing algorithm is also available at [rivuletv3d](https://github.com/Vaa3D/vaa3d_tools/tree/master/bigneuron_ported/siqi/rivuletv3d)
+
 We will provide the first ready to install package for different platforms very soon.
 
 ![logo](https://github.com/lsqshr/Rivulet-Neuron-Tracing-Toolbox/blob/master/Rivulet_resources/Rivulet-Logo2.png)
