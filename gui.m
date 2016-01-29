@@ -604,7 +604,7 @@ if handles.treecheck.Value
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
         if shift > 0
-            fprintf('shift with %f\n', shift);
+%             fprintf('shift with %f\n', shift);
             tree(:, 3:5) = tree(:, 3:5) + shift;
         end
         % show the swc based reconstructure
