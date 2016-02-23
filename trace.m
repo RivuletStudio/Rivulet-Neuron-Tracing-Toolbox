@@ -191,6 +191,10 @@ function [tree, meanconf] = trace(varargin)
 
 	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, tree, StartPoint, SourcePoint, 1, 'rk4', gap);
 
+        if size(l, 1) == 0
+            l = StartPoint'; % Make sure the start point will be erased
+        end
+        
 	    % Get radius of each point from distance transform
 	    radius = zeros(size(l, 1), 1);
 	    parfor r = 1 : size(l, 1)
