@@ -16,7 +16,7 @@ for i = 1 : 9
         disp(opswc)
         opfeat = [oppath, stri, '/OP_', stri, 'fea.mat'];
         I = load_v3d_raw_img_file(opdraw);
-        swc = load_v3d_swc_file(opswc);
+        swc = loadswc(opswc);
         curfeats = featextract(I, swc, sigma);
         save(opfeat, 'curfeats');
     end

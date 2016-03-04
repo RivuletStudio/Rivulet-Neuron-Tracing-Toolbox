@@ -434,12 +434,8 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
         tree(:, 6) = 1;
     end
     
-    if handles.outputswccheck.Value
-        if exist('save_v3d_raw_img_file') && isfield(handles.selectfilebtn.UserData, 'inputpath')
-            save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
-%             msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
-        else
-            msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...\nHowever you can save the results with ''All To Workspace''');
+        if handles.outputswccheck.Value
+            saveswc(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
         end
     end
 %     t = tree(:,4);
