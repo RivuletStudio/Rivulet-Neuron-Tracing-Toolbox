@@ -583,7 +583,7 @@ if pathname ~= 0
     hObject.UserData.default = pathname;
 end
 filepath = fullfile(pathname, filename);
-handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
+handles.selectfilebtn.UserData.swc = loadswc(filepath);
 refresh_render(handles);
 
 function refresh_render(handles)

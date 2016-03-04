@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="1475120392" file="/home/siqi/Rivulet-Neuron-Tracing-Toolbox/Rivulet.prj" location="/home/siqi/Rivulet-Neuron-Tracing-Toolbox" name="Rivulet" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1211930789" file="/home/siqi/Rivulet-Neuron-Tracing-Toolbox/Rivulet.prj" location="/home/siqi/Rivulet-Neuron-Tracing-Toolbox" name="Rivulet" target="target.mlapps" target-name="Package App">
     <param.appname>Rivulet</param.appname>
     <param.authnamewatermark>Siqi Liu, Donghao Zhang</param.authnamewatermark>
     <param.email>lsqshr@gmail.com</param.email>
@@ -98,15 +98,6 @@
       <file>${PROJECT_ROOT}/util/somalocationdt.m</file>
       <file>${PROJECT_ROOT}/util/spherepoint.m</file>
       <file>${PROJECT_ROOT}/util/tifread.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadRaw2Stack.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadRaw2Stack_c.mexa64</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_neuron_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_raw_img_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/load_v3d_swc_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/loadfilelist.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/saveStack2File_c.mexa64</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/save_v3d_raw_img_file.m</file>
-      <file>/home/siqi/hpc-data1/v3d_external/matlab_io_basicdatatype/save_v3d_swc_file.m</file>
     </fileset.depfun>
     <fileset.resources>
       <file>${PROJECT_ROOT}/gui.fig</file>
