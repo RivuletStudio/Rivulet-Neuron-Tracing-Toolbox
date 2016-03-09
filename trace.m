@@ -148,7 +148,7 @@ function [tree, meanconf] = trace(varargin)
     if somagrowthcheck
         fprintf('Initialization of swc tree.\n'); 
         tree(1, 1) = 1;
-        tree(1, 2) = 2;
+        tree(1, 2) = 1;
         tree(1, 3) = soma.x;
         tree(1, 4) = soma.y;
         tree(1, 5) = soma.z;

@@ -1,4 +1,4 @@
-function saveswc( outfilename, swc )
+function saveswc( swc, outfilename )
 %SAVESWC Summary of this function goes here
 %   Detailed explanation goes here
 

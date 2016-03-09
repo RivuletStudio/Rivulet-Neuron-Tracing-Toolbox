@@ -434,10 +434,10 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
         tree(:, 6) = 1;
     end
     
-        if handles.outputswccheck.Value
-            saveswc(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
-        end
+    if handles.outputswccheck.Value && isfield('inputpath', handles.selectfilebtn.UserData)
+        saveswc(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
     end
+    
 %     t = tree(:,4);
 %     tree(:, 4) = tree(:, 3);
 %     tree(:, 3) = t;
