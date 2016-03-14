@@ -64,6 +64,8 @@ if exist(fullfile(pathstr, 'config.mat'), 'file')
     addpath(v3dmatpath);
 end
 
+handles.reversecolour.UserData.black = 1;
+
 reloadworkspacebtn_Callback(hObject, eventdata, handles)
 % UIWAIT makes gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -432,14 +434,10 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
         tree(:, 6) = 1;
     end
     
-    if handles.outputswccheck.Value
-        if exist('save_v3d_raw_img_file') && isfield(handles.selectfilebtn.UserData, 'inputpath')
-            save_v3d_swc_file(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
-%             msgbox(sprintf('Mean confidence of the tracing: %.4f. The traced swc file has been output to %s', meanconf, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']));
-        else
-            msgbox('Cannot find save_v3d_swc_file! Please check if vaa3d_matlabio_toolbox has been loaded...\nHowever you can save the results with ''All To Workspace''');
-        end
+    if handles.outputswccheck.Value && isfield('inputpath', handles.selectfilebtn.UserData)
+        saveswc(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
     end
+    
 %     t = tree(:,4);
 %     tree(:, 4) = tree(:, 3);
 %     tree(:, 3) = t;
@@ -581,7 +579,7 @@ if pathname ~= 0
     hObject.UserData.default = pathname;
 end
 filepath = fullfile(pathname, filename);
-handles.selectfilebtn.UserData.swc = load_v3d_swc_file(filepath);
+handles.selectfilebtn.UserData.swc = loadswc(filepath);
 refresh_render(handles);
 
 function refresh_render(handles)
@@ -602,7 +600,7 @@ if handles.treecheck.Value
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
         if shift > 0
-            fprintf('shift with %f\n', shift);
+%             fprintf('shift with %f\n', shift);
             tree(:, 3:5) = tree(:, 3:5) + shift;
         end
         % show the swc based reconstructure
@@ -612,8 +610,11 @@ end
 
 % If the image tick box is ticked, new bI will be updated.
 if handles.imagecheck.Value
-    if isfield(handles.selectfilebtn.UserData, 'bI')
-        showbox(handles.selectfilebtn.UserData.bI, 0.5, ~handles.lightcheck.Value, true);
+    if isfield(handles.selectfilebtn.UserData, 'I')
+        showbox(handles.selectfilebtn.UserData.I,...
+                handles.thresholdslider.Value,...
+                ~handles.lightcheck.Value, true,...
+                handles.reversecolour.UserData.black);
     end
 end
 
@@ -1679,3 +1680,13 @@ if isfield(handles.selectfilebtn.UserData, 'soma')
     plot3(x, y, z, 'b.');
     axis equal
 end
+
+
+% --- Executes on button press in reversecolour.
+function reversecolour_Callback(hObject, eventdata, handles)
+% hObject    handle to reversecolour (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.reversecolour.UserData.black = ~handles.reversecolour.UserData.black;
+
+refresh_render(handles);

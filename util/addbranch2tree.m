@@ -16,7 +16,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 	newtree = zeros(size(l, 1), 7);
 	if size(tree, 1) == 0 || size(tree, 1) == 1 % 1 When soma location is used 
 		newtree(:, 1) = 2 : size(l, 1)+1;
-		newtree(:, 2) = 2;
+		newtree(:, 2) = 3;
 		newtree(:, 3:5) = l;
 		newtree(:, 6) = radius;
 		newtree(1:end-1, 7) = newtree(2:end, 1);
@@ -47,7 +47,7 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 
         % Sort internal relationship
 		newtree(:, 1) = tree(end, 1) + 1 : tree(end, 1) + size(l, 1);
-		newtree(:, 2) = 2;
+		newtree(:, 2) = 3;
 		newtree(:, 3:5) = l;
 		newtree(:, 6) = radius;
 		newtree(1:end-1, 7) = newtree(2:end, 1);
@@ -64,9 +64,11 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 				if plot
 					plot3([newtree(end, 4);tree(idx1, 4)], [newtree(end, 3);tree(idx1, 3)], [newtree(end, 5);tree(idx1, 5)], 'b-.');
 					drawnow
-				end
+                end
+                newtree(end, 2) = 5;
 			else
 				newtree(end, 7) = -2; % Remain unconnected
+                newtree(end, 2) = 6;
 			end
 		end
 
@@ -75,9 +77,11 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			if plot
 				plot3([newtree(1, 4);tree(idx2, 4)], [newtree(1, 3);tree(idx2, 3)], [newtree(1, 5);tree(idx2, 5)], 'b-.');
 				drawnow
-			end
+            end
+            newtree(1, 2) = 3;
 		else
-			newtree(1, 7) = -2; % Remain unconnected
+% 			newtree(1, 7) = -2; % Remain unconnected
+            newtree(1, 2) = 6;
 		end
 
 		% plot3([newtree(end, 4);tree(idx, 4)], [newtree(end, 3);tree(idx, 3)], [newtree(end, 5);tree(idx, 5)], 'b-.');

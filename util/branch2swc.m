@@ -93,7 +93,7 @@ function [tree] = branch2swc(S, filename)
     end
 
     fprintf('Saving to %s\n', [filename, '.swc']);
-    save_v3d_swc_file(tree, [filename, '.swc']);
+    saveswc(tree, [filename, '.swc']);
 end
 
 
