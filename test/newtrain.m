@@ -7,8 +7,8 @@ clear all
 close all
 sigma = 1.2;
 oppath = '/home/donghao/Desktop/OP/OP';
-for i = 1 : 9
-    if i ~= 2
+for i = 1 : 5
+    if i ~= 2 & i ~= 4
         stri = num2str(i);                                                                                                                           
         opdraw = [oppath, stri, '/op', stri, '.v3draw'];
         disp(opdraw)
