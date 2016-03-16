@@ -189,7 +189,7 @@ function [tree, meanconf] = trace(varargin)
 	    	break;
 	    end
 
-	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, tree, StartPoint, SourcePoint, 1, 'rk4', gap);
+	    [l, dump, merged, somamerged] = shortestpath2(T, grad, I, tree, StartPoint, SourcePoint, 1, 'euler', gap);
 
         if size(l, 1) == 0
             l = StartPoint'; % Make sure the start point will be erased
