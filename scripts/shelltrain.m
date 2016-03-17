@@ -9,7 +9,7 @@ Y = [];
 disp(['Searching path...', path2feat])
 fields = {};
 % how to change training example: trainlist = [1, 3, 4...]
-trainlist = [1];
+trainlist = [1, 3, 4, 8];
 opnum = numel(trainlist);
 for i = 1 : opnum       
     xrows = [];

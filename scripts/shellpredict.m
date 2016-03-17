@@ -1,15 +1,15 @@
 clc
 clear all
 close all
-path2feat='/home/donghao/Desktop/OP/OP1';
+path2feat='/home/donghao/Desktop/OP/OP6';
 X = [];
 Y = [];
 disp(['Searching path...', path2feat])
 fields = {};
 xrows = [];
 yrows = [];
-fprintf('Collecting %s\n', 'OP_1fea.mat');
-feats = load(fullfile(path2feat, 'OP_1fea.mat'));
+fprintf('Collecting %s\n', 'OP_6fea.mat');
+feats = load(fullfile(path2feat, 'OP_6fea.mat'));
 feats = feats.curfeats;
 fields = fieldnames(feats);
 for j = 1:numel(fields)

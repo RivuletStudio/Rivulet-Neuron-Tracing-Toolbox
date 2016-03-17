@@ -1,7 +1,7 @@
 clc
 clear all
 close all
-i = 1;
+i = 6;
 stri = num2str(i);  
 oppath = '/home/donghao/Desktop/OP/OP';
 opdraw = [oppath, stri, '/op', stri, '.v3draw'];
