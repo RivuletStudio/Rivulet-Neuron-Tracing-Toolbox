@@ -230,10 +230,33 @@ end
 
 function autocropbtn_Callback(hObject, eventdata, handles)
 if isfield(handles.selectfilebtn.UserData, 'bI')
-    bI = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
+    [bI, cropregion] = imagecrop(handles.selectfilebtn.UserData.bI, 0.5);
     handles.volumesizetxt.String = sprintf('Volume Size: %d, %d, %d', size(bI, 1), size(bI, 2), size(bI, 3));
     handles.selectfilebtn.UserData.bI = bI;
     handles.selectfilebtn.UserData.I = imagecrop(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
+    
+    if isfield(handles.selectfilebtn.UserData, 'swc') % If there is a swc loaded, crop it with the image as well
+        swc = handles.selectfilebtn.UserData.swc;
+        swc(:, 3) = swc(:, 3) - cropregion(1,1) + 1;
+        swc(:, 4) = swc(:, 4) - cropregion(2,1) + 1;
+        swc(:, 5) = swc(:, 5) - cropregion(3,1) + 1;
+        newswc = [];
+
+        for i = 1 : size(swc, 1)
+            if swc(i, 3) >= 1 && ...
+               swc(i, 4) >= 1 && ...
+               swc(i, 5) >= 1 && ...
+               swc(i, 3) < cropregion(1,2) && ...
+               swc(i, 4) < cropregion(2,2) && ...
+               swc(i, 5) < cropregion(3,2)
+
+               newswc = [newswc; swc(i, :)];
+           end
+        end
+
+        handles.selectfilebtn.UserData.swc = newswc;
+    end
+    
     refresh_render(handles);
 end
 
@@ -579,7 +602,10 @@ if pathname ~= 0
     hObject.UserData.default = pathname;
 end
 filepath = fullfile(pathname, filename);
-handles.selectfilebtn.UserData.swc = loadswc(filepath);
+swc = loadswc(filepath);
+swc(:, 3:5) = swc(:, 3:5) + 1;
+handles.selectfilebtn.UserData.swc = swc;
+
 refresh_render(handles);
 
 function refresh_render(handles)
@@ -599,6 +625,7 @@ if handles.treecheck.Value
     %  field in the structure array S.
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
+        tree(:, 3:5) = tree(:, 3:5);
         if shift > 0
 %             fprintf('shift with %f\n', shift);
             tree(:, 3:5) = tree(:, 3:5) + shift;
@@ -1494,10 +1521,16 @@ try
         handles.selectfilebtn.UserData.I = I;
         handles.selectfilebtn.UserData.bI = bI;
         refresh_render(handles);
-    elseif ndims(I) == 2 && size(I, 2) == 7 % swc
-        fprintf('Trying to load %s as swc tree\n', varname);
-        handles.selectfilebtn.UserData.swc = I;
-        refresh_render(handles);
+    elseif ndims(I) == 2 
+        if size(I, 2) == 7 % swc
+            fprintf('Trying to load %s as swc tree\n', varname);
+            I(:, 3:5) = I(:, 3:5) + 1;
+            handles.selectfilebtn.UserData.swc = I;
+            refresh_render(handles);
+        else % Image
+            figure(2)
+            imshow(I);
+        end
     end
 catch exception
     fprintf('Cannot read variable %s\n', varname);
@@ -1543,11 +1576,20 @@ function saveallbtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 vars2save = fields(handles.selectfilebtn.UserData);
+
+if isfield(handles.selectfilebtn.UserData, 'swc')
+    handles.selectfilebtn.UserData.swc(:, 3:5) = handles.selectfilebtn.UserData.swc(:, 3:5) - 1;
+end
+
 for i = 1 : numel(vars2save)
     field = vars2save{i};
     eval(sprintf('%s = handles.selectfilebtn.UserData.%s;', field, field));
     eval(sprintf('assignin (''base'', ''%s'', %s);', field, field));
 end
+
+% Reload workspace
+vlist = evalin('base', 'who');
+set(handles.workspacelist, 'String', vlist, 'Value', 1);
 
 % --- Executes on key press with focus on saveallbtn and none of its controls.
 function saveallbtn_KeyPressFcn(hObject, eventdata, handles)
@@ -1690,3 +1732,77 @@ function reversecolour_Callback(hObject, eventdata, handles)
 handles.reversecolour.UserData.black = ~handles.reversecolour.UserData.black;
 
 refresh_render(handles);
+
+
+% --- Executes on button press in xyproject.
+function xyproject_Callback(hObject, eventdata, handles)
+% hObject    handle to xyproject (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles.selectfilebtn.UserData, 'I')
+    I = handles.selectfilebtn.UserData.I;
+    maxI = squeeze(max(I, [], 3));
+
+%     figure()
+%     imshow(maxI);
+    if isfield(handles.selectfilebtn.UserData, 'inputpath')
+        [~, fn, ~] = fileparts(handles.selectfilebtn.UserData.inputpath);
+    else
+        fn = 'maxI';
+    end
+    
+    if isfield(handles.selectfilebtn.UserData, 'swc')
+        swcxy = handles.selectfilebtn.UserData.swc;
+        swcxy(:, 5) = 1;
+    else
+    end
+    
+    path2save = sprintf('%s-XY.tif', fn);    
+    fprintf('Saving tif image to %s\n', path2save);
+    imwrite(maxI, path2save);
+        
+    % Calculate real valued DT from the skeleton
+    dt = dtfromswc(I, handles.selectfilebtn.UserData.swc);
+    
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'maxI', 'maxI')); 
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'swcxy', 'swcxy')); 
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt', 'dt')); 
+end
+
+
+% --- Executes on button press in gvfswc.
+function gvfswc_Callback(hObject, eventdata, handles)
+% hObject    handle to gvfswc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'swc') && isfield(handles.selectfilebtn.UserData, 'I')
+    handles.selectfilebtn.UserData.swc = gvf_adjust_swc(handles.selectfilebtn.UserData.I,...
+                                                        handles.selectfilebtn.UserData.swc, str2double(handles.mu.String));                                                    
+    refresh_render(handles);
+else
+    disp('Sorry, there is no swc/image loaded.')
+end
+
+
+
+function mu_Callback(hObject, eventdata, handles)
+% hObject    handle to mu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of mu as text
+%        str2double(get(hObject,'String')) returns contents of mu as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function mu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to mu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
