@@ -1,49 +1,97 @@
-function dt = dtfromswc(I, swc)
+function dt = dtfromswc(sz, swc, alpha, is2D)
+% Generate distance transform from the SWC file
+% The SWC nodes will be upsampled to make sure almost every voxel along the path has a value
+% sz: The input image size in 3D
+% swc: the SWC node list
+% is2D: boolean for whether the output is expected to be the XY projection
+
 	% Up sample swc nodes
-	[~, pts] = binarycilinder3D(size(I), swc, true);
-	dt = zeros(size(I));
-	dtflag = zeros(size(I));
-	dtflag(:) = -1;
+	[~, pts] = binarycilinder3D(sz, swc, true);
+
+	if is2D
+		dt = zeros(sz(1:2));
+	else
+		dt = zeros(sz);
+	end
+
 	dt(:) = -1;
+
 
 	% Fill in the distances between the nodes and the voxel it stays in
 	for i = 1 : size(pts, 1)
-		dt(ceil(pts(i, 1)), ceil(pts(i, 2)), ceil(pts(i, 3))) = norm(pts(i, 1:3) - ceil(pts(i, 1:3)), 2);
-		dtflag(ceil(pts(i, 1)), ceil(pts(i, 2)), ceil(pts(i, 3))) = 0;
+		if is2D
+			dt(ceil(pts(i, 1)), ceil(pts(i, 2))) = norm(pts(i, 1:2) - ceil(pts(i, 1:2)), 2);
+		else
+			dt(ceil(pts(i, 1)), ceil(pts(i, 2)), ceil(pts(i, 3))) = norm(pts(i, 1:3) - ceil(pts(i, 1:3)), 2);
+		end
     end
     
     newdt = dt; 
     
 	for i = 1 : 5 
-		ind = findneighbours(dt); % Return the linear index of all neighbours in the outer boundary
-		[x, y, z] = ind2sub(size(I), ind);
 		disp(i)
-        for j = 1 : numel(ind)
-		 	[xgrid, ygrid, zgrid] = meshgrid(x(j)-1:x(j)+1,...
-		 	                                 y(j)-1:y(j)+1,...
-		 	                                 z(j)-1:z(j)+1);
-			xgrid = constrain(xgrid(:), 1, size(dt, 1));
-			ygrid = constrain(ygrid(:), 1, size(dt, 2));
-			zgrid = constrain(zgrid(:), 1, size(dt, 3));
-            gridind = sub2ind(size(I), xgrid, ygrid, zgrid);
-            neighbourval = dt(gridind);
-            
-            if ~all(neighbourval == -1)
-            	neighbourval(neighbourval == -1) = 10000; % To find the minimum value except -1
-            	[minD, minDidx] = min(neighbourval);
-            	[minx, miny, minz] = ind2sub(size(dt), gridind(minDidx));
-            	nd = norm([x(j), y(j), z(j)] - [minx, miny, minz], 2) + minD;
-                newdt(ind(j)) = nd;
-            end
-        end
+
+        if is2D
+			ind = findneighbours(dt, is2D); % Return the linear index of all neighbours in the outer boundary
+			[x, y] = ind2sub(sz(1:2), ind);
+
+	        for j = 1 : numel(ind)
+			 	[xgrid, ygrid] = meshgrid(x(j)-1:x(j)+1, y(j)-1:y(j)+1);
+				xgrid = constrain(xgrid(:), 1, size(dt, 1));
+				ygrid = constrain(ygrid(:), 1, size(dt, 2));
+	            gridind = sub2ind(sz(1:2), xgrid, ygrid);
+	            neighbourval = dt(gridind);
+	            
+	            if ~all(neighbourval == -1)
+	            	neighbourval(neighbourval == -1) = 10000; % To find the minimum value except -1
+	            	[minD, minDidx] = min(neighbourval);
+	            	[minx, miny] = ind2sub(sz(1:2), gridind(minDidx));
+	            	nd = norm([x(j), y(j)] - [minx, miny], 2) + minD;
+	                newdt(ind(j)) = nd;
+	            end
+	        end
+        else
+			ind = findneighbours(dt, is2D); % Return the linear index of all neighbours in the outer boundary
+			[x, y, z] = ind2sub(sz, ind);
+	        for j = 1 : numel(ind)
+			 	[xgrid, ygrid, zgrid] = meshgrid(x(j)-1:x(j)+1,...
+			 	                                 y(j)-1:y(j)+1,...
+			 	                                 z(j)-1:z(j)+1);
+				xgrid = constrain(xgrid(:), 1, size(dt, 1));
+				ygrid = constrain(ygrid(:), 1, size(dt, 2));
+				zgrid = constrain(zgrid(:), 1, size(dt, 3));
+	            gridind = sub2ind(sz, xgrid, ygrid, zgrid);
+	            neighbourval = dt(gridind);
+	            
+	            if ~all(neighbourval == -1)
+	            	neighbourval(neighbourval == -1) = 10000; % To find the minimum value except -1
+	            	[minD, minDidx] = min(neighbourval);
+	            	[minx, miny, minz] = ind2sub(sz, gridind(minDidx));
+	            	nd = norm([x(j), y(j), z(j)] - [minx, miny, minz], 2) + minD;
+	                newdt(ind(j)) = nd;
+	            end
+	        end
+	    end
+
 		dt = newdt;
 	end
+    
+    fgdt = dt ~= -1;
+	dt(fgdt) = alpha * (1 - dt(fgdt) ./ max(dt(:)));
+	dt(fgdt) = exp(dt(fgdt)) - 1;
+	dt = dt ./ max(dt(:));
 end
 
-
-function ind = findneighbours(dt)
+			 	                                
+function ind = findneighbours(dt, is2D)
 	binarydt = dt >= 0;
-    se = strel(ones(3,3,3));
+
+	if is2D
+	    se = strel(ones(3, 3));
+	else
+	    se = strel(ones(3, 3, 3));
+	end
+
     binarydt = imdilate(binarydt, se) - binarydt;
     ind = find(binarydt ~= 0);
 end

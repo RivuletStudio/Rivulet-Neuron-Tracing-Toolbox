@@ -1763,11 +1763,89 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     imwrite(maxI, path2save);
         
     % Calculate real valued DT from the skeleton
-    dt = dtfromswc(I, handles.selectfilebtn.UserData.swc);
+    dt2d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), true);
+    dt3d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), false);
     
+    % Reload workspace
+    vlist = evalin('base', 'who');
+    set(handles.workspacelist, 'String', vlist, 'Value', 1);
+    
+    disp('DT generated!');
+
+    bg = maxI <= handles.thresholdslider.Value;
+    % bdist = bwdist(bg, 'Quasi-Euclidean');
+    % bdist(bg) = 0;
+    % maxd = ceil(max(bdist(:)));
+    % meanbdist = bdist(bdist > 0);
+    % meanbdist = mean(meanbdist(:));
+    % meanradius = ceil(meanbdist);
+    maxd = 20;
+
+    % Pad image
+    pad2Dimg = zeros(maxd * 4 + size(maxI, 1), maxd * 4 + size(maxI, 2));
+    pad2Dimg(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = maxI;
+    % pad2Dbdist = zeros(maxd * 4 + size(maxI, 1), maxd * 4 + size(maxI, 2));
+    % pad2Dbdist(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = bdist;
+    fg = pad2Dimg > handles.thresholdslider.Value;
+
+    se = strel('diamond', 3); % dilate foreground to sample foreground patches
+    fg = imdilate(fg, se);
+    fgidx = find(fg > 0);
+    [x, y] = ind2sub(size(pad2Dimg), fgidx);
+    patchsize = 50;
+    patchctr = 1;
+    scale = [30:10:60];
+    nscale = numel(scale);
+    patches15 = zeros(numel(fgidx), nscale, patchsize, patchsize);
+
+    for i = 1 : numel(fgidx)
+        % radius = ceil(pad2Dbdist(fgidx(i)));
+        radiusidx = 1;
+        out = false;
+
+        for radius = scale
+            leftx = x(i) - radius;
+            rightx = x(i) + radius;
+            lefty = y(i) - radius;
+            righty = y(i) + radius;
+            if leftx < 1 || lefty < 1 || rightx > size(pad2Dimg, 1) || righty > size(pad2Dimg, 2)
+                out = true;
+                break;
+            end
+        end
+
+        if out == true
+            continue;
+        end
+
+        for radius = scale 
+            leftx = x(i) - radius;
+            rightx = x(i) + radius;
+            lefty = y(i) - radius;
+            righty = y(i) + radius;
+            
+            fprintf('%d:%d - %d-%d\tExtracting %f%%\n', leftx, rightx, lefty, righty, 100*i/numel(fgidx));
+
+            p = pad2Dimg(leftx:rightx, lefty:righty);
+            p = imresize(p, [patchsize, patchsize]);
+            patches15(patchctr, radiusidx, :, :) = p;
+
+            imwrite(p, sprintf('patches/%d-%d.tif', patchctr, radius));
+
+            radiusidx = radiusidx + 1;
+        end
+
+        patchctr = patchctr + 1;
+    end
+
+    patches15(patchctr:end,:,:,:) = []; % Release the unused memory
+
     eval(sprintf('assignin (''base'', ''%s'', %s);', 'maxI', 'maxI')); 
     eval(sprintf('assignin (''base'', ''%s'', %s);', 'swcxy', 'swcxy')); 
-    eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt', 'dt')); 
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt2d', 'dt2d'));
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt3d', 'dt3d'));
+    % eval(sprintf('assignin (''base'', ''%s'', %s);', 'bdist', 'bdist'));
+    eval(sprintf('assignin (''base'', ''%s'', %s);', 'patches15', 'patches15'));
 end
 
 
@@ -1798,6 +1876,29 @@ function mu_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function mu_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to mu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function alpha_Callback(hObject, eventdata, handles)
+% hObject    handle to alpha (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of alpha as text
+%        str2double(get(hObject,'String')) returns contents of alpha as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function alpha_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to alpha (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
