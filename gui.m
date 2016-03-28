@@ -1758,9 +1758,9 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     else
     end
     
-    path2save = sprintf('%s-XY.tif', fn);    
-    fprintf('Saving tif image to %s\n', path2save);
-    imwrite(maxI, path2save);
+%     path2save = sprintf('%s-XY.tif', fn);    
+%     fprintf('Saving tif image to %s\n', path2save);
+%     imwrite(maxI, path2save);
         
     % Calculate real valued DT from the skeleton
     disp('Extracing 2D Distance transform')
@@ -1813,8 +1813,7 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     disp('Extracting patches...')
     for i = 1 : numel(fgidx)
         fprintf('Extracting %f%%\n', 100*i/numel(fgidx));
-        % radius = ceil(pad2Dbdist(fgidx(i)));
-        radiusidx = 1;
+
         out = false;
 
         for radius = scale
@@ -1833,27 +1832,48 @@ if isfield(handles.selectfilebtn.UserData, 'I')
         end
         
         % Randomly rotate image patches 
-        randangle = randi([0, 359]);
-        
-        for radius = scale 
-            leftx = x(i) - radius;
-            rightx = x(i) + radius;
-            lefty = y(i) - radius;
-            righty = y(i) + radius;
-            p = pad2Dimg(leftx:rightx, lefty:righty);
-            p = imresize(p, [patchsize, patchsize]);
-            
-            if handles.rotatecheck.Value
-                p = imrotate(p, randangle, 'bilinear', 'crop');
+        if handles.rotatecheck.Value
+            for angleidx = 1 : 5
+                randangle = randi([0, 359]);
+                radiusidx = 1;
+                for radius = scale 
+                    leftx = x(i) - radius;
+                    rightx = x(i) + radius;
+                    lefty = y(i) - radius;
+                    righty = y(i) + radius;
+                    p = pad2Dimg(leftx:rightx, lefty:righty);
+                    p = imresize(p, [patchsize, patchsize]);
+                    p = imrotate(p, randangle, 'bilinear', 'crop');
+                    patches(:, :, radiusidx , patchctr) = p;
+                    radiusidx = radiusidx + 1;
+                end
+
+                gt(patchctr) = pad2Ddist(fgidx(i));
+                coord(:, patchctr) = [x(i), y(i)];
+                patchctr = patchctr + 1;
             end
             
-            patches(:, :, radiusidx , patchctr) = p;
+        else      
+            for radius = scale 
+                leftx = x(i) - radius;
+                rightx = x(i) + radius;
+                lefty = y(i) - radius;
+                righty = y(i) + radius;
+                p = pad2Dimg(leftx:rightx, lefty:righty);
+                p = imresize(p, [patchsize, patchsize]);
+
+                if handles.rotatecheck.Value
+                    p = imrotate(p, randangle, 'bilinear', 'crop');
+                end
+
+                patches(:, :, radiusidx , patchctr) = p;
+                radiusidx = radiusidx + 1;
+            end
+
             gt(patchctr) = pad2Ddist(fgidx(i));
             coord(:, patchctr) = [x(i), y(i)];
-            radiusidx = radiusidx + 1;
+            patchctr = patchctr + 1;
         end
-
-        patchctr = patchctr + 1;
     end
 
     patches(:,:,:,patchctr:end) = []; % Release the unused memory
@@ -1880,7 +1900,7 @@ if isfield(handles.selectfilebtn.UserData, 'I')
 %     eval(sprintf('assignin (''base'', ''%s'', %s);', 'patches', 'patches'));
 
     disp('Writting H5...')
-    fh5 = '/home/siqi/ncidata/Neuveal-Caffe/expt/2d/data/data-8.h5';
+    fh5 = '/home/siqi/ncidata/Neuveal-Caffe/expt/2d/data/norotate/data-1.h5';
     if exist(fh5, 'file')==2
       delete(fh5);
     end

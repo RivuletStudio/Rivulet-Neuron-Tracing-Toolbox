@@ -78,8 +78,8 @@ function dt = dtfromswc(sz, swc, alpha, is2D)
 	dt(:) = alpha * (1 - dt(:) ./ max(dt(:)));
 	dt(:) = exp(dt(:)) - 1;
 	dt = dt ./ max(dt(:));
+    % dt(bgmask) = -1;
     dt(bgmask) = 0;
-	% dt(dt < 0) = 0;
 end
 
 			 	                                
