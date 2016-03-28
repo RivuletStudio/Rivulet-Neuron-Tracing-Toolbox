@@ -1806,7 +1806,7 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     patchctr = 1;
     scale = [60:20:120];
     nscale = numel(scale);
-    patches = zeros(patchsize, patchsize, nscale, numel(fgidx));
+    patches = zeros(patchsize, patchsize, 1, numel(fgidx) * nscale);
     gt = zeros(1, numel(fgidx));
     coord = zeros(2, numel(fgidx));
 
@@ -1866,19 +1866,20 @@ if isfield(handles.selectfilebtn.UserData, 'I')
                     p = imrotate(p, randangle, 'bilinear', 'crop');
                 end
 
-                patches(:, :, radiusidx , patchctr) = p;
-                radiusidx = radiusidx + 1;
+                patches(:, :, 1 , patchctr) = p;
+                gt(patchctr) = pad2Ddist(fgidx(i));
+                coord(:, patchctr) = [x(i), y(i)];
+                patchctr = patchctr + 1;
+%                 radiusidx = radiusidx + 1;
             end
 
-            gt(patchctr) = pad2Ddist(fgidx(i));
-            coord(:, patchctr) = [x(i), y(i)];
-            patchctr = patchctr + 1;
+            
         end
     end
 
     patches(:,:,:,patchctr:end) = []; % Release the unused memory
     gt(:, patchctr:end) = []; % Release the unused memory
-
+    coord(:, patchctr:end) = [];
     % Sample foreground and background instances
 %     bgidx = find(gt == 0);
 %     fgidx = find(gt > 0);
@@ -1901,16 +1902,18 @@ if isfield(handles.selectfilebtn.UserData, 'I')
 
     disp('Writting H5...')
     fh5 = '/home/siqi/ncidata/Neuveal-Caffe/expt/2d/data/norotate/data-1.h5';
-    if exist(fh5, 'file')==2
+    if exist(fh5, 'file') == 2
       delete(fh5);
     end
 
     h5create(fh5, '/data' , [patchsize, patchsize, numel(scale), Inf], 'ChunkSize', [patchsize, patchsize, numel(scale), 64], 'DataType', 'single');
     h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
+    h5create(fh5, '/label2' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
     h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
     h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
     h5write(fh5, '/data', single(patches), [1, 1, 1, 1], size(patches));
     h5write(fh5, '/label', single(gt), [1, 1], size(gt));
+    h5write(fh5, '/label2', single(gt > 0.5), [1, 1], size(gt));
     h5write(fh5, '/coord', single(coord), [1, 1], size(coord));
     sz = size(pad2Dimg);
     h5write(fh5, '/imagesize', uint16(sz), [1, 1], size(sz));
