@@ -29,8 +29,6 @@ function dt = dtfromswc(sz, swc, alpha, is2D)
     newdt = dt; 
     
 	for i = 1 : 5 
-		disp(i)
-
         if is2D
 			ind = findneighbours(dt, is2D); % Return the linear index of all neighbours in the outer boundary
 			[x, y] = ind2sub(sz(1:2), ind);
@@ -74,12 +72,14 @@ function dt = dtfromswc(sz, swc, alpha, is2D)
 	    end
 
 		dt = newdt;
-	end
+    end
     
-    fgdt = dt ~= -1;
-	dt(fgdt) = alpha * (1 - dt(fgdt) ./ max(dt(:)));
-	dt(fgdt) = exp(dt(fgdt)) - 1;
+    bgmask = dt == -1;
+	dt(:) = alpha * (1 - dt(:) ./ max(dt(:)));
+	dt(:) = exp(dt(:)) - 1;
 	dt = dt ./ max(dt(:));
+    dt(bgmask) = 0;
+	% dt(dt < 0) = 0;
 end
 
 			 	                                
