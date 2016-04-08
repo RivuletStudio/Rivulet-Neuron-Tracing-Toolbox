@@ -1741,11 +1741,10 @@ function xyproject_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if isfield(handles.selectfilebtn.UserData, 'I')
+    tic
     I = handles.selectfilebtn.UserData.I;
     maxI = squeeze(max(I, [], 3));
 
-%     figure()
-%     imshow(maxI);
     if isfield(handles.selectfilebtn.UserData, 'inputpath')
         [~, fn, ~] = fileparts(handles.selectfilebtn.UserData.inputpath);
     else
@@ -1754,19 +1753,14 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     
     if isfield(handles.selectfilebtn.UserData, 'swc')
         swcxy = handles.selectfilebtn.UserData.swc;
-        swcxy(:, 5) = 1;
-    else
+        swcxy(:, 5) = 1;    
     end
     
-%     path2save = sprintf('%s-XY.tif', fn);    
-%     fprintf('Saving tif image to %s\n', path2save);
-%     imwrite(maxI, path2save);
-        
     % Calculate real valued DT from the skeleton
     disp('Extracing 2D Distance transform')
     dt2d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), true);
-    disp('Extracing 3D Distance transform')
-    dt3d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), false);
+%     disp('Extracing 3D Distance transform')
+%     dt3d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), false);
     
     % Reload workspace
     vlist = evalin('base', 'who');
@@ -1788,32 +1782,65 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     pad2Dimg(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = maxI;
     
     pad2Ddist = zeros(maxd * 4 + size(maxI, 1), maxd * 4 + size(maxI, 2));
-    pad2Ddist(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = dt2d;
-    fg = pad2Dimg > handles.thresholdslider.Value;
+    pad2Ddist(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = dt2d;    
     
-    % Normalise maxI
-    pad2Dimg = double(pad2Dimg);
-    pad2Dimg = pad2Dimg - mean(pad2Dimg(:));
-    pad2Dimg = pad2Dimg / std(pad2Dimg(:));
-    pad2Dimg = pad2Dimg - min(pad2Dimg(:));
-    pad2Dimg = pad2Dimg / max(pad2Dimg(:)); 
-
-    se = strel('diamond', str2double(handles.kernelsize.String)); % dilate foreground to sample foreground patches
-    fg = imdilate(fg, se);
-    fgidx = find(fg > 0);
-    [x, y] = ind2sub(size(pad2Dimg), fgidx);
+    % Define the hyper paramters for patch extraction
     patchsize = 19;
-    patchctr = 1;
     scale = [60:20:120];
     nscale = numel(scale);
+
+
+    patchctr = 1;
+    fh5 = handles.h5path.String;
+    
+    if handles.add2list.Value % Append this filelist to the filelist txt
+        fid = fopen(handles.h5list.String, 'r');
+        added = false;
+
+        tline = fgets(fid);
+        while ischar(tline)
+            tline = fgets(fid);
+            if strcmp(tline, handles.h5path.String)
+                added = true;
+            end
+        end
+
+        fclose(fid);
+
+        if ~added
+            fid = fopen(handles.h5list.String, 'at');
+            fprintf(fid, handles.h5path.String);
+            fclose(fid);
+        end
+    end
+
+    if exist(fh5, 'file') == 2
+        delete(fh5);
+    end
+
+    h5create(fh5, '/data' , [patchsize, patchsize, numel(scale), Inf], 'ChunkSize', [patchsize, patchsize, numel(scale), 64], 'DataType', 'single');
+    h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
+    h5create(fh5, '/label2' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
+    h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
+    h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
+    sz = size(pad2Dimg);
+    h5write(fh5, '/imagesize', uint16(sz), [1, 1], size(sz));
+
+    se = strel('diamond', str2double(handles.kernelsize.String)); % dilate foreground to sample foreground patches
+    fg = pad2Dimg > handles.thresholdslider.Value;
+    fg = imdilate(fg, se);
+    fgidx = find(fg > 0);
+
+    % Normalise pad2Dimg
+    pad2Dimg = double(pad2Dimg);
+
+    [x, y] = ind2sub(size(pad2Dimg), fgidx);
     patches = zeros(patchsize, patchsize, 1, numel(fgidx) * nscale);
     gt = zeros(1, numel(fgidx));
     coord = zeros(2, numel(fgidx));
 
-    disp('Extracting patches...')
     for i = 1 : numel(fgidx)
-        fprintf('Extracting %f%%\n', 100*i/numel(fgidx));
-
+        fprintf('Extracting %f%%\n', 100 * i / numel(fgidx));
         out = false;
 
         for radius = scale
@@ -1830,97 +1857,41 @@ if isfield(handles.selectfilebtn.UserData, 'I')
         if out == true
             continue;
         end
-        
-        % Randomly rotate image patches 
-        if handles.rotatecheck.Value
-            for angleidx = 1 : 5
-                randangle = randi([0, 359]);
-                radiusidx = 1;
-                for radius = scale 
-                    leftx = x(i) - radius;
-                    rightx = x(i) + radius;
-                    lefty = y(i) - radius;
-                    righty = y(i) + radius;
-                    p = pad2Dimg(leftx:rightx, lefty:righty);
-                    p = imresize(p, [patchsize, patchsize]);
-                    p = imrotate(p, randangle, 'bilinear', 'crop');
-                    patches(:, :, radiusidx , patchctr) = p;
-                    radiusidx = radiusidx + 1;
-                end
 
-                gt(patchctr) = pad2Ddist(fgidx(i));
-                coord(:, patchctr) = [x(i), y(i)];
-                patchctr = patchctr + 1;
+        % Scale image patches 
+        for radius = scale 
+            leftx = x(i) - radius;
+            rightx = x(i) + radius;
+            lefty = y(i) - radius;
+            righty = y(i) + radius;
+            p = pad2Dimg(leftx:rightx, lefty:righty);
+            p = imresize(p, [patchsize, patchsize]);
+            % randomly rotate each patch
+            if handles.rotatecheck.Value
+                p = imrotate(p, rand() * 360, 'bilinear', 'crop'); 
             end
-            
-        else      
-            for radius = scale 
-                leftx = x(i) - radius;
-                rightx = x(i) + radius;
-                lefty = y(i) - radius;
-                righty = y(i) + radius;
-                p = pad2Dimg(leftx:rightx, lefty:righty);
-                p = imresize(p, [patchsize, patchsize]);
-
-                if handles.rotatecheck.Value
-                    p = imrotate(p, randangle, 'bilinear', 'crop');
-                end
-
-                patches(:, :, 1 , patchctr) = p;
-                gt(patchctr) = pad2Ddist(fgidx(i));
-                coord(:, patchctr) = [x(i), y(i)];
-                patchctr = patchctr + 1;
-%                 radiusidx = radiusidx + 1;
-            end
-
-            
+            patches(:, :, 1, patchctr) = p;
+            gt(patchctr) = pad2Ddist(fgidx(i));
+            coord(:, patchctr) = [x(i), y(i)];
+            patchctr = patchctr + 1;
         end
     end
 
     patches(:,:,:,patchctr:end) = []; % Release the unused memory
     gt(:, patchctr:end) = []; % Release the unused memory
     coord(:, patchctr:end) = [];
-    % Sample foreground and background instances
-%     bgidx = find(gt == 0);
-%     fgidx = find(gt > 0);
-%     randbgidx = randperm(numel(bgidx));
-%     randbgidx = bgidx(randbgidx);
-%     fgpatches = patches(:,:,:,fgidx);
-%     bgpatches = patches(:,:,:,randbgidx(1:numel(fgidx)));
-%     patches = zeros(size(patches, 1), size(patches, 2), size(patches, 3), 2*numel(fgidx));
-%     patches(:,:,:,1:numel(fgidx)) = fgpatches;
-%     patches(:,:,:,numel(fgidx)+1:end) = bgpatches;
-%     gt = [gt(fgidx), gt(randbgidx(1:numel(fgidx)))];
-%     coord = [coord(:, fgidx), coord(:, randbgidx(1:numel(fgidx)))];
-    
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'maxI', 'maxI')); 
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'swcxy', 'swcxy')); 
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt2d', 'dt2d'));
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'dt3d', 'dt3d'));
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'gt', 'gt'));
-%     eval(sprintf('assignin (''base'', ''%s'', %s);', 'patches', 'patches'));
-
     disp('Writting H5...')
-    fh5 = '/home/siqi/ncidata/Neuveal-Caffe/expt/2d/data/norotate/data-1.h5';
-    if exist(fh5, 'file') == 2
-      delete(fh5);
-    end
 
-    h5create(fh5, '/data' , [patchsize, patchsize, numel(scale), Inf], 'ChunkSize', [patchsize, patchsize, numel(scale), 64], 'DataType', 'single');
-    h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
-    h5create(fh5, '/label2' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
-    h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
-    h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
     h5write(fh5, '/data', single(patches), [1, 1, 1, 1], size(patches));
     h5write(fh5, '/label', single(gt), [1, 1], size(gt));
     h5write(fh5, '/label2', single(gt > 0.5), [1, 1], size(gt));
     h5write(fh5, '/coord', single(coord), [1, 1], size(coord));
-    sz = size(pad2Dimg);
-    h5write(fh5, '/imagesize', uint16(sz), [1, 1], size(sz));
+
+    toc    
     
     disp('Done');
 end
-
+    
 
 % --- Executes on button press in gvfswc.
 function gvfswc_Callback(hObject, eventdata, handles)
@@ -2012,3 +1983,65 @@ function rotatecheck_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of rotatecheck
+
+
+
+function h5path_Callback(hObject, eventdata, handles)
+% hObject    handle to h5path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of h5path as text
+%        str2double(get(hObject,'String')) returns contents of h5path as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function h5path_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to h5path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in lrnfilterbtn.
+function lrnfilterbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to lrnfilterbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function h5list_Callback(hObject, eventdata, handles)
+% hObject    handle to h5list (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of h5list as text
+%        str2double(get(hObject,'String')) returns contents of h5list as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function h5list_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to h5list (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in add2list.
+function add2list_Callback(hObject, eventdata, handles)
+% hObject    handle to add2list (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of add2list

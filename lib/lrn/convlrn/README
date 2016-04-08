@@ -1,0 +1,15 @@
+Convolutional filter learning - MATLAB version
+
+This is a simplified implementation of the convolutional filter learning
+algorithm presented in [1].
+The code learns a filter bank on the images of the CIFAR-10 dataset
+(http://www.cs.toronto.edu/~kriz/cifar.html).
+
+The algorithm's settings are in the helper_functions/get_config.m file.
+Before running the code, please make sure to have downloaded the MATLAB version
+of the dataset and have properly filled the file containing the list of data
+batches.
+
+
+[1] R. Rigamonti, M. Brown, V. Lepetit, "Are Sparse Representations Really
+    Relevant for Image Classification?", CVPR 2011
