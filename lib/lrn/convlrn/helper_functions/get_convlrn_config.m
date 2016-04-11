@@ -16,7 +16,7 @@ function [p] = get_config()
 
 %% Dataset's parameters
 % File containing the path for the CIFAR-10's training batches
-p.dataset_filelist = '/home/siqi/Desktop/err_GMR_57C10_AD_01-1xLwt_attp40_4stop1-f-A01-20110325_3_A3-left_optic_lobe.v3draw.extract_4/neuron2d_filelist.txt';
+p.dataset_filelist = '';
 
 % Number of images per block
 p.imgs_per_block = 168024 * 4;
@@ -43,7 +43,7 @@ p.wf_filename = 'w_filter.mat';
 p.filters_no = 100;
 
 % Filter's size
-p.filters_size = 11;
+p.filters_size = 7;
 
 %% Optimization algorithm's parameters
 % Number of ISTA steps on the coefficients

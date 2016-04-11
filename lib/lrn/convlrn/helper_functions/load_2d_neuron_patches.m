@@ -1,10 +1,10 @@
 function dataset = load_2d_neuron_patches(p)
-	if (~exist(p.paths.processed_dataset,'file'))
+	% if (~exist(p.paths.processed_dataset,'file'))
 	    [blocks_list,blocks_no] = get_list(p.dataset_filelist);
 	    dataset = {};
 	    
 	    for i_block = 1:blocks_no
-	        fprintf('  Loading 2D neuron pathces, block %d/%d\n',i_block,blocks_no);
+	        fprintf('Loading 2D neuron pathces from %s, block %d/%d\n', blocks_list{i_block}, i_block,blocks_no);
 	        x = double(h5read(blocks_list{i_block}, '/data'));
 	        tdataset = cell(size(x, 4), 1);
 	        neuronpatch = zeros(size(x, 1), size(x, 2));
@@ -34,7 +34,7 @@ function dataset = load_2d_neuron_patches(p)
 	    end
 	    
 	    save(p.paths.processed_dataset,'dataset','-v7.3');
-	else
-	    load(p.paths.processed_dataset,'dataset');
-	end
+	% else
+	%     load(p.paths.processed_dataset,'dataset');
+	% end
 end

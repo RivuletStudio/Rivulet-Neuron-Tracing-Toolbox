@@ -26,7 +26,7 @@ addpath(genpath('helper_functions'));
 if (nargin==0)
     resume_fb_no = 0;
 else
-    if (nargin>1 || ~isnumeric(resume_fb_no))
+    if (nargin>2 || ~isnumeric(resume_fb_no))
         error('Wrong parameters');
     end
 end

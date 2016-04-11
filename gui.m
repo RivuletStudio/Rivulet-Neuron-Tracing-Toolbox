@@ -613,7 +613,7 @@ function refresh_render(handles)
 % the shift vaule make swc recontruction and binaryied image do not overlap
 % each other
 shift = handles.shiftslider.Value * 20;
-h = msgbox('Rendering');
+% h = msgbox('Rendering');
 ax = handles.mainfig;
 % clear the single ax with ax
 cla(ax);
@@ -645,7 +645,7 @@ if handles.imagecheck.Value
     end
 end
 
-close(h);
+% close(h);
 
 
 % --- Executes on button press in imagecheck.
@@ -1512,12 +1512,14 @@ I = evalin('base', varname);
 try
     if ndims(I) == 3 % 3D image
         fprintf('Trying to load %s as 3D image\n', varname);
+        I = double(I);
+        I(I < 0) = 0;
         autothreshold(I, handles);
 
         [bI, ~] = binarizeimage('threshold', I,...
-            handles.thresholdslider.Value,...
-            handles.delta_t.Value, handles.cropcheck.Value,...
-            handles.levelsetcheck.Value);
+                                handles.thresholdslider.Value,...
+                                handles.delta_t.Value, handles.cropcheck.Value,...
+                                handles.levelsetcheck.Value);
         handles.selectfilebtn.UserData.I = I;
         handles.selectfilebtn.UserData.bI = bI;
         refresh_render(handles);
@@ -1527,9 +1529,19 @@ try
             I(:, 3:5) = I(:, 3:5) + 1;
             handles.selectfilebtn.UserData.swc = I;
             refresh_render(handles);
-        else % Image
-            figure(2)
-            imshow(I);
+        else % 2D Image
+            fprintf('Trying to load %s as 2D image\n', varname);
+            I = double(I);
+            I(I < 0) = 0;
+            autothreshold(I, handles);
+
+            [bI, ~] = binarizeimage('threshold', I,...
+                                    handles.thresholdslider.Value,...
+                                    handles.delta_t.Value, handles.cropcheck.Value,...
+                                    handles.levelsetcheck.Value);
+            handles.selectfilebtn.UserData.I = I;
+            handles.selectfilebtn.UserData.bI = bI;
+            refresh_render(handles);
         end
     end
 catch exception
@@ -1734,9 +1746,9 @@ handles.reversecolour.UserData.black = ~handles.reversecolour.UserData.black;
 refresh_render(handles);
 
 
-% --- Executes on button press in xyproject.
-function xyproject_Callback(hObject, eventdata, handles)
-% hObject    handle to xyproject (see GCBO)
+% --- Executes on button press in extractpatches.
+function extractpatches_Callback(hObject, eventdata, handles)
+% hObject    handle to extractpatches (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -2014,7 +2026,9 @@ function lrnfilterbtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
+p = get_convlrn_config();
+p.dataset_filelist = handles.h5list.String;
+convolutional_filter_learning(0, p);
 
 function h5list_Callback(hObject, eventdata, handles)
 % hObject    handle to h5list (see GCBO)
@@ -2045,3 +2059,52 @@ function add2list_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of add2list
+
+
+% --- Executes on button press in recon.
+function recon_Callback(hObject, eventdata, handles)
+% Only works with 2D now
+p.img = handles.selectfilebtn.UserData.I;
+p.ISTA_steps_no = 10;
+p.gd_step_size_fm = 5e-5;
+p.lambda_l1 = 2e-2;
+p.filters_txt = handles.filterpath.String;
+
+handles.selectfilebtn.UserData.I = reconimg(p);
+% figure(), imagesc(handles.selectfilebtn.UserData.I)
+handles.selectfilebtn.UserData.bI = handles.selectfilebtn.UserData.I > handles.thresholdslider.Value;
+refresh_render(handles);
+
+
+function filterpath_Callback(hObject, eventdata, handles)
+% hObject    handle to filterpath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of filterpath as text
+%        str2double(get(hObject,'String')) returns contents of filterpath as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function filterpath_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to filterpath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in projectxy.
+function projectxy_Callback(hObject, eventdata, handles)
+% hObject    handle to projectxy (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles.selectfilebtn.UserData, 'I')
+    handles.selectfilebtn.UserData.I = max(handles.selectfilebtn.UserData.I, [], 3);
+    handles.selectfilebtn.UserData.bI = handles.selectfilebtn.UserData.I > handles.thresholdslider.Value;
+    refresh_render(handles);
+end
