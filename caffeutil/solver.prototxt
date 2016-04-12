@@ -1,4 +1,4 @@
-net: "caffeproto/net.prototxt"
+net: "caffeutil/net.prototxt"
 test_iter: 100
 test_interval: 1000
 test_compute_loss: true
@@ -10,5 +10,5 @@ lr_policy: "fixed"
 display: 1000
 max_iter: 10000
 snapshot: 1000
-snapshot_prefix: "caffeproto/snapshots/cae"
+snapshot_prefix: "caffeutil/snapshots/"
 solver_mode: GPU

@@ -1752,168 +1752,67 @@ function extractpatches_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-if isfield(handles.selectfilebtn.UserData, 'I')
-    tic
-    I = handles.selectfilebtn.UserData.I;
-    maxI = squeeze(max(I, [], 3));
+p.is2d = handles.is2dextract.Value;
+p.scales = str2num(handles.extractradii.String); % Convert string with numbers and spaces to double array 
+p.patchradius = str2num(handles.patchradius.String);
+p.pixelthreshold = handles.thresholdslider.Value;
+p.nsample = str2num(handles.nsample.String);
+p.dtradii = str2num(handles.dtradiitxt.String);
+p.bgdist = str2num(handles.bgdist.String);
+p.rotate = handles.rotatecheck.Value;
+p.dtalpha = str2num(handles.dtalpha.String);
 
-    if isfield(handles.selectfilebtn.UserData, 'inputpath')
-        [~, fn, ~] = fileparts(handles.selectfilebtn.UserData.inputpath);
-    else
-        fn = 'maxI';
-    end
-    
-    if isfield(handles.selectfilebtn.UserData, 'swc')
-        swcxy = handles.selectfilebtn.UserData.swc;
-        swcxy(:, 5) = 1;    
-    end
-    
-    % Calculate real valued DT from the skeleton
-    disp('Extracing 2D Distance transform')
-    dt2d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), true);
-%     disp('Extracing 3D Distance transform')
-%     dt3d = dtfromswc(size(I), handles.selectfilebtn.UserData.swc, str2double(handles.alpha.String), false);
-    
-    % Reload workspace
-    vlist = evalin('base', 'who');
-    set(handles.workspacelist, 'String', vlist, 'Value', 1);
-    
-    disp('DT generated!');
-
-    bg = maxI <= handles.thresholdslider.Value;
-    % bdist = bwdist(bg, 'Quasi-Euclidean');
-    % bdist(bg) = 0;
-    % maxd = ceil(max(bdist(:)));
-    % meanbdist = bdist(bdist > 0);
-    % meanbdist = mean(meanbdist(:));
-    % meanradius = ceil(meanbdist);
-    maxd = 120;
-
-    % Pad image
-    pad2Dimg = zeros(maxd * 4 + size(maxI, 1), maxd * 4 + size(maxI, 2));
-    pad2Dimg(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = maxI;
-    
-    pad2Ddist = zeros(maxd * 4 + size(maxI, 1), maxd * 4 + size(maxI, 2));
-    pad2Ddist(2*maxd + 1:2*maxd+size(maxI,1), 2*maxd + 1:2*maxd+size(maxI,2)) = dt2d;    
-    
-    % Define the hyper paramters for patch extraction
-    patchsize = 19;
-    scale = [60:20:120];
-    nscale = numel(scale);
-
-    patchctr = 1;
-    fh5 = handles.h5path.String;
-    
-    if handles.add2list.Value % Append this filelist to the filelist txt
-
-        added = false;
-        if exist(handles.h5list.String, 'file') == 2
-            fid = fopen(handles.h5list.String, 'r');
-
-            tline = fgets(fid);
-            while ischar(tline)
-                tline = fgets(fid);
-                if strcmp(tline, handles.h5path.String)
-                    added = true;
-                end
-            end
-
-            fclose(fid);
-        end
-
-        if ~added
-            fid = fopen(handles.h5list.String, 'at');
-            fprintf(fid, handles.h5path.String);
-            fclose(fid);
-        end
-    end
-
-    if exist(fh5, 'file') == 2
-        delete(fh5);
-    end
-
-    h5create(fh5, '/data' , [patchsize, patchsize, numel(scale), Inf], 'ChunkSize', [patchsize, patchsize, numel(scale), 64], 'DataType', 'single');
-    h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
-    h5create(fh5, '/label2' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
-    h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
-    h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
-    sz = size(pad2Dimg);
-    h5write(fh5, '/imagesize', uint16(sz), [1, 1], size(sz));
-
-    se = strel('diamond', str2double(handles.kernelsize.String)); % dilate foreground to sample foreground patches
-    fg = pad2Dimg > handles.thresholdslider.Value;
-    dilate_fg = imdilate(fg, se);
-    bg = dilate_fg - fg; % Background map within a distance from the neuron
-    fgidx = find(fg > 0);
-    bgidx = find(bg > 0);
-    % Randomly sample a subset of voxels
-    fgidx = fgidx(randperm(numel(fgidx)));
-    bgidx = bgidx(randperm(numel(bgidx)));
-    disp(numel(fgidx))
-    fgidx = fgidx(1:str2double(handles.nsample.String));
-    bgidx = bgidx(1:str2double(handles.nsample.String));
-    idx2sample = [fgidx, bgidx];
-    idx2sample = idx2sample(randperm(numel(idx2sample)));
-
-    pad2Dimg = double(pad2Dimg);
-
-    [x, y] = ind2sub(size(pad2Dimg), idx2sample);
-    patches = zeros(patchsize, patchsize, 1, numel(idx2sample) * nscale);
-    gt = zeros(1, numel(idx2sample));
-    coord = zeros(2, numel(idx2sample));
-
-    for i = 1 : numel(idx2sample)
-        fprintf('Extracting %f%%\n', 100 * i / numel(idx2sample));
-        out = false;
-
-        for radius = scale
-            leftx = x(i) - radius;
-            rightx = x(i) + radius;
-            lefty = y(i) - radius;
-            righty = y(i) + radius;
-            if leftx < 1 || lefty < 1 || rightx > size(pad2Dimg, 1) || righty > size(pad2Dimg, 2)
-                out = true;
-                break;
-            end
-        end
-
-        if out == true
-            continue;
-        end
-
-        % Scale image patches 
-        for radius = scale 
-            leftx = x(i) - radius;
-            rightx = x(i) + radius;
-            lefty = y(i) - radius;
-            righty = y(i) + radius;
-            p = pad2Dimg(leftx:rightx, lefty:righty);
-            p = imresize(p, [patchsize, patchsize]);
-            % randomly rotate each patch
-            if handles.rotatecheck.Value
-                p = imrotate(p, rand() * 360, 'bilinear', 'crop'); 
-            end
-            patches(:, :, 1, patchctr) = p;
-            gt(patchctr) = pad2Ddist(idx2sample(i));
-            coord(:, patchctr) = [x(i), y(i)];
-            patchctr = patchctr + 1;
-        end
-    end
-
-    patches(:,:,:,patchctr:end) = []; % Release the unused memory
-    gt(:, patchctr:end) = []; % Release the unused memory
-    coord(:, patchctr:end) = [];
-    disp('Writting H5...')
-
-    h5write(fh5, '/data', single(patches), [1, 1, 1, 1], size(patches));
-    h5write(fh5, '/label', single(gt), [1, 1], size(gt));
-    h5write(fh5, '/label2', single(gt > 0.5), [1, 1], size(gt));
-    h5write(fh5, '/coord', single(coord), [1, 1], size(coord));
-
-    toc    
-    
-    disp('Done');
+if handles.save2h5.Value
+    [file, fpath] = uiputfile('*.h5', 'Save the extracted patches as'); 
+    fh5 = fullfile(fpath, file);
 end
+
+if handles.folderextract.Value
+    %TODO
+else
+    if isfield(handles.selectfilebtn.UserData, 'swc')
+        p.I = handles.selectfilebtn.UserData.I;
+    else
+        throw(MException('MyComponent:noSuchVariable', 'No image loaded in buffer'));
+    end
+
+    if isfield(handles.selectfilebtn.UserData, 'swc')
+        p.swc = handles.selectfilebtn.UserData.swc;
+    else
+        throw(MException('MyComponent:noSuchVariable', ...
+                'No swc loaded in buffer'));
+    end
+
+    [patches, gt, coord, padimgsz] = extractpatches(p); % Perform patch extraction
+
+    % Save the extraction result to a hdf5 file
+    if handles.save2h5.Value
+        batchsize = 64;
+
+        if exist(fh5, 'file') == 2
+            delete(fh5);
+        end
+
+        patchsize = p.patchradius * 2  + 1;
+        h5create(fh5, '/data' , [patchsize, patchsize, 1, Inf], 'ChunkSize', [patchsize, patchsize, 1, batchsize], 'DataType', 'single');
+        h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
+        h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
+        h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
+        h5write(fh5, '/imagesize', uint16(padimgsz), [1, 1], size(padimgsz));
+        h5write(fh5, '/data', single(patches), [1, 1, 1, 1], size(patches));
+        h5write(fh5, '/label', single(gt), [1, 1], size(gt));
+        h5write(fh5, '/coord', single(coord), [1, 1], size(coord));
+    else % Export the extracted data to workspace only
+        vars2save = {'patches', 'gt', 'coord', 'padimgsz'};
+        for i = 1 : numel(vars2save)
+            field = vars2save{i};
+            % eval(sprintf('%s = handles.selectfilebtn.UserData.%s;', field, field));
+            eval(sprintf('assignin (''base'', ''%s'', %s);', field, field));
+        end
+    end
+end
+
+disp('*** Done ***');
     
 
 % --- Executes on button press in gvfswc.
@@ -1977,18 +1876,18 @@ end
 
 
 
-function kernelsize_Callback(hObject, eventdata, handles)
-% hObject    handle to kernelsize (see GCBO)
+function bgdist_Callback(hObject, eventdata, handles)
+% hObject    handle to bgdist (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of kernelsize as text
-%        str2double(get(hObject,'String')) returns contents of kernelsize as a double
+% Hints: get(hObject,'String') returns contents of bgdist as text
+%        str2double(get(hObject,'String')) returns contents of bgdist as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function kernelsize_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to kernelsize (see GCBO)
+function bgdist_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bgdist (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -2134,6 +2033,125 @@ function nsample_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function nsample_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to nsample (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in is2dextract.
+function is2dextract_Callback(hObject, eventdata, handles)
+% hObject    handle to is2dextract (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of is2dextract
+
+
+
+function extractradii_Callback(hObject, eventdata, handles)
+% hObject    handle to extractradii (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of extractradii as text
+%        str2double(get(hObject,'String')) returns contents of extractradii as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function extractradii_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to extractradii (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function patchradius_Callback(hObject, eventdata, handles)
+% hObject    handle to patchradius (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of patchradius as text
+%        str2double(get(hObject,'String')) returns contents of patchradius as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function patchradius_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to patchradius (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function pixelthreshold_Callback(hObject, eventdata, handles)
+% hObject    handle to pixelthreshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pixelthreshold as text
+%        str2double(get(hObject,'String')) returns contents of pixelthreshold as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pixelthreshold_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pixelthreshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in folderextract.
+function folderextract_Callback(hObject, eventdata, handles)
+% hObject    handle to folderextract (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of folderextract
+
+
+% --- Executes on button press in save2h5.
+function save2h5_Callback(hObject, eventdata, handles)
+% hObject    handle to save2h5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of save2h5
+
+
+
+function dtradii_Callback(hObject, eventdata, handles)
+% hObject    handle to dtradiitxt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dtradiitxt as text
+%        str2double(get(hObject,'String')) returns contents of dtradiitxt as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dtradiitxt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dtradiitxt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

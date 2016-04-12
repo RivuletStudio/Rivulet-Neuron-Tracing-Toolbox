@@ -6,7 +6,7 @@ layer {
   top: "data"
   top: "label"
   hdf5_data_param {
-    source: "caffeproto/train_file_locations.txt"
+    source: "caffeutil/train_file_locations.txt"
     batch_size: 64
     shuffle: true
   }
@@ -18,7 +18,7 @@ layer {
   top: "data"
   top: "label"
   hdf5_data_param {
-    source: "caffeproto/test_file_locations.txt"
+    source: "caffeutil/test_file_locations.txt"
     batch_size: 64
   }
   include: {phase:TEST}

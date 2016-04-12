@@ -1,5 +1,7 @@
 function feats = featextract(varargin)
+% Deprecated!
 % Extract hession features from 1 subject
+
 I = varargin{1};
 swc = varargin{2};
 sigma = varargin{3};
