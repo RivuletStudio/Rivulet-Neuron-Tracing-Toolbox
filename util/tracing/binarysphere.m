@@ -1,6 +1,8 @@
 function binarygt = binarysphere(originalimg, tree)
-%tree is the  swc matrix and the dimension of this matrix is N * 7
-%originalimg is the original 3D image stack
+% Generate synthetic binary image mask from swc tree
+% 
+% originalimg is the original 3D image stack
+% tree is the  swc matrix and the dimension of this matrix is N * 7
 % figure
 [M, N, Z] = size(originalimg);
 %Initialize the 3d binary matrix with zeros 

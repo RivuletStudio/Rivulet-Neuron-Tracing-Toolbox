@@ -1801,23 +1801,25 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     scale = [60:20:120];
     nscale = numel(scale);
 
-
     patchctr = 1;
     fh5 = handles.h5path.String;
     
     if handles.add2list.Value % Append this filelist to the filelist txt
-        fid = fopen(handles.h5list.String, 'r');
+
         added = false;
+        if exist(handles.h5list.String, 'file') == 2
+            fid = fopen(handles.h5list.String, 'r');
 
-        tline = fgets(fid);
-        while ischar(tline)
             tline = fgets(fid);
-            if strcmp(tline, handles.h5path.String)
-                added = true;
+            while ischar(tline)
+                tline = fgets(fid);
+                if strcmp(tline, handles.h5path.String)
+                    added = true;
+                end
             end
-        end
 
-        fclose(fid);
+            fclose(fid);
+        end
 
         if ~added
             fid = fopen(handles.h5list.String, 'at');
@@ -1840,19 +1842,28 @@ if isfield(handles.selectfilebtn.UserData, 'I')
 
     se = strel('diamond', str2double(handles.kernelsize.String)); % dilate foreground to sample foreground patches
     fg = pad2Dimg > handles.thresholdslider.Value;
-    fg = imdilate(fg, se);
+    dilate_fg = imdilate(fg, se);
+    bg = dilate_fg - fg; % Background map within a distance from the neuron
     fgidx = find(fg > 0);
+    bgidx = find(bg > 0);
+    % Randomly sample a subset of voxels
+    fgidx = fgidx(randperm(numel(fgidx)));
+    bgidx = bgidx(randperm(numel(bgidx)));
+    disp(numel(fgidx))
+    fgidx = fgidx(1:str2double(handles.nsample.String));
+    bgidx = bgidx(1:str2double(handles.nsample.String));
+    idx2sample = [fgidx, bgidx];
+    idx2sample = idx2sample(randperm(numel(idx2sample)));
 
-    % Normalise pad2Dimg
     pad2Dimg = double(pad2Dimg);
 
-    [x, y] = ind2sub(size(pad2Dimg), fgidx);
-    patches = zeros(patchsize, patchsize, 1, numel(fgidx) * nscale);
-    gt = zeros(1, numel(fgidx));
-    coord = zeros(2, numel(fgidx));
+    [x, y] = ind2sub(size(pad2Dimg), idx2sample);
+    patches = zeros(patchsize, patchsize, 1, numel(idx2sample) * nscale);
+    gt = zeros(1, numel(idx2sample));
+    coord = zeros(2, numel(idx2sample));
 
-    for i = 1 : numel(fgidx)
-        fprintf('Extracting %f%%\n', 100 * i / numel(fgidx));
+    for i = 1 : numel(idx2sample)
+        fprintf('Extracting %f%%\n', 100 * i / numel(idx2sample));
         out = false;
 
         for radius = scale
@@ -1883,7 +1894,7 @@ if isfield(handles.selectfilebtn.UserData, 'I')
                 p = imrotate(p, rand() * 360, 'bilinear', 'crop'); 
             end
             patches(:, :, 1, patchctr) = p;
-            gt(patchctr) = pad2Ddist(fgidx(i));
+            gt(patchctr) = pad2Ddist(idx2sample(i));
             coord(:, patchctr) = [x(i), y(i)];
             patchctr = patchctr + 1;
         end
@@ -2107,4 +2118,27 @@ if isfield(handles.selectfilebtn.UserData, 'I')
     handles.selectfilebtn.UserData.I = max(handles.selectfilebtn.UserData.I, [], 3);
     handles.selectfilebtn.UserData.bI = handles.selectfilebtn.UserData.I > handles.thresholdslider.Value;
     refresh_render(handles);
+end
+
+
+
+function nsample_Callback(hObject, eventdata, handles)
+% hObject    handle to nsample (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of nsample as text
+%        str2double(get(hObject,'String')) returns contents of nsample as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function nsample_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to nsample (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end

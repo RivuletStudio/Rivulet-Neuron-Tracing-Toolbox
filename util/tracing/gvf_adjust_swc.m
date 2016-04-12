@@ -1,4 +1,6 @@
 function swc = gvf_adjust_swc(I, swc, mu)
+% Push the traced swc tree further towards the centre-line
+% Deprecated: it is not working. And not found useful anyway
 	I = double(I);
 	nvox = numel(I);
 	% niter = floor(sqrt(nvox));
