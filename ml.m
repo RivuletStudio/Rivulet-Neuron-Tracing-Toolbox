@@ -22,7 +22,7 @@ function varargout = ml(varargin)
 
 % Edit the above text to modify the response to help ml
 
-% Last Modified by GUIDE v2.5 15-Apr-2016 15:39:23
+% Last Modified by GUIDE v2.5 15-Apr-2016 16:14:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -521,3 +521,82 @@ function dtradii_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in caffeprdimg.
+function caffeprdimg_Callback(hObject, eventdata, handles)
+% hObject    handle to caffeprdimg (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in traincaffe.
+function traincaffe_Callback(hObject, eventdata, handles)
+% hObject    handle to traincaffe (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+[filename, pathname] = uigetfile({'*.prototxt'},...
+    'Select Caffe Solver Prototxt', pwd);
+
+if handles.gpu.Value
+    caffe.set_mode_gpu();
+else
+    caffe.set_mode_cpu();
+end
+
+solverpath = fullfile(pathname, filename);
+solver = caffe.Solver(solverpath);
+handles.traincaffe.UserData.caffesolver = solver; % Save solver to handle
+solver.step(handles.caffeiterslider.Value);
+handles.traincaffe.UserData.caffenet = solver.net; % Save trained network 
+
+
+% --- Executes on button press in gpu.
+function gpu_Callback(hObject, eventdata, handles)
+% hObject    handle to gpu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of gpu
+
+
+% --- Executes on slider movement.
+function caffeiterslider_Callback(hObject, eventdata, handles)
+% hObject    handle to caffeiterslider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+disp('fuck')
+handles.caffeitertxt.String = sprintf('Iteration: %d', handles.caffeiterslider.Value);
+disp(handles.caffeiterslider.Value)
+
+
+% --- Executes during object creation, after setting all properties.
+function caffeiterslider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to caffeiterslider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function caffeitertxt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to caffeitertxt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% handles.caffeitertxt.String = sprintf('Iteration: %f', handles.caffeiterslider.Value);

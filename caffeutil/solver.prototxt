@@ -10,5 +10,5 @@ lr_policy: "fixed"
 display: 919 
 max_iter: 100000
 snapshot: 919
-snapshot_prefix: "caffeutil/snapshots/"
+snapshot_prefix: "caffe-snapshots/"
 solver_mode: GPU
