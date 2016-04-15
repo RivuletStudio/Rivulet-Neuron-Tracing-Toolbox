@@ -5,19 +5,18 @@ function dt = dtfromswc(sz, swc, alpha, radius)
 % swc: the SWC node list
 
 if numel(sz) == 2
-    is2D = true
+    is2D = true;
 else
-	is2D = false
+	is2D = false;
 end
 
 % Upsample swc nodes
-
 if is2D
 	dt  = zeros(sz(1:2));
-	pts = binarycilinder2D(sz, swc, true);
+	pts = binarycilinder2D(sz, swc);
 else
 	dt  = zeros(sz);
-	pts = binarycilinder3D(sz, swc, true);
+	pts = binarycilinder3D(sz, swc);
 end
 
 dt(:) = -1;
@@ -104,7 +103,7 @@ ind = find(binarydt ~= 0);
 end
 
 
-function [pts] = binarycilinder3D(sz, swc, ignore_radius)
+function [pts] = binarycilinder3D(sz, swc)
 % Generate more points along the swc branches
 
 bcilinder = logical(zeros(sz));
@@ -118,10 +117,9 @@ for i = 1 : size(swc, 1)
         pnode = swc(swc(:,1) == pid, :);
 
         if ~any(swc(:,1) == pid) || ...
-                any(pnode(3:5) < 0) || ...
-                any(pnode(3:5) > sz) || ...
-                any(node(3:5) < 0) || ...
-                any(node(3:5) > sz)
+            any(pnode(3:5) < 0) || ...
+            any(pnode(3:5) > sz)
+
             continue
         end
 
@@ -143,7 +141,7 @@ end
 end
 
 
-function [pts] = binarycilinder2D(sz, swc, ignore_radius)
+function [pts] = binarycilinder2D(sz, swc)
 % Generate more points along the swc branches
 
 pts = [];
@@ -154,11 +152,10 @@ for i = 1 : size(swc, 1)
         pid = swc(i, 7);
         pnode = swc(swc(:,1) == pid, :);
 
-        if ~any(swc(:,1) == pid) || ...
-                any(pnode(3:4) < 0) || ...
-                any(pnode(3:4) > sz) || ...
-                any(node(3:4) < 0) || ...
-                any(node(3:4) > sz)
+        if isempty(pnode) || ...
+           any(pnode(3:4) < 0) || ...
+           any(pnode(3:4) > sz)
+
             continue
         end
 
@@ -168,6 +165,10 @@ for i = 1 : size(swc, 1)
         step = direction / nstep;        
         dr = (pnode(:, 6) - node(:, 6)) / (nstep - 1);
         r = node(6);
+        
+        if nstep == 0
+            pts = [pts; node(3), node(4), 1, r];
+        end
 
         for j = 0 : nstep - 1
             node(3:4) = node(3:4) + step;

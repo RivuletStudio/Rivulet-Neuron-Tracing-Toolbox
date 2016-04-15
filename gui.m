@@ -68,7 +68,7 @@ handles.reversecolour.UserData.black = 1;
 
 reloadworkspacebtn_Callback(hObject, eventdata, handles)
 % UIWAIT makes gui wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.maingui);
 
 function I = hessianfilter(I, handles)
 h = msgbox('Filtering...');
@@ -246,9 +246,9 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
             if swc(i, 3) >= 1 && ...
                swc(i, 4) >= 1 && ...
                swc(i, 5) >= 1 && ...
-               swc(i, 3) < cropregion(1,2) && ...
-               swc(i, 4) < cropregion(2,2) && ...
-               swc(i, 5) < cropregion(3,2)
+               swc(i, 3) < (cropregion(1,2) - cropregion(1,1)) && ...
+               swc(i, 4) < (cropregion(2,2) - cropregion(2,1)) && ...
+               swc(i, 5) < (cropregion(3,2) - cropregion(3,1))
 
                newswc = [newswc; swc(i, :)];
            end
@@ -1752,67 +1752,7 @@ function extractpatches_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-p.is2d = handles.is2dextract.Value;
-p.scales = str2num(handles.extractradii.String); % Convert string with numbers and spaces to double array 
-p.patchradius = str2num(handles.patchradius.String);
-p.pixelthreshold = handles.thresholdslider.Value;
-p.nsample = str2num(handles.nsample.String);
-p.dtradii = str2num(handles.dtradiitxt.String);
-p.bgdist = str2num(handles.bgdist.String);
-p.rotate = handles.rotatecheck.Value;
-p.dtalpha = str2num(handles.dtalpha.String);
 
-if handles.save2h5.Value
-    [file, fpath] = uiputfile('*.h5', 'Save the extracted patches as'); 
-    fh5 = fullfile(fpath, file);
-end
-
-if handles.folderextract.Value
-    %TODO
-else
-    if isfield(handles.selectfilebtn.UserData, 'swc')
-        p.I = handles.selectfilebtn.UserData.I;
-    else
-        throw(MException('MyComponent:noSuchVariable', 'No image loaded in buffer'));
-    end
-
-    if isfield(handles.selectfilebtn.UserData, 'swc')
-        p.swc = handles.selectfilebtn.UserData.swc;
-    else
-        throw(MException('MyComponent:noSuchVariable', ...
-                'No swc loaded in buffer'));
-    end
-
-    [patches, gt, coord, padimgsz] = extractpatches(p); % Perform patch extraction
-
-    % Save the extraction result to a hdf5 file
-    if handles.save2h5.Value
-        batchsize = 64;
-
-        if exist(fh5, 'file') == 2
-            delete(fh5);
-        end
-
-        patchsize = p.patchradius * 2  + 1;
-        h5create(fh5, '/data' , [patchsize, patchsize, 1, Inf], 'ChunkSize', [patchsize, patchsize, 1, batchsize], 'DataType', 'single');
-        h5create(fh5, '/label' , [1, Inf], 'ChunkSize', [1, 64], 'DataType', 'single');
-        h5create(fh5, '/coord' , [2, Inf], 'ChunkSize', [2, 64], 'DataType', 'single');
-        h5create(fh5, '/imagesize' , [1, 3], 'ChunkSize', [1, 3], 'DataType', 'uint16');
-        h5write(fh5, '/imagesize', uint16(padimgsz), [1, 1], size(padimgsz));
-        h5write(fh5, '/data', single(patches), [1, 1, 1, 1], size(patches));
-        h5write(fh5, '/label', single(gt), [1, 1], size(gt));
-        h5write(fh5, '/coord', single(coord), [1, 1], size(coord));
-    else % Export the extracted data to workspace only
-        vars2save = {'patches', 'gt', 'coord', 'padimgsz'};
-        for i = 1 : numel(vars2save)
-            field = vars2save{i};
-            % eval(sprintf('%s = handles.selectfilebtn.UserData.%s;', field, field));
-            eval(sprintf('assignin (''base'', ''%s'', %s);', field, field));
-        end
-    end
-end
-
-disp('*** Done ***');
     
 
 % --- Executes on button press in gvfswc.
@@ -2160,3 +2100,14 @@ function dtradiitxt_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+function dtalpha_CreateFcn(hObject, eventdata, handles)
+function dtradii_CreateFcn(hObject, eventdata, handles)
+
+
+% --- Executes on button press in mlbtn.
+function mlbtn_Callback(hObject, eventdata, handles)
+% hObject    handle to mlbtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ml

@@ -22,18 +22,18 @@ I = double(I); % Make sure the image is double
 
 if imgdim == 3 && p.is2d
     I = squeeze(max(I, [], 3));
-    swc(:, 5) = 1
+    swc(:, 5) = 1;
 end
 
 dt = dtfromswc(size(I), swc, p.dtalpha, p.dtradii);
 
 % Pad Image
-maxd = 100;
+margin = max(p.scales(:));
 if p.is2d
-    padimg = zeros(maxd * 4 + size(I, 1), maxd * 4 + size(I, 2));
-    padimg(2*maxd + 1:2*maxd+size(I, 1), 2*maxd + 1:2*maxd+size(I, 2)) = I;
-    paddist = zeros(maxd * 4 + size(I, 1), maxd * 4 + size(I, 2));
-    paddist(2*maxd + 1:2*maxd+size(I, 1), 2*maxd + 1:2*maxd+size(I, 2)) = dt;
+    padimg = zeros(margin * 2 + size(I, 1), margin * 2 + size(I, 2));
+    padimg(margin + 1:margin+size(I, 1), margin + 1:margin+size(I, 2)) = I;
+    paddist = zeros(margin * 2 + size(I, 1), margin * 2 + size(I, 2));
+    paddist(margin + 1:margin+size(I, 1), margin + 1:margin+size(I, 2)) = dt;
 else
     % TODO
 end
@@ -52,7 +52,7 @@ fgidx = fgidx(randperm(numel(fgidx)));
 bgidx = bgidx(randperm(numel(bgidx)));
 
 if p.nsample > numel(fgidx)
-    p.nsample = numel(fgidx)
+    p.nsample = numel(fgidx);
 end
 
 fgidx = fgidx(1 : p.nsample);
@@ -67,7 +67,7 @@ patchctr = 1;
 patchsize = 2 * p.patchradius + 1;
 gt = zeros(1, numel(idx2sample));
 if p.is2d
-    [x, y] = ind2sub(size(I), idx2sample);
+    [x, y] = ind2sub(size(padimg), idx2sample);
     patches = zeros(patchsize, patchsize, 1, numel(idx2sample) * numel(p.scales));
     coord = zeros(2, numel(idx2sample));
 else
@@ -75,19 +75,18 @@ else
 end
 
 for i = 1 : numel(idx2sample) % Loop to extract patches
-    fprintf('Extracting %f%%\n', 100 * i / numel(idx2sample));
     out = false;
 
     if p.is2d
         % Check if the sampling position is out of bound
         for r = p.scales
-            leftx = x(i) - r;
+            leftx  = x(i) - r;
             rightx = x(i) + r;
-            lefty = y(i) - r;
+            lefty  = y(i) - r;
             righty = y(i) + r;
 
-            if leftx < 1 || lefty < 1 || rightx > size(padimg, 1) ||...
-               righty > size(padimg, 2)
+            if leftx < 1 || lefty < 1 || rightx > padimgsz(1) || righty > padimgsz(2)
+                % fprintf('%f, %f, %f,%f is outof bound in %f - %f\n', leftx, lefty, rightx, righty, padimgsz(1), padimgsz(2))
                 out = true;
                 break;
             end
@@ -98,11 +97,11 @@ for i = 1 : numel(idx2sample) % Loop to extract patches
         end
 
         % Scale image patches 
-        for radius = p.scales
-            leftx = x(i) - radius;
-            rightx = x(i) + radius;
-            lefty = y(i) - radius;
-            righty = y(i) + radius;
+        for r = p.scales
+            leftx = x(i) - r;
+            rightx = x(i) + r;
+            lefty = y(i) - r;
+            righty = y(i) + r;
 
             pch = padimg(leftx:rightx, lefty:righty);
             pch = imresize(pch, [patchsize, patchsize]);
@@ -125,11 +124,11 @@ gt(:, patchctr:end) = []; % Release the unused memory
 coord(:, patchctr:end) = [];
 
 % Zero-Mean & STD each patch
-for i = size(patches, imgdim + 2)
+for i = 1 : size(patches, ndims(patches)) 
     if p.is2d
         pch = patches(:, :, 1, i);
     else
-        %TODO
+        pch = patches(:, :, :, 1, i);
     end
 
     % Standardise the patch
@@ -141,7 +140,7 @@ for i = size(patches, imgdim + 2)
     if p.is2d
         patches(:, :, 1, i) = pch;
     else
-        %TODO
+        patches(:, :, :, 1, i) = pch;
     end
 end
 

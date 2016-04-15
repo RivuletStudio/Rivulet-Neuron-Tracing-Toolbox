@@ -3,12 +3,12 @@ test_iter: 100
 test_interval: 1000
 test_compute_loss: true
 # ---------- training parameters ----------
-base_lr: 0.006
+base_lr: 0.001
 weight_decay: 0.0005
 lr_policy: "fixed"
 # ---------- visualization parameters ----------
-display: 1000
-max_iter: 10000
-snapshot: 1000
+display: 919 
+max_iter: 100000
+snapshot: 919
 snapshot_prefix: "caffeutil/snapshots/"
 solver_mode: GPU
