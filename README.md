@@ -7,6 +7,10 @@ Rivulet is a Matlab GUI App for automatic reconstruction of single neuron cells.
 
 Please cite the following paper for research use of Rivulet:
 
+*Siqi Liu, Donghao Zhang, Sidong Liu, Dagan Feng, Hanchuan Peng, Weidong Cai, 
+"Rivulet: 3D Neuron Morphology Tracing with Iterative Back-Tracking", 
+Neuroinformatics, 2016.
+
 *Donghao Zhang, Siqi Liu, Sidong Liu, Dagan Feng, Hanchuan Peng, Weidong Cai, 
 "Sub-Voxel Reconstruction of 3D Neuron Morphology using RIVULET Back-Tracking", 
 The IEEE International Symposium on Biomedical Imaging: From Nano to Macro (ISBI 2016), 2016.*
