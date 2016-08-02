@@ -119,16 +119,42 @@ function [tree, meanconf] = trace(varargin)
         % Find the soma radius
         d = pdist2([somax, somay, somaz], [soma.x, soma.y, soma.z]);
         maxD = max(d);
-        fprintf('bug one?\n'); 
-        centersoma = zeros(size(I));
-        centersoma(round(SourcePoint(1)), round(SourcePoint(2)), round(SourcePoint(3))) = 1;
-        T_soma_center = bwdist(centersoma > 0.5, 'Quasi-Euclidean');
-        scale_k = 2;
-        T_soma_center = T_soma_center.^(1/scale_k);
-        scale_k2 = 600000;
-        T_soma_center = T_soma_center * scale_k2;
-        T_soma_center = T_soma_center.*double((I>0.5));
-        fprintf('bug two?\n'); 
+        % %%Second version soma field start
+        % fprintf('the start point of soma bounding box, x is : %d, y is : %d, z is : %d\n', soma.startpoint(1), soma.startpoint(2), soma.startpoint(3));
+        % fprintf('the end point of soma bounding box, x is : %d, y is : %d, z is : %d\n', soma.endpoint(1), soma.endpoint(2), soma.endpoint(3));
+        % fprintf('the esitmated radius is : %d\n', maxD);
+        % centersoma = zeros(size(I));
+        % centersoma(round(SourcePoint(1)), round(SourcePoint(2)), round(SourcePoint(3))) = 1;
+        % T_soma_center = bwdist(centersoma > 0.5, 'Quasi-Euclidean');
+        % soma_dist_box = T_soma_center(soma.startpoint(1):soma.endpoint(1), soma.startpoint(2):soma.endpoint(2), soma.startpoint(3):soma.endpoint(3));
+        % estimated_radius = maxD;
+        % scale_para = 1;
+        % % % Original setting 0.9 -> 0.93 -> 1
+        % expotential_coefficient = 2 / estimated_radius; 
+        % gaussian_vec = exp(soma_dist_box.*expotential_coefficient);
+        % gaussian_vec = gaussian_vec / min(gaussian_vec(:));
+        % gaussian_vec = scale_para * gaussian_vec;
+        % min_gaussian_vec = min(gaussian_vec(:));
+        % if min_gaussian_vec < 1
+        %     gaussian_vec = gaussian_vec + (1 - min_gaussian_vec); 
+        % end
+        % fprintf('Saving parameters for a new version of soma field...'); 
+        % save('/home/donghao/Desktop/soma_field/soma_case1/soma_case1.mat');
+        % %%Second version soma field end
+        
+        %%First version soma field start 
+        % fprintf('bug one?\n'); 
+        % centersoma = zeros(size(I));
+        % centersoma(round(SourcePoint(1)), round(SourcePoint(2)), round(SourcePoint(3))) = 1;
+        % T_soma_center = bwdist(centersoma > 0.5, 'Quasi-Euclidean');
+        % scale_k = 2;
+        % T_soma_center = T_soma_center.^(1/scale_k);
+        % scale_k2 = 600000;
+        % T_soma_center = T_soma_center * scale_k2;
+        % T_soma_center = T_soma_center.*double((I>0.5));
+        % fprintf('bug two?\n');
+        %%First verison soma field end 
+        
         % somaSourcepoint = [somax, somay, somaz];
         % sizesomaSourcepoint = size(somaSourcepoint); 
         % fprintf('The first dimension of source point is : %d\n', sizesomaSourcepoint(1));
@@ -140,26 +166,63 @@ function [tree, meanconf] = trace(varargin)
         % fprintf('The size of source point is : %d', size(SourcePoint));
 
     end
-    disp('Make the speed image...')
+    disp('Make the speed image...');
     SpeedImage=(bdist/maxD).^4;
+    % SpeedImage=(bdist/maxD).^2;
+
     clear bdist;
+    % %Second version soma field start
+    % if somagrowthcheck
+    %     fprintf('Extract speed image box...\n');
+    %     speed_box = SpeedImage(soma.startpoint(1):soma.endpoint(1), soma.startpoint(2):soma.endpoint(2), soma.startpoint(3):soma.endpoint(3));
+    %     fprintf('Gausssian convolution begins...\n');    
+    %     speed_box = speed_box .* gaussian_vec;
+    %     SpeedImage(soma.startpoint(1):soma.endpoint(1), soma.startpoint(2):soma.endpoint(2), soma.startpoint(3):soma.endpoint(3)) = speed_box;
+    % end
+    % % Second version soma field begin
+
+    % Third version of soma field
+    fprintf('The soma field version 3 is running\n');
+    somabI = soma.I > 0.5;
+    % The following two lines find surface of the binary soma
+    S=ones(3,3,3);
+    Bsoma=xor(somabI,imdilate(somabI,S));
+    dtsoma = bwdist(Bsoma);
+    % When distance transform values are larger than 15, we do not consider
+    % them. It is beyond the scope of soma field
+    dtsoma(dtsoma>15) = 1;
+    [Dx, Dy, Dz] = ind2sub(size(dtsoma),find(dtsoma > 1));
+    minx = min(Dx);
+    maxx = max(Dx);
+    miny = min(Dy);
+    maxy = max(Dy);
+    minz = min(Dz);
+    maxz = max(Dz);
+    surf_dist = dtsoma(minx:maxx, miny:maxy, minz:maxz);
+    clear dtsoma; clear S; clear Bsoma; clear somabI;
+    % expotential_coefficient = 2 / estimated_radius;
+    % The following is a test case which might not be necessary
+    surf_scale = 1;
+    surf_dist = (surf_dist * surf_scale);
+    if somagrowthcheck
+        fprintf('Extract speed image box...\n');
+        speed_box = SpeedImage(minx:maxx, miny:maxy, minz:maxz);
+        fprintf('Surface distance enhancement convolution begins...\n');    
+        speed_box = speed_box .* surf_dist;
+        SpeedImage(minx:maxx, miny:maxy, minz:maxz) = speed_box;
+    end
+    % Third version soma field end
+
     SpeedImage(SpeedImage==0) = 1e-10;
     if plot
         axes(ax);
     end 
     disp('marching...');
     T = msfm(SpeedImage, SourcePoint, false, false);
-    T = T + double(T_soma_center);
-    % notsomabI = not(soma.I<0.5);
-    % T_soma = bwdist(notsomabI, 'Quasi-Euclidean');
-    % T_soma = T_soma + soma.I; 
-    % T_soma = double(T_soma);
-    % T_soma = 1./ T_soma;
-    % T_soma = T_soma / min(T_soma(:));
-    % T_soma = T_soma.*double((I>0.5));
-    % T_soma_alpha = 7000;
-    % T_beta = 70;
-    save('SpeedImage');
+    %%First version soma field start 
+    % T = T + double(T_soma_center);
+    %%First version soma field end
+
     
     % T = T / T_beta + T_soma_alpha * T_soma; 
     szT = size(T);

@@ -116,5 +116,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	soma.x = mean(x);
 	soma.y = mean(y);
 	soma.z = mean(z);
+    soma.startpoint = startpoint;
+    soma.endpoint = endpoint;
 	fprintf('The soma centre is recalculated as (%f, %f, %f)', soma.x, soma.y, soma.z);
 end

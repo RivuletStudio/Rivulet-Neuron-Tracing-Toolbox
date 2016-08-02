@@ -18,7 +18,9 @@ if super_s > s
         for y = 1:super_s
             for z = 1:super_s
                 r = (x-c)^2 + (y-c)^2 + (z-c)^2;
-                super_g(x, y, z) = exp(-(2*sigma^2)/r);
+                % super_g(x, y, z) = exp(-(2*sigma^2)/r);
+                % super_g(x, y, z) = exp(-(r)/2*sigma^2);
+                
                 % super_g(x, y, z) = log(r/(2*sigma^2));
             end
         end
@@ -35,11 +37,13 @@ else
             for z = 1:s
                 r = (x-c)^2 + (y-c)^2 + (z-c)^2;
                 % g(x, y, z) = exp(-r/(2*sigma^2));
-                g(x, y, z) = exp(-(2*sigma^2)/r);
+                % g(x, y, z) = exp(-(2*sigma^2)/r);
+                g(x, y, z) = exp(-(r)/2*sigma^2);
+                % g(x, y, z) = log((r)/2*sigma^2);
             end
         end
     end
-    g = g/sum(g(:));
+    % g = g/sum(g(:));
 end
 
 

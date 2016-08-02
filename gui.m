@@ -433,8 +433,7 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     if handles.ignoreradiuscheck.Value
         tree(:, 6) = 1;
     end
-    
-    if handles.outputswccheck.Value && isfield('inputpath', handles.selectfilebtn.UserData)
+    if handles.outputswccheck.Value && isfield(handles.selectfilebtn.UserData, 'inputpath')
         saveswc(tree, [handles.selectfilebtn.UserData.inputpath, '-rivulet.swc']);
     end
     
