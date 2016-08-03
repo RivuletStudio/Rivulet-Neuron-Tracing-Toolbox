@@ -167,7 +167,12 @@ function [tree, meanconf] = trace(varargin)
 
     end
     disp('Make the speed image...');
+    % Make sure uncomment the following line
+    % SpeedImage=(bdist/maxD);
     SpeedImage=(bdist/maxD).^4;
+    % !!!!!!!!
+
+    %.^4;
     % SpeedImage=(bdist/maxD).^2;
 
     clear bdist;
@@ -182,14 +187,18 @@ function [tree, meanconf] = trace(varargin)
     % % Second version soma field begin
 
     % Third version of soma field
+    % Third version soma field begin
     fprintf('The soma field version 3 is running\n');
     somabI = soma.I > 0.5;
     % The following two lines find surface of the binary soma
     S=ones(3,3,3);
     Bsoma=xor(somabI,imdilate(somabI,S));
     dtsoma = bwdist(Bsoma);
+    dtsoma(dtsoma>15) = 1;
+    dtsoma = (dtsoma - min(dtsoma(:))) / (max(dtsoma(:)) - min(dtsoma(:))) * 5 + 1;
     % When distance transform values are larger than 15, we do not consider
     % them. It is beyond the scope of soma field
+    % dtsoma = dtsoma + 1;
     dtsoma(dtsoma>15) = 1;
     [Dx, Dy, Dz] = ind2sub(size(dtsoma),find(dtsoma > 1));
     minx = min(Dx);
@@ -208,8 +217,12 @@ function [tree, meanconf] = trace(varargin)
         fprintf('Extract speed image box...\n');
         speed_box = SpeedImage(minx:maxx, miny:maxy, minz:maxz);
         fprintf('Surface distance enhancement convolution begins...\n');    
+        save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxbefore.mat', 'speed_box');
         speed_box = speed_box .* surf_dist;
+        save('/home/donghao/Desktop/soma_field/soma_case3/surf_dist.mat', 'surf_dist');
         SpeedImage(minx:maxx, miny:maxy, minz:maxz) = speed_box;
+        save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxafter.mat', 'speed_box');
+        xxxxxxx
     end
     % Third version soma field end
 
