@@ -194,12 +194,13 @@ function [tree, meanconf] = trace(varargin)
     S=ones(3,3,3);
     Bsoma=xor(somabI,imdilate(somabI,S));
     dtsoma = bwdist(Bsoma);
-    dtsoma(dtsoma>15) = 1;
+    dtsoma(dtsoma>10) = 1;
     dtsoma = (dtsoma - min(dtsoma(:))) / (max(dtsoma(:)) - min(dtsoma(:))) * 5 + 1;
+    % dtsoma = exp(dtsoma);
     % When distance transform values are larger than 15, we do not consider
     % them. It is beyond the scope of soma field
     % dtsoma = dtsoma + 1;
-    dtsoma(dtsoma>15) = 1;
+    % dtsoma(dtsoma>15) = 1;
     [Dx, Dy, Dz] = ind2sub(size(dtsoma),find(dtsoma > 1));
     minx = min(Dx);
     maxx = max(Dx);
@@ -217,12 +218,12 @@ function [tree, meanconf] = trace(varargin)
         fprintf('Extract speed image box...\n');
         speed_box = SpeedImage(minx:maxx, miny:maxy, minz:maxz);
         fprintf('Surface distance enhancement convolution begins...\n');    
-        save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxbefore.mat', 'speed_box');
+        % save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxbefore.mat', 'speed_box');
         speed_box = speed_box .* surf_dist;
-        save('/home/donghao/Desktop/soma_field/soma_case3/surf_dist.mat', 'surf_dist');
+        % save('/home/donghao/Desktop/soma_field/soma_case3/surf_dist.mat', 'surf_dist');
         SpeedImage(minx:maxx, miny:maxy, minz:maxz) = speed_box;
-        save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxafter.mat', 'speed_box');
-        xxxxxxx
+        % save('/home/donghao/Desktop/soma_field/soma_case3/speed_boxafter.mat', 'speed_box');
+        % xxxxxxx
     end
     % Third version soma field end
 

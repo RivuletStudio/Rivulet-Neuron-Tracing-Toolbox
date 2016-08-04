@@ -29,7 +29,7 @@ for i = 20
 end
 
 figure
-for i = 1 : size(surf_dist.surf_dist, 3)
+for i = 20
     imagesc(afspbox.speed_box(:,:,i));
     pause(0.5)
 end
