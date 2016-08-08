@@ -194,13 +194,14 @@ function [tree, meanconf] = trace(varargin)
     S=ones(3,3,3);
     Bsoma=xor(somabI,imdilate(somabI,S));
     dtsoma = bwdist(Bsoma);
-    dtsoma(dtsoma>10) = 1;
-    dtsoma = (dtsoma - min(dtsoma(:))) / (max(dtsoma(:)) - min(dtsoma(:))) * 5 + 1;
+    % dtsoma(dtsoma>10) = 1;
+    % dtsoma = (dtsoma - min(dtsoma(:))) / (max(dtsoma(:)) - min(dtsoma(:))) * 5 + 1;
     % dtsoma = exp(dtsoma);
     % When distance transform values are larger than 15, we do not consider
     % them. It is beyond the scope of soma field
-    % dtsoma = dtsoma + 1;
-    % dtsoma(dtsoma>15) = 1;
+    dtsoma = dtsoma + 1;
+    dtsoma(dtsoma>15) = 1;
+    fprintf('version 3 soma field is running\n');
     [Dx, Dy, Dz] = ind2sub(size(dtsoma),find(dtsoma > 1));
     minx = min(Dx);
     maxx = max(Dx);
