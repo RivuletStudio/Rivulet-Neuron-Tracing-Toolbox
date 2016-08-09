@@ -68,7 +68,7 @@ handles.reversecolour.UserData.black = 1;
 
 reloadworkspacebtn_Callback(hObject, eventdata, handles)
 % UIWAIT makes gui wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.mainfigure);
 
 function I = hessianfilter(I, handles)
 h = msgbox('Filtering...');
@@ -619,6 +619,8 @@ if handles.imagecheck.Value
 end
 
 close(h);
+
+
 
 
 % --- Executes on button press in imagecheck.
@@ -1690,3 +1692,37 @@ function reversecolour_Callback(hObject, eventdata, handles)
 handles.reversecolour.UserData.black = ~handles.reversecolour.UserData.black;
 
 refresh_render(handles);
+
+
+% --- Executes on button press in swccontrol.
+function swccontrol_Callback(hObject, eventdata, handles)
+% hObject    handle to swccontrol (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+swccontrol;
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function swccontrol_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to swccontrol (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton33.
+function pushbutton33_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton33 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on dtthres and none of its controls.
+function dtthres_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to dtthres (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
