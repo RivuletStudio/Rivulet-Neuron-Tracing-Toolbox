@@ -22,7 +22,7 @@ function varargout = swccontrol(varargin)
 
 % Edit the above text to modify the response to help swccontrol
 
-% Last Modified by GUIDE v2.5 09-Aug-2016 17:18:08
+% Last Modified by GUIDE v2.5 10-Aug-2016 11:05:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -114,7 +114,6 @@ if g1data.treecheck.Value
     if isfield(g1data.selectfilebtn.UserData, 'swc')
         tree = g1data.selectfilebtn.UserData.swc;
         if resampxvalue ~= 0
-            fprintf('Please print the current value of x: %f\n', resampxvalue);
             tree(:, 3) = tree(:, 3) / resampxvalue;
         end
         if resampyvalue ~= 0
@@ -146,6 +145,12 @@ if g1data.imagecheck.Value
     end
 end
 close(messagerh)
+
+if handles.doneswc.Value
+    fprintf('Saving modified swc...\n');
+    saveswc(tree, [g1data.selectfilebtn.UserData.inputpath, '-rivuletmodified.swc']);
+end
+
 
 
 
@@ -282,3 +287,12 @@ function swcsampz_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in doneswc.
+function doneswc_Callback(hObject, eventdata, handles)
+% hObject    handle to doneswc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of doneswc
