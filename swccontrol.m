@@ -22,7 +22,7 @@ function varargout = swccontrol(varargin)
 
 % Edit the above text to modify the response to help swccontrol
 
-% Last Modified by GUIDE v2.5 10-Aug-2016 11:05:27
+% Last Modified by GUIDE v2.5 10-Aug-2016 14:52:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,9 +80,9 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in saveswcbt.
+function saveswcbt_Callback(hObject, eventdata, handles)
+% hObject    handle to saveswcbt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % refresh_swc_render(handles)global shiftx
@@ -90,18 +90,25 @@ firsth = findobj('Tag','mainfigure');
 if ~isempty(firsth)
     g1data = guidata(firsth);
 end
+fprintf('Saving modified swc...\n');
+saveswc(g1data.selectfilebtn.UserData.swc, [g1data.selectfilebtn.UserData.inputpath, '-rivuletmodified.swc']);
+
+
+
+
+
+
+% --- Executes on slider movement.
+function shiftswcx_Callback(hObject, eventdata, handles)
+% hObject    handle to shiftswcx (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+firsth = findobj('Tag','mainfigure');
+if ~isempty(firsth)
+    g1data = guidata(firsth);
+end
 % shiftx vairable is a single vaule
 shiftx = handles.shiftswcx.Value;
-% shifty vairable is a single vaule
-shifty = handles.shiftswcy.Value;
-% shiftz vairable is a single vaule
-shiftz = handles.shiftswcz.Value;
-% resampxvalue is a single value
-resampxvalue = str2num(handles.swcsampx.String);
-% resampyvalue is a single value
-resampyvalue = str2num(handles.swcsampy.String);
-% resampzvalue is a single value
-resampzvalue = str2num(handles.swcsampz.String);
 messagerh = msgbox('Rendering');
 ax = g1data.mainfig;
 % clear the single ax with ax
@@ -113,28 +120,14 @@ if g1data.treecheck.Value
     %  field in the structure array S.
     if isfield(g1data.selectfilebtn.UserData, 'swc')
         tree = g1data.selectfilebtn.UserData.swc;
-        if resampxvalue ~= 0
-            tree(:, 3) = tree(:, 3) / resampxvalue;
-        end
-        if resampyvalue ~= 0
-            tree(:, 4) = tree(:, 4) / resampyvalue;
-        end        
-        if resampzvalue ~= 0
-            tree(:, 5) = tree(:, 5) / resampzvalue;
-        end
         if shiftx ~= 0
             tree(:, 3) = tree(:, 3) + shiftx;
-        end
-        if shifty ~= 0
-            tree(:, 4) = tree(:, 4) + shifty;
-        end
-        if shiftz ~= 0
-            tree(:, 5) = tree(:, 5) + shiftz;
         end
         % show the swc based reconstructure
         showswc(tree, false);
     end
 end
+g1data.selectfilebtn.UserData.swc = tree;
 % If the image tick box is ticked, new bI will be updated.
 if g1data.imagecheck.Value
     if isfield(g1data.selectfilebtn.UserData, 'I')
@@ -145,20 +138,7 @@ if g1data.imagecheck.Value
     end
 end
 close(messagerh)
-
-if handles.doneswc.Value
-    fprintf('Saving modified swc...\n');
-    saveswc(tree, [g1data.selectfilebtn.UserData.inputpath, '-rivuletmodified.swc']);
-end
-
-
-
-
-% --- Executes on slider movement.
-function shiftswcx_Callback(hObject, eventdata, handles)
-% hObject    handle to shiftswcx (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+guidata(firsth, g1data);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
@@ -181,6 +161,42 @@ function shiftswcy_Callback(hObject, eventdata, handles)
 % hObject    handle to shiftswcy (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+firsth = findobj('Tag','mainfigure');
+if ~isempty(firsth)
+    g1data = guidata(firsth);
+end
+% shifty vairable is a single vaule
+shifty = handles.shiftswcy.Value;
+messagerh = msgbox('Rendering');
+ax = g1data.mainfig;
+% clear the single ax with ax
+cla(ax);
+% makes the axis with handle ax current
+axes(ax);
+if g1data.treecheck.Value
+    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
+    %  field in the structure array S.
+    if isfield(g1data.selectfilebtn.UserData, 'swc')
+        tree = g1data.selectfilebtn.UserData.swc;
+        if shifty ~= 0
+            tree(:, 4) = tree(:, 4) + shifty;
+        end
+        % show the swc based reconstructure
+        showswc(tree, false);
+    end
+end
+g1data.selectfilebtn.UserData.swc = tree;
+% If the image tick box is ticked, new bI will be updated.
+if g1data.imagecheck.Value
+    if isfield(g1data.selectfilebtn.UserData, 'I')
+        showbox(g1data.selectfilebtn.UserData.I,...
+                g1data.thresholdslider.Value,...
+                ~g1data.lightcheck.Value, true,...
+                g1data.reversecolour.UserData.black);
+    end
+end
+close(messagerh)
+guidata(firsth, g1data);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
@@ -203,6 +219,42 @@ function shiftswcz_Callback(hObject, eventdata, handles)
 % hObject    handle to shiftswcz (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+firsth = findobj('Tag','mainfigure');
+if ~isempty(firsth)
+    g1data = guidata(firsth);
+end
+% shiftz vairable is a single vaule
+shiftz = handles.shiftswcz.Value;
+messagerh = msgbox('Rendering');
+ax = g1data.mainfig;
+% clear the single ax with ax
+cla(ax);
+% makes the axis with handle ax current
+axes(ax);
+if g1data.treecheck.Value
+    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
+    %  field in the structure array S.
+    if isfield(g1data.selectfilebtn.UserData, 'swc')
+        tree = g1data.selectfilebtn.UserData.swc;
+        if shiftz ~= 0
+            tree(:, 5) = tree(:, 5) + shiftz;
+        end
+        % show the swc based reconstructure
+        showswc(tree, false);
+    end
+end
+g1data.selectfilebtn.UserData.swc = tree;
+% If the image tick box is ticked, new bI will be updated.
+if g1data.imagecheck.Value
+    if isfield(g1data.selectfilebtn.UserData, 'I')
+        showbox(g1data.selectfilebtn.UserData.I,...
+                g1data.thresholdslider.Value,...
+                ~g1data.lightcheck.Value, true,...
+                g1data.reversecolour.UserData.black);
+    end
+end
+close(messagerh)
+guidata(firsth, g1data);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider

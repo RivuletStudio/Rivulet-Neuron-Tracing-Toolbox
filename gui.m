@@ -586,7 +586,6 @@ function refresh_render(handles)
 % shift vairable is a single vaule
 % the shift vaule make swc recontruction and binaryied image do not overlap
 % each other
-shift = handles.shiftslider.Value * 20;
 h = msgbox('Rendering');
 ax = handles.mainfig;
 % clear the single ax with ax
@@ -599,10 +598,6 @@ if handles.treecheck.Value
     %  field in the structure array S.
     if isfield(handles.selectfilebtn.UserData, 'swc')
         tree = handles.selectfilebtn.UserData.swc;
-        if shift > 0
-%             fprintf('shift with %f\n', shift);
-            tree(:, 3:5) = tree(:, 3:5) + shift;
-        end
         % show the swc based reconstructure
         showswc(tree, false);
     end
