@@ -217,7 +217,7 @@ if strcmp(ext, '.v3draw')
         msgbox(sprintf('Please set the vaa3d_matlab_io_toolbox path first to read the *.v3draw file...Please refer to https://code.google.com/p/vaa3d/wiki/MatlabIO'));
     end
 elseif strcmp(ext, '.tif')
-    I = tifread(filepath);
+    I = loadtif(filepath);
 elseif strcmp(ext, '.mat')
     f = load(filepath);
     fields = fieldnames(f);
@@ -586,12 +586,10 @@ function refresh_render(handles)
 % shift vairable is a single vaule
 % the shift vaule make swc recontruction and binaryied image do not overlap
 % each other
-h = msgbox('Rendering');
 ax = handles.mainfig;
-% clear the single ax with ax
-cla(ax);
-% makes the axis with handle ax current
-axes(ax);
+[az, el] = view(ax);
+cla(ax); % clear the single ax with ax
+axes(ax); % makes the axis with handle ax current
 
 if handles.treecheck.Value
     %  isfield(S,FIELD) returns true if the string FIELD is the name of a
@@ -612,10 +610,7 @@ if handles.imagecheck.Value
                 handles.reversecolour.UserData.black);
     end
 end
-
-close(h);
-
-
+view(az, el);
 
 
 % --- Executes on button press in imagecheck.
@@ -1363,24 +1358,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-
 function edit36_Callback(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit36 as text
-%        str2double(get(hObject,'String')) returns contents of edit36 as a double
 
 
 % --- Executes during object creation, after setting all properties.
 function edit36_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -1388,22 +1370,10 @@ end
 
 
 function stumsizezx_Callback(hObject, eventdata, handles)
-% hObject    handle to stumsizezx (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of stumsizezx as text
-%        str2double(get(hObject,'String')) returns contents of stumsizezx as a double
 
 
 % --- Executes during object creation, after setting all properties.
 function stumsizezx_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to stumsizezx (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end

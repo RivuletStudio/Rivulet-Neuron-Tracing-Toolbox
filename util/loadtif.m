@@ -1,4 +1,4 @@
-function input_matrix = tifread(destpath)
+function input_matrix = loadtif(destpath)
 [~, ~, ext] = fileparts(destpath);
 
 if strcmp(ext, '.tif')
@@ -18,5 +18,6 @@ else
         input_matrix(:,:,i) = imread([destpath filesep tifname]);
     end
 end
+
 end
  
