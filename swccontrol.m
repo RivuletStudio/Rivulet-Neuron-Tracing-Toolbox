@@ -61,6 +61,16 @@ guidata(hObject, handles);
 % UIWAIT makes swccontrol wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+% Make a copy of the swc 
+mainfig = findobj('Tag','mainfigure');
+if ~isempty(mainfig)
+    g1data = guidata(mainfig);
+
+    if isfield(g1data.selectfilebtn.UserData, 'swc')
+        g1data.selectfilebtn.UserData.original_swc = g1data.selectfilebtn.UserData.swc;
+    end
+end
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = swccontrol_OutputFcn(hObject, eventdata, handles) 
@@ -73,29 +83,44 @@ function varargout = swccontrol_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
 % --- Executes on button press in saveswcbt.
 function saveswcbt_Callback(hObject, eventdata, handles)
 % hObject    handle to saveswcbt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% refresh_swc_render(handles)global shiftx
-firsth = findobj('Tag','mainfigure');
-if ~isempty(firsth)
-    g1data = guidata(firsth);
+mainfig = findobj('Tag','mainfigure');
+if ~isempty(mainfig)
+    g1data = guidata(mainfig);
 end
-fprintf('Saving modified swc...\n');
-saveswc(g1data.selectfilebtn.UserData.swc, [g1data.selectfilebtn.UserData.inputpath, '-rivuletmodified.swc']);
+
+if isfield(g1data.selectfilebtn.UserData, 'inputpath')
+    saveswc(g1data.selectfilebtn.UserData.swc, [g1data.selectfilebtn.UserData.inputpath, '-rivuletmodified.swc']);
+else
+    msgbox('This swc was loaded from the Matlab workspace.\n It would be easier to save it to a file using matlab console.')
+end
 
 
+function shiftswc(handles)
+mainfig = findobj('Tag', 'mainfigure');
 
+if ~isempty(mainfig)
+    g1data = guidata(mainfig);
+else
+    return
+end
 
+if g1data.treecheck.Value
+    if isfield(g1data.selectfilebtn.UserData, 'original_swc')
+        tree = g1data.selectfilebtn.UserData.original_swc;
+        tree(:, 3) = tree(:, 3) + handles.shiftswcx.Value;
+        tree(:, 4) = tree(:, 4) + handles.shiftswcy.Value;
+        tree(:, 5) = tree(:, 5) + handles.shiftswcz.Value;
+        g1data.selectfilebtn.UserData.swc = tree;
+    end
+end
+
+guidata(mainfig, g1data);
+refresh_render(g1data)
 
 
 % --- Executes on slider movement.
@@ -103,45 +128,7 @@ function shiftswcx_Callback(hObject, eventdata, handles)
 % hObject    handle to shiftswcx (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-firsth = findobj('Tag','mainfigure');
-if ~isempty(firsth)
-    g1data = guidata(firsth);
-end
-% shiftx vairable is a single vaule
-shiftx = handles.shiftswcx.Value;
-messagerh = msgbox('Rendering');
-ax = g1data.mainfig;
-% clear the single ax with ax
-cla(ax);
-% makes the axis with handle ax current
-axes(ax);
-if g1data.treecheck.Value
-    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
-    %  field in the structure array S.
-    if isfield(g1data.selectfilebtn.UserData, 'swc')
-        tree = g1data.selectfilebtn.UserData.swc;
-        if shiftx ~= 0
-            tree(:, 3) = tree(:, 3) + shiftx;
-        end
-        % show the swc based reconstructure
-        showswc(tree, false);
-    end
-end
-g1data.selectfilebtn.UserData.swc = tree;
-% If the image tick box is ticked, new bI will be updated.
-if g1data.imagecheck.Value
-    if isfield(g1data.selectfilebtn.UserData, 'I')
-        showbox(g1data.selectfilebtn.UserData.I,...
-                g1data.thresholdslider.Value,...
-                ~g1data.lightcheck.Value, true,...
-                g1data.reversecolour.UserData.black);
-    end
-end
-close(messagerh)
-guidata(firsth, g1data);
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+shiftswc(handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -161,45 +148,9 @@ function shiftswcy_Callback(hObject, eventdata, handles)
 % hObject    handle to shiftswcy (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-firsth = findobj('Tag','mainfigure');
-if ~isempty(firsth)
-    g1data = guidata(firsth);
-end
-% shifty vairable is a single vaule
-shifty = handles.shiftswcy.Value;
-messagerh = msgbox('Rendering');
-ax = g1data.mainfig;
-% clear the single ax with ax
-cla(ax);
-% makes the axis with handle ax current
-axes(ax);
-if g1data.treecheck.Value
-    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
-    %  field in the structure array S.
-    if isfield(g1data.selectfilebtn.UserData, 'swc')
-        tree = g1data.selectfilebtn.UserData.swc;
-        if shifty ~= 0
-            tree(:, 4) = tree(:, 4) + shifty;
-        end
-        % show the swc based reconstructure
-        showswc(tree, false);
-    end
-end
-g1data.selectfilebtn.UserData.swc = tree;
-% If the image tick box is ticked, new bI will be updated.
-if g1data.imagecheck.Value
-    if isfield(g1data.selectfilebtn.UserData, 'I')
-        showbox(g1data.selectfilebtn.UserData.I,...
-                g1data.thresholdslider.Value,...
-                ~g1data.lightcheck.Value, true,...
-                g1data.reversecolour.UserData.black);
-    end
-end
-close(messagerh)
-guidata(firsth, g1data);
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+% shifty vairable is a single vaule
+shiftswc(handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -219,45 +170,7 @@ function shiftswcz_Callback(hObject, eventdata, handles)
 % hObject    handle to shiftswcz (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-firsth = findobj('Tag','mainfigure');
-if ~isempty(firsth)
-    g1data = guidata(firsth);
-end
-% shiftz vairable is a single vaule
-shiftz = handles.shiftswcz.Value;
-messagerh = msgbox('Rendering');
-ax = g1data.mainfig;
-% clear the single ax with ax
-cla(ax);
-% makes the axis with handle ax current
-axes(ax);
-if g1data.treecheck.Value
-    %  isfield(S,FIELD) returns true if the string FIELD is the name of a
-    %  field in the structure array S.
-    if isfield(g1data.selectfilebtn.UserData, 'swc')
-        tree = g1data.selectfilebtn.UserData.swc;
-        if shiftz ~= 0
-            tree(:, 5) = tree(:, 5) + shiftz;
-        end
-        % show the swc based reconstructure
-        showswc(tree, false);
-    end
-end
-g1data.selectfilebtn.UserData.swc = tree;
-% If the image tick box is ticked, new bI will be updated.
-if g1data.imagecheck.Value
-    if isfield(g1data.selectfilebtn.UserData, 'I')
-        showbox(g1data.selectfilebtn.UserData.I,...
-                g1data.thresholdslider.Value,...
-                ~g1data.lightcheck.Value, true,...
-                g1data.reversecolour.UserData.black);
-    end
-end
-close(messagerh)
-guidata(firsth, g1data);
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+shiftswc(handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -272,79 +185,29 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 
+function refresh_render(handles)
+% Identical to the one in gui.m
+ax = handles.mainfig;
+[az, el] = view(ax);
+cla(ax); % clear the single ax with ax
+axes(ax); % makes the axis with handle ax current
 
-function swcsampx_Callback(hObject, eventdata, handles)
-% hObject    handle to swcsampx (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of swcsampx as text
-%        str2double(get(hObject,'String')) returns contents of swcsampx as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function swcsampx_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to swcsampx (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if handles.treecheck.Value
+    if isfield(handles.selectfilebtn.UserData, 'swc')
+        tree = handles.selectfilebtn.UserData.swc;
+        % show the swc based reconstructure
+        showswc(tree, false);
+    end
 end
 
-
-
-function swcsampy_Callback(hObject, eventdata, handles)
-% hObject    handle to swcsampy (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of swcsampy as text
-%        str2double(get(hObject,'String')) returns contents of swcsampy as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function swcsampy_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to swcsampy (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+% If the image tick box is ticked, new bI will be updated.
+if handles.imagecheck.Value
+    if isfield(handles.selectfilebtn.UserData, 'I')
+        showbox(handles.selectfilebtn.UserData.I,...
+                handles.thresholdslider.Value,...
+                ~handles.lightcheck.Value, true,...
+                handles.reversecolour.UserData.black);
+    end
 end
 
-
-
-function swcsampz_Callback(hObject, eventdata, handles)
-% hObject    handle to swcsampz (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of swcsampz as text
-%        str2double(get(hObject,'String')) returns contents of swcsampz as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function swcsampz_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to swcsampz (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in doneswc.
-function doneswc_Callback(hObject, eventdata, handles)
-% hObject    handle to doneswc (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of doneswc
+view(az, el);
