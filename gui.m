@@ -974,11 +974,14 @@ center(2) = ylocvalue;
 center(3) = zlocvalue;
 handles.selectfilebtn.UserData.soma = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
 toc
-fprintf('Saving the soma mask into v3draw\n');
+
 somamask = handles.selectfilebtn.UserData.soma.I;
 somamask = somamask * 30;
 somamask = uint8(somamask);
-% save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'somamask');
+cursoma = handles.selectfilebtn.UserData.soma;
+fprintf('Saving the soma mat\n');
+save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+clear cursoma
 
 
 function stepnum_Callback(hObject, eventdata, handles)
@@ -1643,6 +1646,10 @@ if isfield(handles.selectfilebtn.UserData, 'soma')
     axis equal
 	drawnow
     hold off
+    cursoma = handles.selectfilebtn.UserData.soma;
+    fprintf('Saving the soma mat\n');
+    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+    clear cursoma
 end
 
 
@@ -1664,6 +1671,10 @@ if isfield(handles.selectfilebtn.UserData, 'soma')
     axis equal
 	drawnow
     hold off
+    cursoma = handles.selectfilebtn.UserData.soma;
+    fprintf('Saving the soma mat\n');
+    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+    clear cursoma
 end
 
 
