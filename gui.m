@@ -980,7 +980,7 @@ somamask = somamask * 30;
 somamask = uint8(somamask);
 cursoma = handles.selectfilebtn.UserData.soma;
 fprintf('Saving the soma mat\n');
-save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+save([handles.selectfilebtn.UserData.inputpath, '-Rtracedsoma.mat'], 'cursoma');
 clear cursoma
 
 
@@ -1648,7 +1648,7 @@ if isfield(handles.selectfilebtn.UserData, 'soma')
     hold off
     cursoma = handles.selectfilebtn.UserData.soma;
     fprintf('Saving the soma mat\n');
-    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+    save([handles.selectfilebtn.UserData.inputpath, '-Rtracedsoma.mat'], 'cursoma');
     clear cursoma
 end
 
@@ -1673,7 +1673,7 @@ if isfield(handles.selectfilebtn.UserData, 'soma')
     hold off
     cursoma = handles.selectfilebtn.UserData.soma;
     fprintf('Saving the soma mat\n');
-    save([handles.selectfilebtn.UserData.inputpath, '-rivuletsomamask.mat'], 'cursoma');
+    save([handles.selectfilebtn.UserData.inputpath, '-Rtracedsoma.mat'], 'cursoma');
     clear cursoma
 end
 

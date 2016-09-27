@@ -109,6 +109,7 @@ function [tree, meanconf] = trace(varargin)
         bdist = bwdist(notbI, 'Quasi-Euclidean');
         bdist = bdist .* double(I);
         bdist = double(bdist);
+        save('/home/donghao/Desktop/soma_case1.mat');
     end
 
     disp('Looking for the source point...')
