@@ -14,4 +14,3 @@
 *~
 *.mlappinstall
 *.mex*
-./test/eval_*
