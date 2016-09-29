@@ -1,4 +1,4 @@
-function somaloc = somalocationdt(imgsoma, imgthres)
+function [somaloc, maxmiumvaule] = somalocationdt(imgsoma, imgthres)
 	bI = imgsoma > imgthres;
 	% safeshowbox(bI, 0.5)
 	notbI = imgsoma < imgthres;

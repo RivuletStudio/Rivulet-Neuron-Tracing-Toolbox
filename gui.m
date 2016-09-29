@@ -947,7 +947,8 @@ if isfield(handles.selectfilebtn.UserData, 'bI')
     showbox(handles.selectfilebtn.UserData.bI, 0.5);
 end
 if (handles.autosomacheck.Value&handles.dtcheck.Value)
-    somaloc = somalocationdt(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
+    [somaloc maxsomadt] = somalocationdt(handles.selectfilebtn.UserData.I, handles.thresholdslider.Value);
+    fprintf('The maximum value of soma distance transform is %d\n', maxsomadt);
     xlocvalue = somaloc.x;
     ylocvalue = somaloc.y;
     zlocvalue = somaloc.z;
@@ -972,16 +973,24 @@ end
 center(1) = xlocvalue;
 center(2) = ylocvalue;
 center(3) = zlocvalue;
-handles.selectfilebtn.UserData.soma = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, sqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
+fprintf('The input radius of the sphere is %d\n', sqrvalue);
+ratioxz = size(handles.selectfilebtn.UserData.I,1)/size(handles.selectfilebtn.UserData.I,3);
+ratioyz = size(handles.selectfilebtn.UserData.I,2)/size(handles.selectfilebtn.UserData.I,3);
+fprintf('The ratio of x to z is %d; The ratio of y to z is %d;\n', ratioxz, ratioyz);
+replacesqrvalue = floor(sqrt(maxsomadt) * max(size(handles.selectfilebtn.UserData.I,1)/size(handles.selectfilebtn.UserData.I,3), size(handles.selectfilebtn.UserData.I,2)/size(handles.selectfilebtn.UserData.I,3)));
+replacesqrvalue = max(replacesqrvalue, 3);
+fprintf('The replacesqrvalue is %d\n', replacesqrvalue);
+handles.selectfilebtn.UserData.soma = somagrowth(handles.swiftcheck.Value, str2num(handles.swiftinivthres.String), handles.thresholdslider.Value, handles.somaplotcheck.Value, ax, handles.selectfilebtn.UserData.I, center, replacesqrvalue, smoothvalue, lambda1value, lambda2value, stepnvalue);
 toc
 
-somamask = handles.selectfilebtn.UserData.soma.I;
-somamask = somamask * 30;
-somamask = uint8(somamask);
-cursoma = handles.selectfilebtn.UserData.soma;
-fprintf('Saving the soma mat\n');
-save([handles.selectfilebtn.UserData.inputpath, '-Rtracedsoma.mat'], 'cursoma');
-clear cursoma
+% The following code is used to save soma structure into .mat extension for further analysis
+% somamask = handles.selectfilebtn.UserData.soma.I;
+% somamask = somamask * 30;
+% somamask = uint8(somamask);
+% cursoma = handles.selectfilebtn.UserData.soma;
+% fprintf('Saving the soma mat\n');
+% save([handles.selectfilebtn.UserData.inputpath, '-Rtracedsoma.mat'], 'cursoma');
+% clear cursoma
 
 
 function stepnum_Callback(hObject, eventdata, handles)
