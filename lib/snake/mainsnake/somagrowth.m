@@ -48,10 +48,10 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	P3{9} = P3kernel;
 	startpoint = zeros(1, 3);
 	startpoint = center - 3 * sqradius;
-	disp(startpoint)
+	% disp(startpoint);
     endpoint = zeros(1, 3);
 	endpoint = center + 3 * sqradius;
-	disp(endpoint);
+	% disp(endpoint);
 	shape = size(imgsoma);
 	startpoint(1) = constrain(startpoint(1), 1, shape(1));
 	startpoint(2) = constrain(startpoint(2), 1, shape(2));
@@ -59,6 +59,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	endpoint(1) = constrain(endpoint(1), 1, shape(1));
 	endpoint(2) = constrain(endpoint(2), 1, shape(2));
 	endpoint(3) = constrain(endpoint(3), 1, shape(3));
+	fprintf('The soma region is defined as: x from %d to %d; y from %d to %d; z from %d to %d;\n', startpoint(1), endpoint(1), startpoint(2), endpoint(2), startpoint(3), endpoint(3));
 	oriI = imgsoma;
 	imgsoma = imgsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3));
 	shape = size(imgsoma);
@@ -67,6 +68,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	center = floor(center);
 	% Basically it creates a logical disk with true elements inside and false elements outside
 	u = circlelevelset3d(shape, center, sqradius);
+	fprintf('The estimation of sqradius is %d\n', sqradius);
 	threshold = 0.5;
 	MorphGAC = ACWEinitialise(double(imgsoma), smoothing, lambda1, lambda2);
 	% the threshold is just for visulisation
@@ -83,19 +85,46 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		axes(ax);
 		% hold on;
 	end
+	% The following vector is used for storing values of counting the number of foreground voxels  
+	foreground_num = [];
+	% The following vector is initialised for storing forward difference
+	forward_diff_store = [];
+	% This is the initialization of sliding window with length of 5
+	slider_diff = [];
 	for i = 1 : stepnum
+		% fprintf('The current step number is %d\n', i);
+		MorphGAC = ACWEstep3d(MorphGAC, i);		
+		A = MorphGAC.u > threshold;  % synthetic data
+		foreground_num(end+1) = sum(A(:));
+		% The following code tries to calculate the first order difference of foreground_num
+		if numel(foreground_num) > 2
+			diff_step=foreground_num(end)-foreground_num(end-1);
+			forward_diff_store(end+1)=diff_step;
+			if numel(forward_diff_store) > 5
+				cur_slider_diff = sum(forward_diff_store(end-5:end));
+				if cur_slider_diff < 20 || cur_slider_diff < (0.01*foreground_num(end))
+					save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
+					save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
+					save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
+					break;
+				end	
+				slider_diff(end+1) = cur_slider_diff; 
+			end
+			if i == stepnum
+				save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
+				save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
+				save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
+			end
+		end  
+		[x y z] = ind2sub(size(A), find(A));
+		x = x + startpoint(1);
+		y = y + startpoint(2);
+		z = z + startpoint(3);
 		if plotcheck
 			cla(ax);
 			hold on
             safeshowbox(oriI, showthres);
 		end
-		
-		MorphGAC = ACWEstep3d(MorphGAC, i);
-		A = MorphGAC.u > threshold;  % synthetic data
-		[x y z] = ind2sub(size(A), find(A));
-		x = x + startpoint(1);
-		y = y + startpoint(2);
-		z = z + startpoint(3);
 		if plotcheck
 			plot3(y, x, z, 'b.');
             axis equal
@@ -106,7 +135,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		end
 	end
 	% close
-	disp(class(MorphGAC.u));
+	% disp(class(MorphGAC.u));
 	backsoma = zeros(size(oriI));
 	backsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3)) = MorphGAC.u;
 	soma.I = double(backsoma);
