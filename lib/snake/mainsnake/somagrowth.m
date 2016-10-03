@@ -82,8 +82,10 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% disp(stepnum)
 	% figure
 	if plotcheck
-		axes(ax);
-		% hold on;
+		if(~isempty(ax))
+			axes(ax);
+			% hold on;
+		end
 	end
 	% The following vector is used for storing values of counting the number of foreground voxels  
 	foreground_num = [];
@@ -102,26 +104,26 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			forward_diff_store(end+1)=diff_step;
 			if numel(forward_diff_store) > 5
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
-				if cur_slider_diff < 20 || cur_slider_diff < (0.01*foreground_num(end))
-					save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
-					save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
-					save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
+				if cur_slider_diff < 20 || cur_slider_diff < (0.05*foreground_num(end))
+					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
+					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
+					% save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
 					break;
 				end	
 				slider_diff(end+1) = cur_slider_diff; 
 			end
-			if i == stepnum
-				save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
-				save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
-				save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
-			end
+			% if i == stepnum
+			% 	save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
+			% 	save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
+			% 	save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
+			% end
 		end  
 		[x y z] = ind2sub(size(A), find(A));
 		x = x + startpoint(1);
 		y = y + startpoint(2);
 		z = z + startpoint(3);
 		if plotcheck
-			cla(ax);
+			% cla(ax);
 			hold on
             safeshowbox(oriI, showthres);
 		end
@@ -133,6 +135,12 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			% axis([0 shape(2) 0 shape(1) 0 shape(3)])
 			drawnow
 		end
+	end
+	for i = 1 : MorphGAC.smoothing
+		MorphGAC.u = curvop3d(MorphGAC.u, P3, 1);
+		A = MorphGAC.u > threshold;  % synthetic data
+		foreground_num(end+1) = sum(A(:));
+		fprintf('The current soma volume is %d', foreground_num(end));
 	end
 	% close
 	% disp(class(MorphGAC.u));
