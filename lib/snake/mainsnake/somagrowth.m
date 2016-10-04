@@ -94,7 +94,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% This is the initialization of sliding window with length of 5
 	slider_diff = [];
 	for i = 1 : stepnum
-		% fprintf('The current step number is %d\n', i);
+		fprintf('The current step number is %d\n', i);
 		MorphGAC = ACWEstep3d(MorphGAC, i);		
 		A = MorphGAC.u > threshold;  % synthetic data
 		foreground_num(end+1) = sum(A(:));
@@ -104,7 +104,8 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			forward_diff_store(end+1)=diff_step;
 			if numel(forward_diff_store) > 5
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
-				if cur_slider_diff < 20 || cur_slider_diff < (0.05*foreground_num(end))
+				fprintf('The current value of cur_slider_diff%3.2f', cur_slider_diff);
+				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.1*foreground_num(end))
 					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
 					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
 					% save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
@@ -136,11 +137,18 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			drawnow
 		end
 	end
+
+	ini_vol = sum(MorphGAC.u(:));
 	for i = 1 : MorphGAC.smoothing
-		MorphGAC.u = curvop3d(MorphGAC.u, P3, 1);
-		A = MorphGAC.u > threshold;  % synthetic data
+		A = curvop3d(MorphGAC.u, P3, 1);
+		% vol_pct is the percent compared to the initial volume compared to  
+		vol_pct = sum(A(:)) / ini_vol; 
+		if vol_pct < 0.85
+			break;
+		end 
 		foreground_num(end+1) = sum(A(:));
-		fprintf('The current soma volume is %d', foreground_num(end));
+		fprintf('The current soma volume is %d\n', foreground_num(end));
+		MorphGAC.u = A;
 	end
 	% close
 	% disp(class(MorphGAC.u));
