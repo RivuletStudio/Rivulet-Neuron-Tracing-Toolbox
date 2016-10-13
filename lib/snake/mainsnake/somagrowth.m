@@ -94,7 +94,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% This is the initialization of sliding window with length of 5
 	slider_diff = [];
 	for i = 1 : stepnum
-		fprintf('The current step number is %d\n', i);
+		fprintf('The current step number is %f3.0\n', i);
 		MorphGAC = ACWEstep3d(MorphGAC, i);		
 		A = MorphGAC.u > threshold;  % synthetic data
 		foreground_num(end+1) = sum(A(:));
@@ -104,7 +104,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			forward_diff_store(end+1)=diff_step;
 			if numel(forward_diff_store) > 5
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
-				fprintf('The current value of cur_slider_diff%3.2f', cur_slider_diff);
+				% fprintf('The current value of cur_slider_diff%3.2f\n', cur_slider_diff);
 				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.1*foreground_num(end))
 					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
 					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
@@ -142,12 +142,19 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	for i = 1 : MorphGAC.smoothing
 		A = curvop3d(MorphGAC.u, P3, 1);
 		% vol_pct is the percent compared to the initial volume compared to  
-		vol_pct = sum(A(:)) / ini_vol; 
+		vol_pct = sum(A(:)) / ini_vol;
+		% Try to use sliding windows method to detect the converged smoothing
+		foreground_num(end+1) = sum(A(:));
+		diff_step=foreground_num(end)-foreground_num(end-1);
+		forward_diff_store(end+1)=diff_step;
+		cur_slider_diff = sum(forward_diff_store(end-5:end));
+		slider_diff(end+1) = cur_slider_diff;
+		% fprintf('The size of current sliding window method is %4.1f\n', cur_slider_diff);  
 		if vol_pct < 0.85
 			break;
 		end 
 		foreground_num(end+1) = sum(A(:));
-		fprintf('The current soma volume is %d\n', foreground_num(end));
+		% fprintf('The current soma volume is %4.1f\n', foreground_num(end));
 		MorphGAC.u = A;
 	end
 	% close
@@ -163,5 +170,5 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	soma.z = mean(z);
     soma.startpoint = startpoint;
     soma.endpoint = endpoint;
-	fprintf('The soma centre is recalculated as (%f, %f, %f)', soma.x, soma.y, soma.z);
+	% fprintf('The soma centre is recalculated as (%f, %f, %f)', soma.x, soma.y, soma.z);
 end
