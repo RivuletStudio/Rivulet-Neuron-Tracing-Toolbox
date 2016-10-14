@@ -59,7 +59,10 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	endpoint(1) = constrain(endpoint(1), 1, shape(1));
 	endpoint(2) = constrain(endpoint(2), 1, shape(2));
 	endpoint(3) = constrain(endpoint(3), 1, shape(3));
-	fprintf('The soma region is defined as: x from %d to %d; y from %d to %d; z from %d to %d;\n', startpoint(1), endpoint(1), startpoint(2), endpoint(2), startpoint(3), endpoint(3));
+	% Fix the warning : Integer operands are required for colon operator when used as index
+	startpoint = round(startpoint);
+	endpoint = round(endpoint);
+	% fprintf('The soma region is defined as: x from %i to %i; y from %i to %i; z from %i to %i;\n', startpoint(1), endpoint(1), startpoint(2), endpoint(2), startpoint(3), endpoint(3));
 	oriI = imgsoma;
 	imgsoma = imgsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3));
 	shape = size(imgsoma);
@@ -68,7 +71,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	center = floor(center);
 	% Basically it creates a logical disk with true elements inside and false elements outside
 	u = circlelevelset3d(shape, center, sqradius);
-	fprintf('The estimation of sqradius is %d\n', sqradius);
+	% fprintf('The estimation of sqradius is %2.2f\n', sqradius);
 	threshold = 0.5;
 	MorphGAC = ACWEinitialise(double(imgsoma), smoothing, lambda1, lambda2);
 	% the threshold is just for visulisation
@@ -94,7 +97,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% This is the initialization of sliding window with length of 5
 	slider_diff = [];
 	for i = 1 : stepnum
-		fprintf('The current step number is %f3.0\n', i);
+		% fprintf('The current step number is %i\n', i);
 		MorphGAC = ACWEstep3d(MorphGAC, i);		
 		A = MorphGAC.u > threshold;  % synthetic data
 		foreground_num(end+1) = sum(A(:));
