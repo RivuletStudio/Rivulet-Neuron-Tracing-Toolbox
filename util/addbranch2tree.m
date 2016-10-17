@@ -31,7 +31,11 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			plot3(newtree(:, 4), newtree(:, 3), newtree(:, 5), 'b-.');
 			drawnow
 		end
-
+				% Try to visualise the soma merged point
+		if somamerged
+			newtree(:, 2) = 200; % Use different colors to show whether soma merged is successful or not
+			fprintf('This is just a debug type one\n');
+		end 
 		tree = [tree;newtree];
 	else
 		termini1 = l(end, :);
@@ -91,6 +95,11 @@ function [tree, newtree, confidence, unconnected] = addbranch2tree(tree, l, merg
 			% return
 		end
 
+		% Try to visualise the soma merged point
+		if somamerged
+			newtree(:, 2) = 200; % Use different colors to show whether soma merged is successful or not
+			fprintf('This is just a debug type two\n');
+		end 
 		tree = [tree; newtree];
 	end
 

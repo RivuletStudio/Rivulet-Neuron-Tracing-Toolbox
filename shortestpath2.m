@@ -77,6 +77,7 @@ while(true)
     elseif dist == -2
         merged = true;
         somamerged = true;
+        fprintf('The coordinate of point reading soma surface: x : %3.2f, y : %3.2f, z : %3.2f\n', StartPoint(1), StartPoint(2), StartPoint(3));
         break;
     end
 

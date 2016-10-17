@@ -341,10 +341,11 @@ function [tree, meanconf] = trace(varargin)
             axes(ax);
         end
         printn = printn + 1;
-        if printn > 1
-            fprintf(1, repmat('\b',1,printcount));
-            printcount = fprintf('Tracing percent: %f%%\n', percent*100);
-        end
+        % The following line is commented to see points which reach soma surface 
+        % if printn > 1
+        %     fprintf(1, repmat('\b',1,printcount));
+        %     printcount = fprintf('Tracing percent: %f%%\n', percent*100);
+        % end
         if percent >= percentage
             disp('Coverage reached end tracing...')
             break;
