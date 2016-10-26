@@ -1,7 +1,7 @@
 clear all;
 close all;
 clc;
-imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/3.v3draw';
+imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/7.v3draw';
 [pathstr,name,ext] = fileparts(imgpath);
 file_info = dir([pathstr '/*.v3draw']);
 file_num = length(file_info);
@@ -13,7 +13,7 @@ end
 % zebrafish1 46 zebrafish2 30 zebrafish3 72 zebrafish4 70 zebrafish5 79 zebrafish6 44 zebrafish7 37 
 soma_input.init_check = false; % First argument: true means that initial soma is provided  
 soma_input.soma_threshold = []; % Second argument: threshold value for soma
-soma_input.plotcheck = true; % Fourth argument: true: plot the process of soma region growth
+soma_input.plotcheck = false; % Fourth argument: true: plot the process of soma region growth
 soma_input.ax = []; % Fifth argument : the axis of the current figure
 soma_input.sqrvalue  = 3; % Eighth argument : the lower bound of the square value of radius which will be assigned to a new value later   
 soma_input.smoothvalue = 20; % Ninth argument : this term controls the smoothness 
@@ -23,14 +23,15 @@ soma_input.stepnvalue = 100; % Twelfth argument controls the upper bound of soma
 fprintf('The file being processed named %s.\n', name);
 % % load the file with the specific path 
 I = load_v3d_raw_img_file([pathstr,'/',name,'.v3draw']);
-soma_input.I = I; % Sixth argument : the grayscale neuron image 
 maxp = max(I(:));
 minp = min(I(:));
 autothreshold = graythresh(I) * maxp;
+autothreshold = 37;
 soma_bI = I > autothreshold;
+soma_input.I = soma_bI * 40; % Sixth argument : the grayscale neuron image 
 figure
-% showbox(soma_bI, 0.5)
-% autothreshold = 30;
+showbox(soma_bI, 0.5)
+% autothreshold = 79;
 [somaloc maxsomadt] = somalocationdt(I, autothreshold);
 fprintf('The maximum value of soma distance transform is %3.2f\n', maxsomadt);
 % Seventh arugment : the initial centre of sphere
@@ -54,7 +55,7 @@ soma = somagrowth(soma_input.init_check, soma_input.soma_threshold,...
 somamask = soma.I * 30;
 somamask = uint8(somamask);
 % save the reconstructed somas as .v3draw extension 
-save_v3d_raw_img_file(somamask, [pathstr, '/tmp/', name, '_autothressoma.v3draw']);
+save_v3d_raw_img_file(somamask, [pathstr, '/tmp/', name, '_autobisoma.v3draw']);
 % The following code is for connect soma with automatic tracing
 % set the input parameters for tracing 
 % rivulet_input.threshold =  40;

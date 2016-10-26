@@ -97,7 +97,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	% This is the initialization of sliding window with length of 5
 	slider_diff = [];
 	for i = 1 : stepnum
-		% fprintf('The current step number is %i\n', i);
+		fprintf('The current step number is %i\n', i);
 		MorphGAC = ACWEstep3d(MorphGAC, i);		
 		A = MorphGAC.u > threshold;  % synthetic data
 		foreground_num(end+1) = sum(A(:));
@@ -108,10 +108,12 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			if numel(forward_diff_store) > 5
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
 				% fprintf('The current value of cur_slider_diff%3.2f\n', cur_slider_diff);
-				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.1*foreground_num(end))
+				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.08*foreground_num(end))
 					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
 					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
 					% save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
+					converged_ratio = abs(cur_slider_diff) / (0.1*foreground_num(end));
+					fprintf('The current converged_ratio is %3.2f\n', converged_ratio);
 					break;
 				end	
 				slider_diff(end+1) = cur_slider_diff; 
