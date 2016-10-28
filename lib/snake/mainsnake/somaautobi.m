@@ -1,7 +1,7 @@
 clear all;
 close all;
 clc;
-imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/4.v3draw';
+imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/7.v3draw';
 [pathstr,name,ext] = fileparts(imgpath);
 file_info = dir([pathstr '/*.v3draw']);
 file_num = length(file_info);
@@ -26,15 +26,15 @@ I = load_v3d_raw_img_file([pathstr,'/',name,'.v3draw']);
 maxp = max(I(:));
 minp = min(I(:));
 autothreshold = graythresh(I) * maxp;
-% autothreshold = 70;
+% autothreshold = 81;
 soma_bI = I > autothreshold;
 soma_bI = imfill(soma_bI,'holes');
 % se = strel('sphere',3);
 % soma_bI = imdilate(soma_bI, se);
 soma_input.I = soma_bI * 40; % Sixth argument : the grayscale neuron image 
 
-% figure
-% showbox(soma_bI, 0.5)
+figure
+showbox(soma_bI, 0.5)
 [somaloc maxsomadt, transI] = somalocationdt(I, autothreshold);
 fprintf('The maximum value of soma distance transform is %3.2f\n', maxsomadt);
 
@@ -57,7 +57,12 @@ fprintf('The replacesqrvalue is %2.2f\n', replacesqrvalue);
 soma = somagrowth(soma_input.init_check, soma_input.soma_threshold,...
  soma_input.threshold, soma_input.plotcheck, soma_input.ax, soma_input.I, soma_input.somaloc, soma_input.sqrvalue,...
   soma_input.smoothvalue, soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue);
-
+if isfield(soma, 'enlrspt')
+	somacube = soma.I(soma.enlrspt(1):soma.enlrept(1), soma.enlrspt(2):soma.enlrept(2), soma.enlrspt(3):soma.enlrept(3));
+	soma = somagrowthcube(0.5, false, soma_input.ax, soma_input.I, soma_input.smoothvalue,...
+							 soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue, somacube,...
+							  soma.enlrspt, soma.enlrept);
+end
 % soma.I is the binarised soma structure
 somamask = soma.I * 30;
 % S = ones(3,3,3); 
@@ -67,12 +72,13 @@ somamask = soma.I * 30;
 % Blist = transI(find(somaB > 0.5));
 % largeone = Blist(find(Blist > 1));
 somamask = uint8(somamask);
-somacube = zeros(size(somamask));
-somacube(soma.enlrspt(1):soma.enlrept(1), soma.enlrspt(2):soma.enlrept(2), soma.enlrspt(3):soma.enlrept(3)) = 40;
-somacube = uint8(somacube);
+% somacube = zeros(size(somamask));
+% somacube(soma.enlrspt(1):soma.enlrept(1), soma.enlrspt(2):soma.enlrept(2), soma.enlrspt(3):soma.enlrept(3)) = 40;
+% somacube = uint8(somacube);
 % save the reconstructed somas as .v3draw extension 
-% save_v3d_raw_img_file(somamask, [pathstr, '/tmp/', name, '_bithres.v3draw']);
-save_v3d_raw_img_file(somacube, [pathstr, '/tmp/', name, '_somacube.v3draw']);
+save_v3d_raw_img_file(somamask, [pathstr, '/tmp/', name, '_bithres.v3draw']);
+clear all
+% save_v3d_raw_img_file(somacube, [pathstr, '/tmp/', name, '_somacube.v3draw']);
 % The following code is for connect soma with automatic tracing
 % set the input parameters for tracing 
 % rivulet_input.threshold =  40;

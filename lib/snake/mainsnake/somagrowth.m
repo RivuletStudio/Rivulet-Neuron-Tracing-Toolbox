@@ -193,7 +193,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	sliceptr = sliceval / (sz1 * sz2);
 	
 	[maxval, maxind] = max(sliceptr)	
-	if max(sliceptr) > 0.15
+	if max(sliceptr) > 0.1
 		fprintf('The new bounding box range is beling calculated.\n');
 		soma.enlrspt = startpoint;
 		soma.enlrept = endpoint;
