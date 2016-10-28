@@ -108,7 +108,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 			if numel(forward_diff_store) > 5
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
 				% fprintf('The current value of cur_slider_diff%3.2f\n', cur_slider_diff);
-				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.08*foreground_num(end))
+				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.06*foreground_num(end))
 					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
 					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
 					% save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
@@ -143,30 +143,96 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		end
 	end
 
-	ini_vol = sum(MorphGAC.u(:));
-	for i = 1 : MorphGAC.smoothing
-		A = curvop3d(MorphGAC.u, P3, 1);
-		% vol_pct is the percent compared to the initial volume compared to  
-		vol_pct = sum(A(:)) / ini_vol;
-		% Try to use sliding windows method to detect the converged smoothing
-		foreground_num(end+1) = sum(A(:));
-		diff_step=foreground_num(end)-foreground_num(end-1);
-		forward_diff_store(end+1)=diff_step;
-		cur_slider_diff = sum(forward_diff_store(end-5:end));
-		slider_diff(end+1) = cur_slider_diff;
-		% fprintf('The size of current sliding window method is %4.1f\n', cur_slider_diff);  
-		if vol_pct < 0.85
-			break;
-		end 
-		foreground_num(end+1) = sum(A(:));
-		% fprintf('The current soma volume is %4.1f\n', foreground_num(end));
-		MorphGAC.u = A;
-	end
+	% ini_vol = sum(MorphGAC.u(:));
+	% for i = 1 : MorphGAC.smoothing
+	% 	A = curvop3d(MorphGAC.u, P3, 1);
+	% 	% vol_pct is the percent compared to the initial volume compared to  
+	% 	vol_pct = sum(A(:)) / ini_vol;
+	% 	% Try to use sliding windows method to detect the converged smoothing
+	% 	foreground_num(end+1) = sum(A(:));
+	% 	diff_step=foreground_num(end)-foreground_num(end-1);
+	% 	forward_diff_store(end+1)=diff_step;
+	% 	cur_slider_diff = sum(forward_diff_store(end-5:end));
+	% 	slider_diff(end+1) = cur_slider_diff;
+	% 	% fprintf('The size of current sliding window method is %4.1f\n', cur_slider_diff);  
+	% 	if vol_pct < 0.85
+	% 		break;
+	% 	end 
+	% 	foreground_num(end+1) = sum(A(:));
+	% 	% fprintf('The current soma volume is %4.1f\n', foreground_num(end));
+	% 	MorphGAC.u = A;
+	% end
+
 	% close
 	% disp(class(MorphGAC.u));
+	% The following code extracts the volume of each face of somatic region 
+	A = MorphGAC.u > threshold;
+	somaslice = A(1,:,:);
+	somaslice = squeeze(somaslice);
+    sliceval(1) = sum(somaslice(:));
+    
+    somaslice = A(end,:,:);
+	somaslice = squeeze(somaslice); 	
+    sliceval(2) = sum(somaslice(:));
+    
+    somaslice = A(:,1,:);
+	somaslice = squeeze(somaslice); 	
+    sliceval(3) = sum(somaslice(:));
+    
+    somaslice = A(:,end,:);
+    somaslice = squeeze(somaslice);
+    sliceval(4) = sum(double(somaslice(:)));
+    
+    somaslice = A(:,:,1);
+    sliceval(5) = sum(somaslice(:));
+
+    somaslice = A(:,:,end);
+    sliceval(6) = sum(somaslice(:));
+    sz1 = size(somaslice, 1);
+	sz2 = size(somaslice, 2);
+	sliceptr = sliceval / (sz1 * sz2);
+	
+	[maxval, maxind] = max(sliceptr)	
+	if max(sliceptr) > 0.15
+		fprintf('The new bounding box range is beling calculated.\n');
+		soma.enlrspt = startpoint;
+		soma.enlrept = endpoint;
+		switch maxind
+			case 1
+				soma.enlrspt(1) = soma.enlrspt(1) - (sz1 / 4);
+			case 2
+				soma.enlrept(1) = soma.enlrept(1) + (sz1 / 4); 
+			case 3
+				soma.enlrspt(2) = soma.enlrspt(2) - (sz1 / 4);
+			case 4
+				soma.enlrept(2) = soma.enlrept(2) + (sz1 / 4);
+			case 5
+				soma.enlrspt(3) = soma.enlrspt(3) - (sz1 / 4);
+			case 6
+				soma.enlrept(3) = soma.enlrept(3) + (sz1 / 4);
+		    otherwise
+		        disp('Invalid number is given and code should be checked')
+		end
+		
+		% To constrain new bounding box inside 
+		soma.enlrspt(1) = constrain(soma.enlrspt(1), 1, size(oriI, 1));
+		soma.enlrspt(2) = constrain(soma.enlrspt(2), 1, size(oriI, 2));
+		soma.enlrspt(3) = constrain(soma.enlrspt(3), 1, size(oriI, 3));
+		soma.enlrept(1) = constrain(soma.enlrept(1), 1, size(oriI, 1));
+		soma.enlrept(2) = constrain(soma.enlrept(2), 1, size(oriI, 2));
+		soma.enlrept(3) = constrain(soma.enlrept(3), 1, size(oriI, 3));
+		
+		% To make sure the indexs of the soma box are integers
+		soma.enlrspt = round(soma.enlrspt);
+		soma.enlrept = round(soma.enlrept); 
+	end
+	% fprintf('The volume of somaplane is %5.2f\n', sum(A(:)));
+	disp(sliceval);
+	fprintf('The volume of somaplane is %5.2f\n', sliceptr);
 	backsoma = zeros(size(oriI));
 	backsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3)) = MorphGAC.u;
 	soma.I = double(backsoma);
+	
 	% Recalculate soma centre
 	somaidx = find(soma.I == 1);
 	[x, y, z] = ind2sub(size(soma.I), somaidx);
