@@ -49,12 +49,12 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 	oriI = imgbi;
 	imgbicube = imgbi(enlrspt(1):enlrept(1), enlrspt(2):enlrept(2), enlrspt(3):enlrept(3));
 	clear imgbi
+	% the threshold is just for visulisation
 	threshold = 0.5;
 	MorphGAC = ACWEinitialise(double(imgbicube), smoothing, lambda1, lambda2);
-	% the threshold is just for visulisation
+	
 	% u is the snake mask which will evolve according to level set equation
     MorphGAC.u = iniu;
-	% disp(stepnum)
 	% figure
 	if plotcheck
 		if(~isempty(ax))
@@ -62,10 +62,13 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 			% hold on;
 		end
 	end
+	
 	% The following vector is used for storing values of counting the number of foreground voxels  
 	foreground_num = [];
+	
 	% The following vector is initialised for storing forward difference
 	forward_diff_store = [];
+	
 	% This is the initialization of sliding window with length of 5
 	slider_diff = [];
 	for i = 1 : stepnum
@@ -82,20 +85,12 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 				cur_slider_diff = sum(forward_diff_store(end-5:end));
 				% fprintf('The current value of cur_slider_diff%3.2f\n', cur_slider_diff);
 				if abs(cur_slider_diff) < 20 || abs(cur_slider_diff) < (0.06*foreground_num(end))
-					% save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
-					% save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
-					% save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
 					converged_ratio = abs(cur_slider_diff) / (0.1*foreground_num(end));
 					fprintf('The current converged_ratio is %3.2f\n', converged_ratio);
 					break;
 				end	
 				slider_diff(end+1) = cur_slider_diff; 
 			end
-			% if i == stepnum
-			% 	save('/home/donghao/Desktop/somadata/converged/slider_diff.mat', 'slider_diff');
-			% 	save('/home/donghao/Desktop/somadata/converged/forward_diff_store.mat', 'forward_diff_store');
-			% 	save('/home/donghao/Desktop/somadata/converged/foreground_num.mat', 'foreground_num');
-			% end
 		end  
 		[x y z] = ind2sub(size(A), find(A));
 		x = x + enlrspt(1);
@@ -137,7 +132,6 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 	% end
 
 	close
-	disp(class(MorphGAC.u));
 	% The following code extracts the volume of each face of somatic region 
 	A = MorphGAC.u > threshold;
 	somaslice = A(1,:,:);
@@ -161,11 +155,11 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 
     somaslice = A(:,:,end);
     sliceval(6) = sum(somaslice(:));
-    sz1 = size(somaslice, 1);
-	sz2 = size(somaslice, 2);
-	sliceptr = sliceval / (sz1 * sz2);
 	
-	[maxval, maxind] = max(sliceval)	
+	% Find the most possible wall which the blocks the extention of soma 
+	[maxval, maxind] = max(sliceval);
+	sz1 = size(somaslice, 1);
+	sz2 = size(somaslice, 2);	
 	if maxval > 100
 		fprintf('The new bounding box range is beling calculated.\n');
 		soma.enlrspt = enlrspt;
@@ -199,9 +193,6 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 		soma.enlrspt = round(soma.enlrspt);
 		soma.enlrept = round(soma.enlrept); 
 	end
-	% % fprintf('The volume of somaplane is %5.2f\n', sum(A(:)));
-	% disp(sliceval);
-	% fprintf('The volume of somaplane is %5.2f\n', sliceptr);
 	backsoma = zeros(size(oriI));
 	backsoma(enlrspt(1):enlrept(1), enlrspt(2):enlrept(2), enlrspt(3):enlrept(3)) = MorphGAC.u;
 	soma.I = double(backsoma);

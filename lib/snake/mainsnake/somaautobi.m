@@ -1,7 +1,7 @@
 clear all;
 close all;
 clc;
-imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/2.v3draw';
+imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/5.v3draw';
 [pathstr,name,ext] = fileparts(imgpath);
 file_info = dir([pathstr '/*.v3draw']);
 file_num = length(file_info);
@@ -26,7 +26,7 @@ I = load_v3d_raw_img_file([pathstr,'/',name,'.v3draw']);
 maxp = max(I(:));
 minp = min(I(:));
 autothreshold = graythresh(I) * maxp;
-autothreshold = 30;
+% autothreshold = 81;
 soma_bI = I > autothreshold;
 soma_bI = imfill(soma_bI,'holes');
 % se = strel('sphere',3);
@@ -57,12 +57,24 @@ fprintf('The replacesqrvalue is %2.2f\n', replacesqrvalue);
 soma = somagrowth(soma_input.init_check, soma_input.soma_threshold,...
  soma_input.threshold, soma_input.plotcheck, soma_input.ax, soma_input.I, soma_input.somaloc, soma_input.sqrvalue,...
   soma_input.smoothvalue, soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue);
+loopctr = 0; 
 while(isfield(soma, 'enlrspt'))
 	somacube = soma.I(soma.enlrspt(1):soma.enlrept(1), soma.enlrspt(2):soma.enlrept(2), soma.enlrspt(3):soma.enlrept(3));
 	soma = somagrowthcube(0.5, false, soma_input.ax, soma_input.I, soma_input.smoothvalue,...
 							 soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue, somacube,...
 							  soma.enlrspt, soma.enlrept);
+	loopctr = loopctr + 1;
+	fprintf('The loop number %5.2f is running.\n', loopctr);
+	if loopctr > 10
+		fprintf('In case a infinite loop happens, there is a backup plan to prevent it.\n');
+		break;
+	end
 end
+% The final step is the smoothing
+somacube = soma.I(soma.startpoint(1):soma.endpoint(1), soma.startpoint(2):soma.endpoint(2), soma.startpoint(3):soma.endpoint(3)); 
+soma = somasmooth(0.5, false, soma_input.ax, soma_input.I, soma_input.smoothvalue,...
+							 soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue, somacube,...
+							  soma.startpoint, soma.endpoint);
 % soma.I is the binarised soma structure
 somamask = soma.I * 30;
 % S = ones(3,3,3); 

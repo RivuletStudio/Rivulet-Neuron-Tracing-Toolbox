@@ -192,7 +192,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 	sz2 = size(somaslice, 2);
 	sliceptr = sliceval / (sz1 * sz2);
 	
-	[maxval, maxind] = max(sliceval)	
+	[maxval, maxind] = max(sliceval);	
 	if maxval > 100
 		fprintf('The new bounding box range is beling calculated.\n');
 		soma.enlrspt = startpoint;
@@ -227,8 +227,7 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		soma.enlrept = round(soma.enlrept); 
 	end
 	% fprintf('The volume of somaplane is %5.2f\n', sum(A(:)));
-	disp(sliceval);
-	fprintf('The volume of somaplane is %5.2f\n', sliceptr);
+	% fprintf('The volume of somaplane is %5.2f\n', sliceptr);
 	backsoma = zeros(size(oriI));
 	backsoma(startpoint(1):endpoint(1), startpoint(2):endpoint(2), startpoint(3):endpoint(3)) = MorphGAC.u;
 	soma.I = double(backsoma);
