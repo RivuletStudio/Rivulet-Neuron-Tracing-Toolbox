@@ -1,7 +1,7 @@
 clear all;
 close all;
 clc;
-imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/5.v3draw';
+imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/2.v3draw';
 [pathstr,name,ext] = fileparts(imgpath);
 file_info = dir([pathstr '/*.v3draw']);
 file_num = length(file_info);
@@ -26,7 +26,7 @@ I = load_v3d_raw_img_file([pathstr,'/',name,'.v3draw']);
 maxp = max(I(:));
 minp = min(I(:));
 autothreshold = graythresh(I) * maxp;
-autothreshold = 81;
+autothreshold = 30;
 soma_bI = I > autothreshold;
 soma_bI = imfill(soma_bI,'holes');
 % se = strel('sphere',3);

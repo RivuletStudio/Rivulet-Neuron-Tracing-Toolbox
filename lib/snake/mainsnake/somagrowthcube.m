@@ -165,8 +165,8 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 	sz2 = size(somaslice, 2);
 	sliceptr = sliceval / (sz1 * sz2);
 	
-	[maxval, maxind] = max(sliceptr)	
-	if max(sliceptr) > 0.15
+	[maxval, maxind] = max(sliceval)	
+	if maxval > 100
 		fprintf('The new bounding box range is beling calculated.\n');
 		soma.enlrspt = enlrspt;
 		soma.enlrept = enlrept;
