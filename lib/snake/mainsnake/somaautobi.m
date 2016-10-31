@@ -1,7 +1,7 @@
 clear all;
 close all;
 clc;
-imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/7.v3draw';
+imgpath = '/home/donghao/Desktop/zebrafishlarveRGC/5.v3draw';
 [pathstr,name,ext] = fileparts(imgpath);
 file_info = dir([pathstr '/*.v3draw']);
 file_num = length(file_info);
@@ -26,7 +26,7 @@ I = load_v3d_raw_img_file([pathstr,'/',name,'.v3draw']);
 maxp = max(I(:));
 minp = min(I(:));
 autothreshold = graythresh(I) * maxp;
-% autothreshold = 81;
+autothreshold = 81;
 soma_bI = I > autothreshold;
 soma_bI = imfill(soma_bI,'holes');
 % se = strel('sphere',3);
@@ -57,7 +57,7 @@ fprintf('The replacesqrvalue is %2.2f\n', replacesqrvalue);
 soma = somagrowth(soma_input.init_check, soma_input.soma_threshold,...
  soma_input.threshold, soma_input.plotcheck, soma_input.ax, soma_input.I, soma_input.somaloc, soma_input.sqrvalue,...
   soma_input.smoothvalue, soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue);
-if isfield(soma, 'enlrspt')
+while(isfield(soma, 'enlrspt'))
 	somacube = soma.I(soma.enlrspt(1):soma.enlrept(1), soma.enlrspt(2):soma.enlrept(2), soma.enlrspt(3):soma.enlrept(3));
 	soma = somagrowthcube(0.5, false, soma_input.ax, soma_input.I, soma_input.smoothvalue,...
 							 soma_input.lambda1value, soma_input.lambda2value, soma_input.stepnvalue, somacube,...

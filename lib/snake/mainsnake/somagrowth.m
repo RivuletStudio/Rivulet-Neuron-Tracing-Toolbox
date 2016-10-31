@@ -143,25 +143,25 @@ function soma = somagrowth(inivcheck, somathres, showthres, plotcheck, ax, imgso
 		end
 	end
 
-	% ini_vol = sum(MorphGAC.u(:));
-	% for i = 1 : MorphGAC.smoothing
-	% 	A = curvop3d(MorphGAC.u, P3, 1);
-	% 	% vol_pct is the percent compared to the initial volume compared to  
-	% 	vol_pct = sum(A(:)) / ini_vol;
-	% 	% Try to use sliding windows method to detect the converged smoothing
-	% 	foreground_num(end+1) = sum(A(:));
-	% 	diff_step=foreground_num(end)-foreground_num(end-1);
-	% 	forward_diff_store(end+1)=diff_step;
-	% 	cur_slider_diff = sum(forward_diff_store(end-5:end));
-	% 	slider_diff(end+1) = cur_slider_diff;
-	% 	% fprintf('The size of current sliding window method is %4.1f\n', cur_slider_diff);  
-	% 	if vol_pct < 0.85
-	% 		break;
-	% 	end 
-	% 	foreground_num(end+1) = sum(A(:));
-	% 	% fprintf('The current soma volume is %4.1f\n', foreground_num(end));
-	% 	MorphGAC.u = A;
-	% end
+	ini_vol = sum(MorphGAC.u(:));
+	for i = 1 : MorphGAC.smoothing
+		A = curvop3d(MorphGAC.u, P3, 1);
+		% vol_pct is the percent compared to the initial volume compared to  
+		vol_pct = sum(A(:)) / ini_vol;
+		% Try to use sliding windows method to detect the converged smoothing
+		foreground_num(end+1) = sum(A(:));
+		diff_step=foreground_num(end)-foreground_num(end-1);
+		forward_diff_store(end+1)=diff_step;
+		cur_slider_diff = sum(forward_diff_store(end-5:end));
+		slider_diff(end+1) = cur_slider_diff;
+		% fprintf('The size of current sliding window method is %4.1f\n', cur_slider_diff);  
+		if vol_pct < 0.85
+			break;
+		end 
+		foreground_num(end+1) = sum(A(:));
+		% fprintf('The current soma volume is %4.1f\n', foreground_num(end));
+		MorphGAC.u = A;
+	end
 
 	% close
 	% disp(class(MorphGAC.u));

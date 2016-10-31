@@ -136,69 +136,69 @@ function soma = somagrowthcube(showthres, plotcheck, ax, imgbi, smoothing, lambd
 	% 	MorphGAC.u = A;
 	% end
 
-	% close
-	% disp(class(MorphGAC.u));
+	close
+	disp(class(MorphGAC.u));
 	% The following code extracts the volume of each face of somatic region 
-	% A = MorphGAC.u > threshold;
-	% somaslice = A(1,:,:);
-	% somaslice = squeeze(somaslice);
- %    sliceval(1) = sum(somaslice(:));
+	A = MorphGAC.u > threshold;
+	somaslice = A(1,:,:);
+	somaslice = squeeze(somaslice);
+    sliceval(1) = sum(somaslice(:));
     
- %    somaslice = A(end,:,:);
-	% somaslice = squeeze(somaslice); 	
- %    sliceval(2) = sum(somaslice(:));
+    somaslice = A(end,:,:);
+	somaslice = squeeze(somaslice); 	
+    sliceval(2) = sum(somaslice(:));
     
- %    somaslice = A(:,1,:);
-	% somaslice = squeeze(somaslice); 	
- %    sliceval(3) = sum(somaslice(:));
+    somaslice = A(:,1,:);
+	somaslice = squeeze(somaslice); 	
+    sliceval(3) = sum(somaslice(:));
     
- %    somaslice = A(:,end,:);
- %    somaslice = squeeze(somaslice);
- %    sliceval(4) = sum(double(somaslice(:)));
+    somaslice = A(:,end,:);
+    somaslice = squeeze(somaslice);
+    sliceval(4) = sum(double(somaslice(:)));
     
- %    somaslice = A(:,:,1);
- %    sliceval(5) = sum(somaslice(:));
+    somaslice = A(:,:,1);
+    sliceval(5) = sum(somaslice(:));
 
- %    somaslice = A(:,:,end);
- %    sliceval(6) = sum(somaslice(:));
- %    sz1 = size(somaslice, 1);
-	% sz2 = size(somaslice, 2);
-	% sliceptr = sliceval / (sz1 * sz2);
+    somaslice = A(:,:,end);
+    sliceval(6) = sum(somaslice(:));
+    sz1 = size(somaslice, 1);
+	sz2 = size(somaslice, 2);
+	sliceptr = sliceval / (sz1 * sz2);
 	
-	% [maxval, maxind] = max(sliceptr)	
-	% if max(sliceptr) > 0.15
-	% 	fprintf('The new bounding box range is beling calculated.\n');
-	% 	soma.enlrspt = startpoint;
-	% 	soma.enlrept = endpoint;
-	% 	switch maxind
-	% 		case 1
-	% 			soma.enlrspt(1) = soma.enlrspt(1) - (sz1 / 4);
-	% 		case 2
-	% 			soma.enlrept(1) = soma.enlrept(1) + (sz1 / 4); 
-	% 		case 3
-	% 			soma.enlrspt(2) = soma.enlrspt(2) - (sz1 / 4);
-	% 		case 4
-	% 			soma.enlrept(2) = soma.enlrept(2) + (sz1 / 4);
-	% 		case 5
-	% 			soma.enlrspt(3) = soma.enlrspt(3) - (sz1 / 4);
-	% 		case 6
-	% 			soma.enlrept(3) = soma.enlrept(3) + (sz1 / 4);
-	% 	    otherwise
-	% 	        disp('Invalid number is given and code should be checked')
-	% 	end
+	[maxval, maxind] = max(sliceptr)	
+	if max(sliceptr) > 0.15
+		fprintf('The new bounding box range is beling calculated.\n');
+		soma.enlrspt = enlrspt;
+		soma.enlrept = enlrept;
+		switch maxind
+			case 1
+				soma.enlrspt(1) = soma.enlrspt(1) - (sz1 / 4);
+			case 2
+				soma.enlrept(1) = soma.enlrept(1) + (sz1 / 4); 
+			case 3
+				soma.enlrspt(2) = soma.enlrspt(2) - (sz1 / 4);
+			case 4
+				soma.enlrept(2) = soma.enlrept(2) + (sz1 / 4);
+			case 5
+				soma.enlrspt(3) = soma.enlrspt(3) - (sz1 / 4);
+			case 6
+				soma.enlrept(3) = soma.enlrept(3) + (sz1 / 4);
+		    otherwise
+		        disp('Invalid number is given and code should be checked')
+		end
 		
-	% 	% To constrain new bounding box inside 
-	% 	soma.enlrspt(1) = constrain(soma.enlrspt(1), 1, size(oriI, 1));
-	% 	soma.enlrspt(2) = constrain(soma.enlrspt(2), 1, size(oriI, 2));
-	% 	soma.enlrspt(3) = constrain(soma.enlrspt(3), 1, size(oriI, 3));
-	% 	soma.enlrept(1) = constrain(soma.enlrept(1), 1, size(oriI, 1));
-	% 	soma.enlrept(2) = constrain(soma.enlrept(2), 1, size(oriI, 2));
-	% 	soma.enlrept(3) = constrain(soma.enlrept(3), 1, size(oriI, 3));
+		% To constrain new bounding box inside 
+		soma.enlrspt(1) = constrain(soma.enlrspt(1), 1, size(oriI, 1));
+		soma.enlrspt(2) = constrain(soma.enlrspt(2), 1, size(oriI, 2));
+		soma.enlrspt(3) = constrain(soma.enlrspt(3), 1, size(oriI, 3));
+		soma.enlrept(1) = constrain(soma.enlrept(1), 1, size(oriI, 1));
+		soma.enlrept(2) = constrain(soma.enlrept(2), 1, size(oriI, 2));
+		soma.enlrept(3) = constrain(soma.enlrept(3), 1, size(oriI, 3));
 		
-	% 	% To make sure the indexs of the soma box are integers
-	% 	soma.enlrspt = round(soma.enlrspt);
-	% 	soma.enlrept = round(soma.enlrept); 
-	% end
+		% To make sure the indexs of the soma box are integers
+		soma.enlrspt = round(soma.enlrspt);
+		soma.enlrept = round(soma.enlrept); 
+	end
 	% % fprintf('The volume of somaplane is %5.2f\n', sum(A(:)));
 	% disp(sliceval);
 	% fprintf('The volume of somaplane is %5.2f\n', sliceptr);
