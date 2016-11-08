@@ -3,7 +3,7 @@ function swc = prunetree(swc, l)
     
     hold on
     
-    showswc(swc, false);
+    % showswc(swc, false);
     % Calculate the order of each node
     nnode = size(swc, 1);
     order = zeros(nnode, 1);
