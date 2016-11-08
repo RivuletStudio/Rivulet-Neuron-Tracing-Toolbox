@@ -105,7 +105,7 @@ function [tree, meanconf] = trace(varargin)
     end
     if (~dtimageflag)
         disp('Distance transform');
-        notbI = not(I>0.5);
+        notbI = not(I>0);
         bdist = bwdist(notbI, 'Quasi-Euclidean');
         bdist = bdist .* double(I);
         bdist = double(bdist);
@@ -248,7 +248,7 @@ function [tree, meanconf] = trace(varargin)
         disp('Fixing topology')
         tree = fixtopology(tree);
     end 
-    tree = prunetree(tree, branchlen);
+    % tree = prunetree(tree, branchlen);
 
 	if plot
 		hold off
