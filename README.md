@@ -1,3 +1,5 @@
+#Deprecated - Pls use the new Rivuletpy library https://github.com/RivuletStudio/rivuletpy
+
 =============================
 Rivulet-Neuron-Tracing-Toobox (WIP)
 =============================
