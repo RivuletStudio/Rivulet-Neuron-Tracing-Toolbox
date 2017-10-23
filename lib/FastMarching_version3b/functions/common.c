@@ -9,6 +9,9 @@
 #define max(a,b)        ((a) > (b) ? (a): (b))
 #endif
 
+#include "math.h"
+#include <stdbool.h>
+
 /* Find minimum value of an array and return its index */
 int minarray(double *A, int l) {
     int i;
